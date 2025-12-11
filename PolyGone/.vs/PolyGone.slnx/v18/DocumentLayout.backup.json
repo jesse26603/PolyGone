@@ -1,0 +1,58 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Jesse.Bailey\\Documents\\GitHub\\PolyGone\\PolyGone\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{323B0A65-6AFD-4510-96AA-07E6F7F9B7B1}|PolyGone\\PolyGone.csproj|c:\\users\\jesse.bailey\\documents\\github\\polygone\\polygone\\polygone\\game1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{323B0A65-6AFD-4510-96AA-07E6F7F9B7B1}|PolyGone\\PolyGone.csproj|solutionrelative:polygone\\game1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{323B0A65-6AFD-4510-96AA-07E6F7F9B7B1}|PolyGone\\PolyGone.csproj|c:\\users\\jesse.bailey\\documents\\github\\polygone\\polygone\\polygone\\sprite.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{323B0A65-6AFD-4510-96AA-07E6F7F9B7B1}|PolyGone\\PolyGone.csproj|solutionrelative:polygone\\sprite.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Game1.cs",
+              "DocumentMoniker": "C:\\Users\\Jesse.Bailey\\Documents\\GitHub\\PolyGone\\PolyGone\\PolyGone\\Game1.cs",
+              "RelativeDocumentMoniker": "PolyGone\\Game1.cs",
+              "ToolTip": "C:\\Users\\Jesse.Bailey\\Documents\\GitHub\\PolyGone\\PolyGone\\PolyGone\\Game1.cs",
+              "RelativeToolTip": "PolyGone\\Game1.cs",
+              "ViewState": "AgIAAB0AAAAAAAAAAAAiwDwAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-11T20:53:00.571Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Sprite.cs",
+              "DocumentMoniker": "C:\\Users\\Jesse.Bailey\\Documents\\GitHub\\PolyGone\\PolyGone\\PolyGone\\Sprite.cs",
+              "RelativeDocumentMoniker": "PolyGone\\Sprite.cs",
+              "ToolTip": "C:\\Users\\Jesse.Bailey\\Documents\\GitHub\\PolyGone\\PolyGone\\PolyGone\\Sprite.cs",
+              "RelativeToolTip": "PolyGone\\Sprite.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACYAAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-11T20:38:52.677Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
