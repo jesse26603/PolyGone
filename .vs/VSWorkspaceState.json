@@ -1,6 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\PolyGone",
+    "\\PolyGone\\PolyGone",
+    "\\PolyGone\\PolyGone\\Content"
   ],
   "PreviewInSolutionExplorer": false
 }

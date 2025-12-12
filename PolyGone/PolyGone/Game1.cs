@@ -9,12 +9,14 @@ namespace PolyGone
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private Sprite player;
+        private SceneManager sceneManager;
 
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            sceneManager = new();
         }
 
         protected override void Initialize()
@@ -30,10 +32,12 @@ namespace PolyGone
 
             // TODO: use this.Content to load your game content here
 
+            sceneManager.AddScene(new GameScene(Content, sceneManager));
+
             player = new Sprite(
                 texture: Content.Load<Texture2D>("player"),
                 position: new Vector2(100, 100),
-                size: new int[] { 64, 64 },
+                size: new int[2] { 64, 64 },
                 color: Color.White
             );
         }
@@ -44,7 +48,7 @@ namespace PolyGone
                 Exit();
 
             // TODO: Add your update logic here
-            player.Update(gameTime);
+            sceneManager.GetCurrentScene().Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -56,7 +60,7 @@ namespace PolyGone
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
 
-            player.Draw(_spriteBatch);
+            sceneManager.GetCurrentScene().Draw(_spriteBatch);
 
             _spriteBatch.End();
 
