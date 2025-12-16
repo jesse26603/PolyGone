@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Jesse.Bailey\\Documents\\GitHub\\PolyGone\\PolyGone\\PolyGone\\PolyGone.csproj": {}
+    "c:\\Users\\Jesse.Bailey\\Documents\\GitHub\\PolyGone\\PolyGone\\PolyGone\\PolyGone.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Jesse.Bailey\\Documents\\GitHub\\PolyGone\\PolyGone\\PolyGone\\PolyGone.csproj": {
+    "c:\\Users\\Jesse.Bailey\\Documents\\GitHub\\PolyGone\\PolyGone\\PolyGone\\PolyGone.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Jesse.Bailey\\Documents\\GitHub\\PolyGone\\PolyGone\\PolyGone\\PolyGone.csproj",
+        "projectUniqueName": "c:\\Users\\Jesse.Bailey\\Documents\\GitHub\\PolyGone\\PolyGone\\PolyGone\\PolyGone.csproj",
         "projectName": "PolyGone",
-        "projectPath": "C:\\Users\\Jesse.Bailey\\Documents\\GitHub\\PolyGone\\PolyGone\\PolyGone\\PolyGone.csproj",
+        "projectPath": "c:\\Users\\Jesse.Bailey\\Documents\\GitHub\\PolyGone\\PolyGone\\PolyGone\\PolyGone.csproj",
         "packagesPath": "C:\\Users\\Jesse.Bailey\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Jesse.Bailey\\Documents\\GitHub\\PolyGone\\PolyGone\\PolyGone\\obj\\",
+        "outputPath": "c:\\Users\\Jesse.Bailey\\Documents\\GitHub\\PolyGone\\PolyGone\\PolyGone\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Jesse.Bailey\\AppData\\Roaming\\NuGet\\NuGet.Config",

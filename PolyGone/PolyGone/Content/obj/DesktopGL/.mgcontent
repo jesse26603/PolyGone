@@ -4,9 +4,13 @@
   <Platform>DesktopGL</Platform>
   <Config />
   <SourceFiles>
+    <File>C:/Users/Jesse.Bailey/Documents/GitHub/PolyGone/PolyGone/PolyGone/Content/enemy.png</File>
+    <File>C:/Users/Jesse.Bailey/Documents/GitHub/PolyGone/PolyGone/PolyGone/Content/ground.png</File>
     <File>C:/Users/Jesse.Bailey/Documents/GitHub/PolyGone/PolyGone/PolyGone/Content/player.png</File>
   </SourceFiles>
   <DestFiles>
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
   </DestFiles>
 </SourceFileCollection>

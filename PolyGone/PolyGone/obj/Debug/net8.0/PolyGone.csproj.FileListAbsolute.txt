@@ -33,3 +33,5 @@ C:\Users\Jesse.Bailey\Documents\GitHub\PolyGone\PolyGone\PolyGone\obj\Debug\net8
 C:\Users\Jesse.Bailey\Documents\GitHub\PolyGone\PolyGone\PolyGone\obj\Debug\net8.0\PolyGone.pdb
 C:\Users\Jesse.Bailey\Documents\GitHub\PolyGone\PolyGone\PolyGone\obj\Debug\net8.0\PolyGone.genruntimeconfig.cache
 C:\Users\Jesse.Bailey\Documents\GitHub\PolyGone\PolyGone\PolyGone\obj\Debug\net8.0\ref\PolyGone.dll
+C:\Users\Jesse.Bailey\Documents\GitHub\PolyGone\PolyGone\PolyGone\bin\Debug\net8.0\Content\enemy.xnb
+C:\Users\Jesse.Bailey\Documents\GitHub\PolyGone\PolyGone\PolyGone\bin\Debug\net8.0\Content\ground.xnb

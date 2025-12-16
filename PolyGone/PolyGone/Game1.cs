@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -8,7 +9,6 @@ namespace PolyGone
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private Sprite player;
         private SceneManager sceneManager;
 
         public Game1()
@@ -33,13 +33,7 @@ namespace PolyGone
             // TODO: use this.Content to load your game content here
 
             sceneManager.AddScene(new GameScene(Content, sceneManager));
-
-            player = new Sprite(
-                texture: Content.Load<Texture2D>("player"),
-                position: new Vector2(100, 100),
-                size: new int[2] { 64, 64 },
-                color: Color.White
-            );
+            sceneManager.GetCurrentScene().Load();
         }
 
         protected override void Update(GameTime gameTime)

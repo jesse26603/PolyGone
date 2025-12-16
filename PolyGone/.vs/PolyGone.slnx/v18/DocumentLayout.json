@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\Jesse.Bailey\\Documents\\GitHub\\PolyGone\\PolyGone\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{323B0A65-6AFD-4510-96AA-07E6F7F9B7B1}|PolyGone\\PolyGone.csproj|c:\\users\\jesse.bailey\\documents\\github\\polygone\\polygone\\polygone\\game1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{323B0A65-6AFD-4510-96AA-07E6F7F9B7B1}|PolyGone\\PolyGone.csproj|solutionrelative:polygone\\game1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{D8E98FF4-F8C5-85A2-B499-26AEFB9F4157}|PolyGone\\PolyGone.csproj|c:\\users\\jesse.bailey\\documents\\github\\polygone\\polygone\\polygone\\game1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D8E98FF4-F8C5-85A2-B499-26AEFB9F4157}|PolyGone\\PolyGone.csproj|solutionrelative:polygone\\game1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{323B0A65-6AFD-4510-96AA-07E6F7F9B7B1}|PolyGone\\PolyGone.csproj|c:\\users\\jesse.bailey\\documents\\github\\polygone\\polygone\\polygone\\sprite.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{323B0A65-6AFD-4510-96AA-07E6F7F9B7B1}|PolyGone\\PolyGone.csproj|solutionrelative:polygone\\sprite.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{D8E98FF4-F8C5-85A2-B499-26AEFB9F4157}|PolyGone\\PolyGone.csproj|c:\\users\\jesse.bailey\\documents\\github\\polygone\\polygone\\polygone\\sprite.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D8E98FF4-F8C5-85A2-B499-26AEFB9F4157}|PolyGone\\PolyGone.csproj|solutionrelative:polygone\\sprite.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -32,7 +32,7 @@
               "RelativeDocumentMoniker": "PolyGone\\Game1.cs",
               "ToolTip": "C:\\Users\\Jesse.Bailey\\Documents\\GitHub\\PolyGone\\PolyGone\\PolyGone\\Game1.cs",
               "RelativeToolTip": "PolyGone\\Game1.cs",
-              "ViewState": "AgIAAB0AAAAAAAAAAAAiwCAAAAAgAAAAAAAAAA==",
+              "ViewState": "AgIAABcAAAAAAAAAAAASwCMAAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-11T20:53:00.571Z",
               "EditorCaption": ""
@@ -47,8 +47,7 @@
               "RelativeToolTip": "PolyGone\\Sprite.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACYAAAA9AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-11T20:38:52.677Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-11T20:38:52.677Z"
             }
           ]
         }

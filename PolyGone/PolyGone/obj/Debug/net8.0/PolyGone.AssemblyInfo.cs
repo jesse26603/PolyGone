@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PolyGone")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e8b99d7c347dd9dc71282e6e9a05456371b7c0ef")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0b7c59fd5f67fbacfc085ec7234c1bd7622d9aae")]
 [assembly: System.Reflection.AssemblyProductAttribute("PolyGone")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PolyGone")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
