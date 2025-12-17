@@ -1,4 +1,0 @@
-Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
-"C:/Users/Jesse.Bailey/Documents/GitHub/PolyGone/PolyGone/PolyGone/Content/enemy.png","C:/Users/Jesse.Bailey/Documents/GitHub/PolyGone/PolyGone/PolyGone/Content/bin/DesktopGL/enemy.xnb","TextureProcessor","Texture2DContent",336,4181,0.079023
-"C:/Users/Jesse.Bailey/Documents/GitHub/PolyGone/PolyGone/PolyGone/Content/ground.png","C:/Users/Jesse.Bailey/Documents/GitHub/PolyGone/PolyGone/PolyGone/Content/bin/DesktopGL/ground.xnb","TextureProcessor","Texture2DContent",183,4181,0.0639887
-"C:/Users/Jesse.Bailey/Documents/GitHub/PolyGone/PolyGone/PolyGone/Content/player.png","C:/Users/Jesse.Bailey/Documents/GitHub/PolyGone/PolyGone/PolyGone/Content/bin/DesktopGL/player.xnb","TextureProcessor","Texture2DContent",129,4181,0.0814574
