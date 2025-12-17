@@ -54,6 +54,13 @@ public class GameScene : IScene
             color: Color.White
         ));
 
+        sprites.Add(new Sprite(
+            texture: contentManager.Load<Texture2D>("ground"),
+            position: new Vector2(264, 200),
+            size: new int[2] { 64, 64 },
+            color: Color.White
+        ));
+
         player = new Player(
             texture: contentManager.Load<Texture2D>("player"),
             position: new Vector2(100, 100),

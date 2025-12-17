@@ -59,6 +59,16 @@ namespace PolyGone
                     if (this != sprite && sprite.Rectangle.Intersects(newHorizontalRect))
                     {
                         canMoveHorizontally = false;
+                        // Position player flush against the collision object
+                        if (changeX > 0)
+                        {
+                            position.X = sprite.position.X - size[0];
+                        }
+                        else if (changeX < 0)
+                        {
+                            position.X = sprite.position.X + sprite.size[0];
+                        }
+                        changeX = 0f;
                         break;
                     }
                 }

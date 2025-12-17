@@ -52,7 +52,7 @@ namespace PolyGone
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
-            _spriteBatch.Begin();
+            _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
             sceneManager.GetCurrentScene().Draw(_spriteBatch);
 
