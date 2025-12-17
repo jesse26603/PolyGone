@@ -12,15 +12,20 @@ public class GameScene : IScene
     private Texture2D texture;
     private SceneManager sceneManager;
     private Sprite player;
+    private FollowCamera camera;
     private List<Sprite> sprites;
-    public GameScene(ContentManager contentManager, SceneManager sceneManager)
+    private GraphicsDeviceManager graphics;
+
+    public GameScene(ContentManager contentManager, SceneManager sceneManager, GraphicsDeviceManager graphics)
     {
         this.contentManager = contentManager;
         this.sceneManager = sceneManager;
+        this.graphics = graphics;
     }
 
     public void Load()
     {
+        camera = new(new Vector2(0, 0));
         sprites = new();
         for (int i = 0; i < 100; i++)
         {
@@ -69,12 +74,14 @@ public class GameScene : IScene
         {
             sprite.Update(gameTime);
         }
+
+        camera.Follow(player.Rectangle, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
     }
     public void Draw(SpriteBatch spriteBatch)
     {
         foreach (Sprite sprite in sprites)
         {
-            sprite.Draw(spriteBatch);
+            sprite.Draw(spriteBatch, camera.position);
         }
     }
 }

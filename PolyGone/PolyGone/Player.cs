@@ -2,10 +2,10 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace PolyGone
 {
@@ -20,7 +20,8 @@ namespace PolyGone
             this.sprites = sprites;
         }
 
-        public override void Update(GameTime gameTime)
+        // Handle player movement and collisions
+        private void Movement()
         {
             keyboardState = Keyboard.GetState();
             // Reset horizontal movement
@@ -100,17 +101,22 @@ namespace PolyGone
             // Allow jumping when on ground
             if (isOnGround && keyboardState.IsKeyDown(Keys.Space))
             {
-                changeY = -15f;
+                changeY = -12f;
             }
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            Movement();
             
             base.Update(gameTime);
         }
 
-        public override void Draw(SpriteBatch spriteBatch)
+        public override void Draw(SpriteBatch spriteBatch, Vector2 offset)
         {
             // Player-specific draw logic can go here
 
-            base.Draw(spriteBatch);
+            base.Draw(spriteBatch, offset);
         }
     }
 }

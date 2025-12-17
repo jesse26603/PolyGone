@@ -32,7 +32,7 @@ namespace PolyGone
 
             // TODO: use this.Content to load your game content here
 
-            sceneManager.AddScene(new GameScene(Content, sceneManager));
+            sceneManager.AddScene(new GameScene(Content, sceneManager, _graphics));
             sceneManager.GetCurrentScene().Load();
         }
 

@@ -34,10 +34,16 @@ namespace PolyGone
             // Default update logic (if any) goes here
         }
 
-        public virtual void Draw(SpriteBatch spriteBatch) 
+        public virtual void Draw(SpriteBatch spriteBatch, Vector2 offset) 
         {
             // Draw the sprite using the provided SpriteBatch
-            spriteBatch.Draw(texture, Rectangle, color);
+            Rectangle adjustedRectangle = new Rectangle(
+                (int)(position.X - offset.X),
+                (int)(position.Y - offset.Y),
+                size[0],
+                size[1]
+            );
+            spriteBatch.Draw(texture, adjustedRectangle, color);
         }
     }
 }
