@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.IO;
 
 namespace PolyGone;
 
@@ -15,16 +16,55 @@ public class GameScene : IScene
     private FollowCamera camera;
     private List<Sprite> sprites;
     private GraphicsDeviceManager graphics;
+    private Dictionary<Vector2, int> tileMap;
+    private List<Rectangle> textureStore;
 
     public GameScene(ContentManager contentManager, SceneManager sceneManager, GraphicsDeviceManager graphics)
     {
         this.contentManager = contentManager;
         this.sceneManager = sceneManager;
         this.graphics = graphics;
+        this.tileMap = LoadMap("../../../Content/Maps/test.csv");
+        this.textureStore = new()
+        {
+            new Rectangle(0, 0, 32, 32),   // Tile ID 1
+            new Rectangle(32, 0, 32, 32),  // Tile ID 2
+            new Rectangle(64, 0, 32, 32),  // Tile ID 3
+            new Rectangle(96, 0, 32, 32),  // Tile ID 4
+            new Rectangle(0, 32, 32, 32)   // Tile ID 5
+        };
     }
+
+    public Dictionary<Vector2, int> LoadMap(string filepath)
+        {
+            Dictionary<Vector2, int> result = new();
+            StreamReader reader = new(filepath);
+
+            int y = 0;
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                string[] items = line.Split(',');
+                for (int x = 0; x < items.Length; x++)
+                {
+                    if (int.TryParse(items[x], out int value))
+                    {
+                        if (value > 0)
+                        {
+                            result[new Vector2(x, y)] = value;
+                        }
+                    }
+                }
+
+                y++;
+            }
+
+            return result;
+        }
 
     public void Load()
     {
+        texture = contentManager.Load<Texture2D>("PolyGoneTileMap");
         camera = new(new Vector2(0, 0));
         sprites = new();
         for (int i = 0; i < 100; i++)
@@ -72,10 +112,6 @@ public class GameScene : IScene
     }
     public void Update(GameTime gameTime)
     {
-        // if (Keyboard.GetState().IsKeyDown(Keys.Space))
-        // {
-        //     sceneManager.AddScene(new ExitScene(contentManager));
-        // }
 
         foreach (Sprite sprite in sprites)
         {
@@ -86,9 +122,20 @@ public class GameScene : IScene
     }
     public void Draw(SpriteBatch spriteBatch)
     {
-        foreach (Sprite sprite in sprites)
+        // foreach (Sprite sprite in sprites)
+        // {
+        //     sprite.Draw(spriteBatch, camera.position);
+        // }
+        foreach (var tile in tileMap)
         {
-            sprite.Draw(spriteBatch, camera.position);
+            Rectangle dest = new Rectangle(
+                (int)(tile.Key.X * 64 - camera.position.X),
+                (int)(tile.Key.Y * 64 - camera.position.Y),
+                64,
+                64
+            );
+            Rectangle src = textureStore[tile.Value - 1];
+            spriteBatch.Draw(texture, dest, src, Color.White);
         }
     }
 }

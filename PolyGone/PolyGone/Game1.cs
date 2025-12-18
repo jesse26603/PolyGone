@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -10,6 +11,8 @@ namespace PolyGone
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private SceneManager sceneManager;
+        private Dictionary<Vector2, int> tileMap;
+        private List<Rectangle> textureStore;
 
         public Game1()
         {
@@ -25,6 +28,7 @@ namespace PolyGone
 
             base.Initialize();
         }
+        
 
         protected override void LoadContent()
         {
