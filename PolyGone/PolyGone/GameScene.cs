@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.IO;
+using System.Diagnostics;
 
 namespace PolyGone;
 
@@ -18,6 +19,7 @@ public class GameScene : IScene
     private GraphicsDeviceManager graphics;
     private Dictionary<Vector2, int> tileMap;
     private List<Rectangle> textureStore;
+    private List<Rectangle> intersections;
 
     public GameScene(ContentManager contentManager, SceneManager sceneManager, GraphicsDeviceManager graphics)
     {
@@ -36,74 +38,79 @@ public class GameScene : IScene
     }
 
     public Dictionary<Vector2, int> LoadMap(string filepath)
-        {
-            Dictionary<Vector2, int> result = new();
-            StreamReader reader = new(filepath);
+    {
+        Dictionary<Vector2, int> result = new();
+        StreamReader reader = new(filepath);
 
-            int y = 0;
-            string line;
-            while ((line = reader.ReadLine()) != null)
+        int y = 0;
+        string line;
+        while ((line = reader.ReadLine()) != null)
+        {
+            string[] items = line.Split(',');
+            for (int x = 0; x < items.Length; x++)
             {
-                string[] items = line.Split(',');
-                for (int x = 0; x < items.Length; x++)
+                if (int.TryParse(items[x], out int value))
                 {
-                    if (int.TryParse(items[x], out int value))
+                    if (value > 0)
                     {
-                        if (value > 0)
-                        {
-                            result[new Vector2(x, y)] = value;
-                        }
+                        result[new Vector2(x, y)] = value;
                     }
                 }
-
-                y++;
             }
 
-            return result;
+            y++;
         }
+
+        return result;
+    }
+
+    public List<Rectangle> GetIntersectingTilesHorizontal(Rectangle rect)
+    {
+        List<Rectangle> intersectiions = new();
+        int width = (rect.Width - (rect.Width % 64)) / 64;
+        int height = (rect.Height - (rect.Height % 64)) / 64;
+
+        for (int x = 0; x <= width; x++)
+        {
+            for (int y = 0; y <= height; y++)
+            {
+                intersectiions.Add(new Rectangle(
+                    (rect.X + x * 64) / 64,
+                    (rect.Y + y * (64 - 1)) / 64,
+                    64,
+                    64
+                ));
+            }
+        }
+        return intersectiions;
+    }
+
+    public List<Rectangle> GetIntersectingTilesVertical(Rectangle rect)
+    {
+        List<Rectangle> intersectiions = new();
+        int width = (rect.Width - (rect.Width % 64)) / 64;
+        int height = (rect.Height - (rect.Height % 64)) / 64;
+
+        for (int x = 0; x <= width; x++)
+        {
+            for (int y = 0; y <= height; y++)
+            {
+                intersectiions.Add(new Rectangle(
+                    (rect.X + x * (64 - 1)) / 64,
+                    (rect.Y + y * 64) / 64,
+                    64,
+                    64
+                ));
+            }
+        }
+        return intersectiions;
+    }
 
     public void Load()
     {
         texture = contentManager.Load<Texture2D>("PolyGoneTileMap");
         camera = new(new Vector2(0, 0));
-        sprites = new();
-        for (int i = 0; i < 100; i++)
-        {
-            sprites.Add(new Sprite(
-                texture: texture,
-                position: new Vector2(i * 64, 300),
-                size: new int[2] { 64, 64 },
-                srcRect: textureStore[0],
-                color: Color.White
-            ));
-        }
-
-        for (int i = 0; i < 3; i++)
-        {
-            sprites.Add(new Sprite(
-                texture: texture,
-                position: new Vector2(400, 300 - (i + 1) * 64),
-                size: new int[2] { 64, 64 },
-                srcRect: textureStore[0],
-                color: Color.White
-            ));
-        }
-
-        sprites.Add(new Sprite(
-            texture: texture,
-            position: new Vector2(200, 200),
-            size: new int[2] { 64, 64 },
-            srcRect: textureStore[0],
-            color: Color.White
-        ));
-
-        sprites.Add(new Sprite(
-            texture: texture,
-            position: new Vector2(264, 200),
-            size: new int[2] { 64, 64 },
-            srcRect: textureStore[0],
-            color: Color.White
-        ));
+        intersections = new();
 
         player = new Player(
             texture: texture,
@@ -113,15 +120,25 @@ public class GameScene : IScene
             srcRect: textureStore[1],
             sprites: sprites
         );
-        sprites.Add(player);
+
+        intersections = GetIntersectingTilesHorizontal(player.Rectangle);
+
+        foreach (var rect in intersections)
+        {
+            Debug.WriteLine($"Intersecting Tile at: {rect.X}, {rect.Y}");
+        }
+        
+        intersections = GetIntersectingTilesVertical(player.Rectangle);
+
+        foreach (var rect in intersections)
+        {
+            Debug.WriteLine($"Intersecting Tile at: {rect.X}, {rect.Y}");
+        }
     }
     public void Update(GameTime gameTime)
     {
 
-        foreach (Sprite sprite in sprites)
-        {
-            sprite.Update(gameTime);
-        }
+
 
         camera.Follow(player.Rectangle, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
     }
@@ -142,5 +159,6 @@ public class GameScene : IScene
             Rectangle src = textureStore[tile.Value - 1];
             spriteBatch.Draw(texture, dest, src, Color.White);
         }
+        player.Draw(spriteBatch, camera.position);
     }
 }
