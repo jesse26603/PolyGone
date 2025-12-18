@@ -24,91 +24,96 @@ namespace PolyGone
         private void Movement()
         {
             keyboardState = Keyboard.GetState();
-            // Reset horizontal movement
-            if (changeX > 0.5) changeX -= .2f;
-            else if (changeX < -0.5) changeX += .2f;
-            else changeX = 0f;
 
             // Handle horizontal input
             if (keyboardState.IsKeyDown(Keys.A))
             {
                 changeX -= 1f;
                 if (changeX < -5f) changeX = -5f;
-
             }
-            if (keyboardState.IsKeyDown(Keys.D))
+            else if (keyboardState.IsKeyDown(Keys.D))
             {
                 changeX += 1f;
                 if (changeX > 5f) changeX = 5f;
             }
+            else
+            {
+                // Apply friction only when no input
+                if (Math.Abs(changeX) > 0.5f) 
+                    changeX *= 0.8f;
+                else 
+                    changeX = 0f;
+            }
 
             // Apply gravity
-            changeY += 0.5f; // Gravity effect
-            if (changeY > 10f) changeY = 10f; // Terminal velocity
+            changeY += 0.5f;
+            if (changeY > 10f) changeY = 10f;
 
-            // Check for collisions before moving
-            bool isOnGround = false;
-            bool canMoveHorizontally = true;
-
-            // Try horizontal movement first
-            if (changeX != 0)
+            // Horizontal collision and movement
+            bool horizontalCollision = false;
+            float nextX = position.X + changeX;
+            
+            foreach (Sprite sprite in sprites)
             {
-                Rectangle newHorizontalRect = new Rectangle((int)(position.X + changeX), (int)position.Y, size[0], size[1]);
-                foreach (Sprite sprite in sprites)
+                if (this != sprite)
                 {
-                    if (this != sprite && sprite.Rectangle.Intersects(newHorizontalRect))
+                    Rectangle nextRect = new Rectangle((int)nextX, (int)position.Y, size[0], size[1]);
+                    if (sprite.Rectangle.Intersects(nextRect))
                     {
-                        canMoveHorizontally = false;
-                        // Position player flush against the collision object
-                        if (changeX > 0)
-                        {
-                            position.X = sprite.position.X - size[0];
-                        }
-                        else if (changeX < 0)
-                        {
-                            position.X = sprite.position.X + sprite.size[0];
-                        }
+                        horizontalCollision = true;
                         changeX = 0f;
                         break;
                     }
                 }
             }
+            
+            if (!horizontalCollision)
+            {
+                position.X = nextX;
+            }
 
-            // Try vertical movement
-            Rectangle newVerticalRect = new Rectangle((int)position.X, (int)(position.Y + changeY), size[0], size[1]);
+            // Vertical collision and movement
+            bool verticalCollision = false;
+            bool isOnGround = false;
+            float nextY = position.Y + changeY;
+            
             foreach (Sprite sprite in sprites)
             {
-                if (this != sprite && sprite.Rectangle.Intersects(newVerticalRect))
+                if (this != sprite)
                 {
-                    // Check if player is landing on top of the sprite
-                    if (changeY > 0 && position.Y + size[1] <= sprite.position.Y + 5)
+                    Rectangle nextRect = new Rectangle((int)position.X, (int)nextY, size[0], size[1]);
+                    if (sprite.Rectangle.Intersects(nextRect))
                     {
-                        isOnGround = true;
-                        position.Y = sprite.position.Y - size[1];
-                        changeY = 0f;
-                        break;
-                    }
-                    else
-                    {
-                        // Hit ceiling or side
+                        verticalCollision = true;
+                        
+                        if (changeY > 0 && (int)position.Y + size[1] <= (int)sprite.position.Y + 5)
+                        {
+                            // Landing on top
+                            isOnGround = true;
+                            position.Y = sprite.position.Y - size[1];
+                        }
+                        else if (changeY < 0)
+                        {
+                            // Hit ceiling
+                            position.Y = sprite.position.Y + sprite.size[1];
+                        }
+                        
                         changeY = 0f;
                         break;
                     }
                 }
             }
-
-            // Apply movements
-            if (canMoveHorizontally)
+            
+            if (!verticalCollision)
             {
-                position.X += changeX;
+                position.Y = nextY;
             }
 
-            if (!isOnGround)
-            {
-                position.Y += changeY;
-            }
+            // Round positions to prevent sub-pixel jittering
+            position.X = (float)Math.Round(position.X);
+            position.Y = (float)Math.Round(position.Y);
 
-            // Allow jumping when on ground
+            // Jumping
             if (isOnGround && keyboardState.IsKeyDown(Keys.Space))
             {
                 changeY = -12f;
