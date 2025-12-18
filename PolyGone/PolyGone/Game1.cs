@@ -11,8 +11,6 @@ namespace PolyGone
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private SceneManager sceneManager;
-        private Dictionary<Vector2, int> tileMap;
-        private List<Rectangle> textureStore;
 
         public Game1()
         {

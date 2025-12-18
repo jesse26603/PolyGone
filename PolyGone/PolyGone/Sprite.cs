@@ -14,6 +14,7 @@ namespace PolyGone
         public Vector2 position;
         public int[] size;
         public Color color;
+        public Rectangle? srcRect;
         public Rectangle Rectangle 
         { 
             get 
@@ -21,12 +22,13 @@ namespace PolyGone
                 return new Rectangle((int)position.X, (int)position.Y, (int)size[0], (int)size[1]); 
             }
         }
-        public Sprite(Texture2D texture, Vector2 position, int[] size, Color color) 
+        public Sprite(Texture2D texture, Vector2 position, int[] size, Color color, Rectangle? srcRect = null) 
         {
             this.texture = texture;
             this.position = position;
             this.size = size;
             this.color = color;
+            this.srcRect = srcRect;
         }
 
         public virtual void Update(GameTime gameTime) 
@@ -43,7 +45,7 @@ namespace PolyGone
                 size[0],
                 size[1]
             );
-            spriteBatch.Draw(texture, adjustedRectangle, color);
+            spriteBatch.Draw(texture, adjustedRectangle, srcRect, color);
         }
     }
 }

@@ -70,9 +70,10 @@ public class GameScene : IScene
         for (int i = 0; i < 100; i++)
         {
             sprites.Add(new Sprite(
-                texture: contentManager.Load<Texture2D>("ground"),
+                texture: texture,
                 position: new Vector2(i * 64, 300),
                 size: new int[2] { 64, 64 },
+                srcRect: textureStore[0],
                 color: Color.White
             ));
         }
@@ -80,32 +81,36 @@ public class GameScene : IScene
         for (int i = 0; i < 3; i++)
         {
             sprites.Add(new Sprite(
-                texture: contentManager.Load<Texture2D>("ground"),
+                texture: texture,
                 position: new Vector2(400, 300 - (i + 1) * 64),
                 size: new int[2] { 64, 64 },
+                srcRect: textureStore[0],
                 color: Color.White
             ));
         }
 
         sprites.Add(new Sprite(
-            texture: contentManager.Load<Texture2D>("ground"),
+            texture: texture,
             position: new Vector2(200, 200),
             size: new int[2] { 64, 64 },
+            srcRect: textureStore[0],
             color: Color.White
         ));
 
         sprites.Add(new Sprite(
-            texture: contentManager.Load<Texture2D>("ground"),
+            texture: texture,
             position: new Vector2(264, 200),
             size: new int[2] { 64, 64 },
+            srcRect: textureStore[0],
             color: Color.White
         ));
 
         player = new Player(
-            texture: contentManager.Load<Texture2D>("player"),
+            texture: texture,
             position: new Vector2(100, 100),
             size: new int[2] { 64, 64 },
             color: Color.White,
+            srcRect: textureStore[1],
             sprites: sprites
         );
         sprites.Add(player);

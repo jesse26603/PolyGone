@@ -15,7 +15,7 @@ namespace PolyGone
         private KeyboardState keyboardState;
         private float changeX;
         private float changeY;
-        public Player(Texture2D texture, Vector2 position, int[] size, Color color, List<Sprite> sprites) : base(texture, position, size, color)
+        public Player(Texture2D texture, Vector2 position, int[] size, Color color, List<Sprite> sprites, Rectangle? srcRect = null) : base(texture, position, size, color, srcRect)
         {
             this.sprites = sprites;
         }
