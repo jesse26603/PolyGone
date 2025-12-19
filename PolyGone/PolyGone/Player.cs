@@ -20,11 +20,9 @@ namespace PolyGone
             this.collisionMap = collisionMap;
         }
 
-        private List<Rectangle>[] GetIntersectingTiles(Rectangle target)
+        private List<Rectangle> GetIntersectingTiles(Rectangle target)
         {
-            List<Rectangle>[] intersectingTiles = new List<Rectangle>[2];
-            intersectingTiles[0] = new List<Rectangle>(); // Horizontal collisions
-            intersectingTiles[1] = new List<Rectangle>(); // Vertical collisions
+            List<Rectangle> intersectingTiles = new List<Rectangle>();
             foreach (var tile in collisionMap)
             {
                 if (tile.Value == -1) continue; // Skip non-collidable tiles
@@ -33,18 +31,7 @@ namespace PolyGone
 
                 if (target.Intersects(tileRect))
                 {
-                    // Determine if the collision is primarily horizontal or vertical
-                    float overlapX = Math.Min(target.Right, tileRect.Right) - Math.Max(target.Left, tileRect.Left);
-                    float overlapY = Math.Min(target.Bottom, tileRect.Bottom) - Math.Max(target.Top, tileRect.Top);
-
-                    if (overlapX < overlapY)
-                    {
-                        intersectingTiles[0].Add(tileRect); // Horizontal collision
-                    }
-                    else
-                    {
-                        intersectingTiles[1].Add(tileRect); // Vertical collision
-                    }
+                    intersectingTiles.Add(tileRect);
                 }
             }
             return intersectingTiles;
@@ -80,54 +67,58 @@ namespace PolyGone
             if (changeY > 10f) changeY = 10f;
 
             // Horizontal collision and movement
-            bool horizontalCollision = false;
             float nextX = position.X + changeX;
+            Rectangle nextRectX = new Rectangle((int)nextX, (int)position.Y, size[0], size[1]);
+            List<Rectangle> horizontalCollisions = GetIntersectingTiles(nextRectX);
             
-            Rectangle nextRect = new Rectangle((int)nextX, (int)position.Y, size[0], size[1]);
-            List<Rectangle>[] intersectingTiles = GetIntersectingTiles(nextRect);
-            
-            if (intersectingTiles[0].Count > 0)
+            if (horizontalCollisions.Count > 0)
             {
-                horizontalCollision = true;
+                // Resolve horizontal collision
+                foreach (Rectangle tileRect in horizontalCollisions)
+                {
+                    if (changeX > 0)
+                    {
+                        // Moving right - push to left edge of tile
+                        position.X = tileRect.Left - size[0];
+                    }
+                    else if (changeX < 0)
+                    {
+                        // Moving left - push to right edge of tile
+                        position.X = tileRect.Right;
+                    }
+                }
                 changeX = 0f;
             }
-            
-            if (!horizontalCollision)
+            else
             {
                 position.X = nextX;
             }
 
             // Vertical collision and movement
-            bool verticalCollision = false;
             bool isOnGround = false;
             float nextY = position.Y + changeY;
+            Rectangle nextRectY = new Rectangle((int)position.X, (int)nextY, size[0], size[1]);
+            List<Rectangle> verticalCollisions = GetIntersectingTiles(nextRectY);
             
-            nextRect = new Rectangle((int)position.X, (int)nextY, size[0], size[1]);
-            intersectingTiles = GetIntersectingTiles(nextRect);
-            
-            if (intersectingTiles[1].Count > 0)
+            if (verticalCollisions.Count > 0)
             {
-                verticalCollision = true;
-                
-                foreach (Rectangle tileRect in intersectingTiles[1])
+                foreach (Rectangle tileRect in verticalCollisions)
                 {
-                    if (changeY > 0 && (int)position.Y + size[1] <= tileRect.Top + 5)
+                    if (changeY > 0)
                     {
-                        // Landing on top
+                        // Falling down - land on top of tile
                         isOnGround = true;
                         position.Y = tileRect.Top - size[1];
                     }
                     else if (changeY < 0)
                     {
-                        // Hit ceiling
+                        // Moving up - hit ceiling
                         position.Y = tileRect.Bottom;
                     }
                 }
-                
                 changeY = 0f;
             }
-            
-            if (!verticalCollision)
+            else
             {
                 position.Y = nextY;
             }
