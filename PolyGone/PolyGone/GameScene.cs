@@ -15,6 +15,7 @@ public class GameScene : IScene
     private SceneManager sceneManager;
     private Player player;
     private FollowCamera camera;
+    private Blaster blaster;
     private GraphicsDeviceManager graphics;
     private Dictionary<Vector2, int> tileMap;
     private Dictionary<Vector2, int> collisionMap;
@@ -77,6 +78,14 @@ public class GameScene : IScene
         // Load texture atlas and initialize camera
         texture = contentManager.Load<Texture2D>("PolyGoneTileMap");
         camera = new(new Vector2(0, 0));
+        // Initialize blaster
+        blaster = new Blaster(
+            texture: texture,
+            position: new Vector2(0, 0),
+            size: new int[2] { 32, 32 },
+            color: Color.White,
+            srcRect: textureStore[1]
+        );
         // Initialize player
         player = new Player(
             texture: texture,
@@ -84,15 +93,16 @@ public class GameScene : IScene
             size: new int[2] { 60, 60 },
             color: Color.White,
             srcRect: textureStore[1],
-            collisionMap: collisionMap
+            collisionMap: collisionMap,
+            blaster: blaster
         );
     }
     public void Update(GameTime gameTime)
     {
 
         player.Update(gameTime);
-
         camera.Follow(player.Rectangle, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
+        player.blaster.Follow(player.Rectangle, camera.position);
     }
     public void Draw(SpriteBatch spriteBatch)
     {

@@ -15,10 +15,12 @@ namespace PolyGone
         private KeyboardState keyboardState;
         private float changeX;
         private float changeY;
-        public Player(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, Rectangle? srcRect = null) 
+        public Blaster blaster;
+        public Player(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, Blaster blaster, Rectangle? srcRect = null) 
             : base(texture, position, size, color, srcRect)
         {
             this.collisionMap = collisionMap;
+            this.blaster = blaster;
         }
 
         private List<Rectangle> GetIntersectingTiles(Rectangle target)
@@ -145,8 +147,7 @@ namespace PolyGone
 
         public override void Draw(SpriteBatch spriteBatch, Vector2 offset)
         {
-            // Player-specific draw logic can go here
-
+            blaster.Draw(spriteBatch, offset);
             base.Draw(spriteBatch, offset);
         }
     }
