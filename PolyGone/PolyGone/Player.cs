@@ -138,7 +138,6 @@ namespace PolyGone
         public override void Update(GameTime gameTime)
         {
             float deltaTime = (float)Math.Round(gameTime.ElapsedGameTime.TotalSeconds * 60f, 3); // Assuming 60 FPS standard
-            Console.WriteLine(deltaTime);
             Movement(deltaTime);
             
             base.Update(gameTime);
