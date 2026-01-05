@@ -81,7 +81,7 @@ public class GameScene : IScene
         player = new Player(
             texture: texture,
             position: new Vector2(100, -100),
-            size: new int[2] { 64, 64 },
+            size: new int[2] { 60, 60 },
             color: Color.White,
             srcRect: textureStore[1],
             collisionMap: collisionMap

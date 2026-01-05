@@ -15,7 +15,8 @@ namespace PolyGone
         private KeyboardState keyboardState;
         private float changeX;
         private float changeY;
-        public Player(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, Rectangle? srcRect = null) : base(texture, position, size, color, srcRect)
+        public Player(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, Rectangle? srcRect = null) 
+            : base(texture, position, size, color, srcRect)
         {
             this.collisionMap = collisionMap;
         }
@@ -38,7 +39,7 @@ namespace PolyGone
         }
 
         // Handle player movement and collisions
-        private void Movement()
+        private void Movement(float deltaTime)
         {
             keyboardState = Keyboard.GetState();
 
@@ -46,12 +47,12 @@ namespace PolyGone
             if (keyboardState.IsKeyDown(Keys.A))
             {
                 changeX -= 1f;
-                if (changeX < -5f) changeX = -5f;
+                changeX = Math.Max(changeX, -5f);
             }
             else if (keyboardState.IsKeyDown(Keys.D))
             {
                 changeX += 1f;
-                if (changeX > 5f) changeX = 5f;
+                changeX = Math.Min(changeX, 5f);
             }
             else
             {
@@ -64,10 +65,10 @@ namespace PolyGone
 
             // Apply gravity
             changeY += 0.5f;
-            if (changeY > 10f) changeY = 10f;
+            changeY = Math.Min(changeY, 10f);
 
             // Horizontal collision and movement
-            float nextX = position.X + changeX;
+            float nextX = position.X + (changeX * deltaTime);
             Rectangle nextRectX = new Rectangle((int)nextX, (int)position.Y, size[0], size[1]);
             List<Rectangle> horizontalCollisions = GetIntersectingTiles(nextRectX);
             
@@ -96,7 +97,7 @@ namespace PolyGone
 
             // Vertical collision and movement
             bool isOnGround = false;
-            float nextY = position.Y + changeY;
+            float nextY = position.Y + (changeY * deltaTime);
             Rectangle nextRectY = new Rectangle((int)position.X, (int)nextY, size[0], size[1]);
             List<Rectangle> verticalCollisions = GetIntersectingTiles(nextRectY);
             
@@ -136,7 +137,9 @@ namespace PolyGone
 
         public override void Update(GameTime gameTime)
         {
-            Movement();
+            float deltaTime = (float)Math.Round(gameTime.ElapsedGameTime.TotalSeconds * 60f, 3); // Assuming 60 FPS standard
+            Console.WriteLine(deltaTime);
+            Movement(deltaTime);
             
             base.Update(gameTime);
         }
