@@ -1,0 +1,17 @@
+﻿# Build results
+[Dd]ebug/
+[Rr]elease/
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# MonoGame
+Content/bin/
+Content/obj/
+*.mgcontent
