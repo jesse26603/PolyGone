@@ -65,7 +65,7 @@ namespace PolyGone
 
             // Apply gravity
             changeY += 0.5f;
-            changeY = Math.Min(changeY, 10f);
+            changeY = Math.Min(changeY, 10f); // Terminal velocity
 
             // Horizontal collision and movement
             float nextX = position.X + (changeX * deltaTime);

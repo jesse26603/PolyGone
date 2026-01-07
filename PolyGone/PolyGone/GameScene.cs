@@ -89,10 +89,11 @@ public class GameScene : IScene
     }
     public void Update(GameTime gameTime)
     {
-
+        // Update player and camera
         player.Update(gameTime);
-
         camera.Follow(player.Rectangle, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
+
+        // Handle scene switching
     }
     public void Draw(SpriteBatch spriteBatch)
     {

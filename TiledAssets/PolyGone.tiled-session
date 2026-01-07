@@ -1,0 +1,50 @@
+{
+    "activeFile": "TiledMaps/TestLevel.tmx",
+    "expandedProjectPaths": [
+        "TiledMaps",
+        ".",
+        "TiledSets"
+    ],
+    "fileStates": {
+        "": {
+            "scaleInDock": 1
+        },
+        "C:/Users/Jesse.Bailey/Documents/GitHub/PolyGone/TiledSets/BasicTiling.tsx": {
+            "scaleInDock": 1
+        },
+        "TiledMaps/TestLevel.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 308.66666666666663,
+                "y": 624.6666666666666
+            }
+        },
+        "TiledMaps/TestLevel.tmx#BasicTiles": {
+            "scaleInDock": 1
+        },
+        "TiledMaps/TestLevel.tmx#BasicTiling": {
+            "dynamicWrapping": true
+        },
+        "TiledSets/BasicTiles.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "TiledSets/CollisionTiles.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.imagePath": "C:/Users/Jesse.Bailey/Documents/GitHub/PolyGone/TiledAssets/TileMaps",
+    "openFiles": [
+        "TiledMaps/TestLevel.tmx"
+    ],
+    "project": "PolyGone.tiled-project",
+    "recentFiles": [
+        "TiledMaps/TestLevel.tmx",
+        "TiledSets/BasicTiles.tsx",
+        "TiledSets/CollisionTiles.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx"
+}
