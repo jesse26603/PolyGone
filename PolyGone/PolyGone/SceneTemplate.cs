@@ -6,6 +6,8 @@ namespace PolyGone;
 
 public interface IScene
 {
+    public void LoadMap() {}
+
     public void Load() {}
 
     public void Update(GameTime gameTime) {}
