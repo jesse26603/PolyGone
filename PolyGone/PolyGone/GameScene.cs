@@ -25,8 +25,8 @@ public class GameScene : IScene
         this.contentManager = contentManager;
         this.sceneManager = sceneManager;
         this.graphics = graphics;
-        this.tileMap = LoadMap("../../../Content/Maps/test.csv");
-        this.collisionMap = LoadMap("../../../Content/Maps/test_collisions.csv");
+        this.tileMap = LoadMap("../../../Content/Maps/TestLevel._Tiles.csv");
+        this.collisionMap = LoadMap("../../../Content/Maps/TestLevel._Collisions.csv");
         this.textureStore = GetTextureStore(32, new int[2] { 4, 4 });
     }
 

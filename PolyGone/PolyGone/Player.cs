@@ -64,36 +64,8 @@ namespace PolyGone
             }
 
             // Apply gravity
-            changeY += 0.5f;
-            changeY = Math.Min(changeY, 10f); // Terminal velocity
-
-            // Horizontal collision and movement
-            float nextX = position.X + (changeX * deltaTime);
-            Rectangle nextRectX = new Rectangle((int)nextX, (int)position.Y, size[0], size[1]);
-            List<Rectangle> horizontalCollisions = GetIntersectingTiles(nextRectX);
-            
-            if (horizontalCollisions.Count > 0)
-            {
-                // Resolve horizontal collision
-                foreach (Rectangle tileRect in horizontalCollisions)
-                {
-                    if (changeX > 0)
-                    {
-                        // Moving right - push to left edge of tile
-                        position.X = tileRect.Left - size[0];
-                    }
-                    else if (changeX < 0)
-                    {
-                        // Moving left - push to right edge of tile
-                        position.X = tileRect.Right;
-                    }
-                }
-                changeX = 0f;
-            }
-            else
-            {
-                position.X = nextX;
-            }
+            changeY += 0.7f;
+            changeY = Math.Min(changeY, 14f); // Terminal velocity
 
             // Vertical collision and movement
             bool isOnGround = false;
@@ -124,6 +96,34 @@ namespace PolyGone
                 position.Y = nextY;
             }
 
+            // Horizontal collision and movement
+            float nextX = position.X + (changeX * deltaTime);
+            Rectangle nextRectX = new Rectangle((int)nextX, (int)position.Y, size[0], size[1]);
+            List<Rectangle> horizontalCollisions = GetIntersectingTiles(nextRectX);
+            
+            if (horizontalCollisions.Count > 0)
+            {
+                // Resolve horizontal collision
+                foreach (Rectangle tileRect in horizontalCollisions)
+                {
+                    if (changeX > 0)
+                    {
+                        // Moving right - push to left edge of tile
+                        position.X = tileRect.Left - size[0];
+                    }
+                    else if (changeX < 0)
+                    {
+                        // Moving left - push to right edge of tile
+                        position.X = tileRect.Right;
+                    }
+                }
+                changeX = 0f;
+            }
+            else
+            {
+                position.X = nextX;
+            }
+
             // Round positions to prevent sub-pixel jittering
             position.X = (float)Math.Round(position.X);
             position.Y = (float)Math.Round(position.Y);
@@ -131,7 +131,7 @@ namespace PolyGone
             // Jumping
             if (isOnGround && keyboardState.IsKeyDown(Keys.Space))
             {
-                changeY = -12f;
+                changeY = -16f;
             }
         }
 

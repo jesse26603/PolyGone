@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="90" height="30" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="1">
  <tileset firstgid="1" name="BasicTiles" tilewidth="32" tileheight="32" tilecount="16" columns="4">
-  <image source="../TileMaps/PolyGoneTileMap.png" width="128" height="128"/>
+  <image source="../../../../TiledAssets/TileMaps/PolyGoneTileMap.png" width="128" height="128"/>
  </tileset>
- <tileset firstgid="17" source="../TiledSets/CollisionTiles.tsx"/>
+ <tileset firstgid="17" source="../../../../TiledAssets/TiledSets/CollisionTiles.tsx"/>
  <layer id="1" name="Tiles" width="90" height="30">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
