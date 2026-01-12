@@ -13,9 +13,11 @@ namespace PolyGone
     {
         private Dictionary<Vector2, int> collisionMap;
         private KeyboardState keyboardState;
+        private MouseState mouseState;
         private float changeX;
         private float changeY;
         public Blaster blaster;
+        public Bullet bullet;
         public Player(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, Blaster blaster, Rectangle? srcRect = null) 
             : base(texture, position, size, color, srcRect)
         {
@@ -44,6 +46,7 @@ namespace PolyGone
         private void Movement(float deltaTime)
         {
             keyboardState = Keyboard.GetState();
+            mouseState = Mouse.GetState();
 
             // Handle horizontal input
             if (keyboardState.IsKeyDown(Keys.A))
@@ -64,6 +67,11 @@ namespace PolyGone
                 else 
                     changeX = 0f;
             }
+            // Handle shooting (Don't worky yet but it okay)
+            // if (mouseState.LeftButton == ButtonState.Pressed)
+            // {
+            //     Bullet.bullet();
+            // }
 
             // Apply gravity
             changeY += 0.5f;
