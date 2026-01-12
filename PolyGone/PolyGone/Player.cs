@@ -21,21 +21,57 @@ namespace PolyGone
             this.collisionMap = collisionMap;
         }
 
-        private List<Rectangle> GetIntersectingTiles(Rectangle target)
+        private List<(Rectangle, CollisionType)> GetIntersectingTiles(Rectangle target)
         {
-            List<Rectangle> intersectingTiles = new List<Rectangle>();
+            List<(Rectangle, CollisionType)> intersectingTiles = new List<(Rectangle, CollisionType)>();
             foreach (var tile in collisionMap)
             {
                 if (tile.Value == -1) continue; // Skip non-collidable tiles
 
                 Rectangle tileRect = new Rectangle((int)tile.Key.X * 64, (int)tile.Key.Y * 64, 64, 64);
+                CollisionType colType = CollisionTypeMapper.GetCollisionType(tile.Value);
 
                 if (target.Intersects(tileRect))
                 {
-                    intersectingTiles.Add(tileRect);
+                    intersectingTiles.Add((tileRect, colType));
                 }
             }
             return intersectingTiles;
+        }
+
+        // Handle vertical collisions
+        private void HandleVerticalCollisions(ref bool isOnGround, ref float changeY, List<(Rectangle, CollisionType)> collisions)
+        {
+            foreach ((Rectangle tileRect, CollisionType colType) in collisions)
+            {
+                switch (colType)
+                {
+                    default:
+                    case CollisionType.Solid:
+                    case CollisionType.Rough:
+                    case CollisionType.Slippery:
+                        if (changeY > 0)
+                        {
+                            // Falling down - land on top of tile
+                            position.Y = tileRect.Top - size[1];
+                            isOnGround = true;
+                        }
+                        else if (changeY < 0)
+                        {
+                            // Moving up - hit ceiling
+                            position.Y = tileRect.Bottom;
+                        }
+                        break;
+                    case CollisionType.SemiSolid:
+                        // Only collide when falling down and above the platform
+                        if (changeY > 0 && (position.Y + size[1] - changeY) <= tileRect.Top + 5)
+                        {
+                            position.Y = tileRect.Top - size[1];
+                            isOnGround = true;
+                        }
+                        break;
+                }
+            }
         }
 
         // Handle player movement and collisions
@@ -71,23 +107,13 @@ namespace PolyGone
             bool isOnGround = false;
             float nextY = position.Y + (changeY * deltaTime);
             Rectangle nextRectY = new Rectangle((int)position.X, (int)nextY, size[0], size[1]);
-            List<Rectangle> verticalCollisions = GetIntersectingTiles(nextRectY);
+            List<(Rectangle, CollisionType)> verticalCollisions = GetIntersectingTiles(nextRectY);
             
             if (verticalCollisions.Count > 0)
             {
-                foreach (Rectangle tileRect in verticalCollisions)
+                foreach ((Rectangle tileRect, CollisionType colType) in verticalCollisions)
                 {
-                    if (changeY > 0)
-                    {
-                        // Falling down - land on top of tile
-                        isOnGround = true;
-                        position.Y = tileRect.Top - size[1];
-                    }
-                    else if (changeY < 0)
-                    {
-                        // Moving up - hit ceiling
-                        position.Y = tileRect.Bottom;
-                    }
+                    HandleVerticalCollisions(ref isOnGround, ref changeY, verticalCollisions);
                 }
                 changeY = 0f;
             }
@@ -99,21 +125,21 @@ namespace PolyGone
             // Horizontal collision and movement
             float nextX = position.X + (changeX * deltaTime);
             Rectangle nextRectX = new Rectangle((int)nextX, (int)position.Y, size[0], size[1]);
-            List<Rectangle> horizontalCollisions = GetIntersectingTiles(nextRectX);
+            List<(Rectangle, CollisionType)> horizontalCollisions = GetIntersectingTiles(nextRectX);
             
             if (horizontalCollisions.Count > 0)
             {
                 // Resolve horizontal collision
-                foreach (Rectangle tileRect in horizontalCollisions)
+                foreach ((Rectangle tileRect, CollisionType colType) in horizontalCollisions)
                 {
                     if (changeX > 0)
                     {
-                        // Moving right - push to left edge of tile
+                        // Moving right - hit left side of tile
                         position.X = tileRect.Left - size[0];
                     }
                     else if (changeX < 0)
                     {
-                        // Moving left - push to right edge of tile
+                        // Moving left - hit right side of tile
                         position.X = tileRect.Right;
                     }
                 }
