@@ -40,37 +40,75 @@ namespace PolyGone
         }
 
         // Handle vertical collisions
-        private void HandleVerticalCollisions(ref bool isOnGround, ref float changeY, List<(Rectangle, CollisionType)> collisions)
+        private void HandleVerticalCollision(ref bool isOnGround, ref float changeY, List<(Rectangle, CollisionType)> collisions)
         {
-            foreach ((Rectangle tileRect, CollisionType colType) in collisions)
+            var (tileRect, colType) = collisions[0];
+            switch (colType)
             {
-                switch (colType)
-                {
-                    default:
-                    case CollisionType.Solid:
-                    case CollisionType.Rough:
-                    case CollisionType.Slippery:
-                        if (changeY > 0)
-                        {
-                            // Falling down - land on top of tile
-                            position.Y = tileRect.Top - size[1];
-                            isOnGround = true;
-                        }
-                        else if (changeY < 0)
-                        {
-                            // Moving up - hit ceiling
-                            position.Y = tileRect.Bottom;
-                        }
-                        break;
-                    case CollisionType.SemiSolid:
-                        // Only collide when falling down and above the platform
-                        if (changeY > 0 && (position.Y + size[1] - changeY) <= tileRect.Top + 5)
-                        {
-                            position.Y = tileRect.Top - size[1];
-                            isOnGround = true;
-                        }
-                        break;
-                }
+                default:
+                case CollisionType.Solid:
+                case CollisionType.Rough:
+                case CollisionType.Slippery:
+                    if (changeY > 0)
+                    {
+                        // Falling down - land on top of tile
+                        position.Y = tileRect.Top - size[1];
+                        isOnGround = true;
+                    }
+                    else if (changeY < 0)
+                    {
+                        // Moving up - hit ceiling
+                        position.Y = tileRect.Bottom;
+                    }
+                    changeY = 0;
+                    break;
+                case CollisionType.SemiSolid:
+                    if (keyboardState.IsKeyDown(Keys.S))
+                    {
+                        // Drop through platform
+                        position.Y += changeY;
+                    }
+                    else if (changeY > 0 && (position.Y + size[1]) <= tileRect.Top + 10)
+                    {
+                        // Falling down - land on top of tile
+                        position.Y = tileRect.Top - size[1];
+                        changeY = 0;
+                        isOnGround = true;
+                    }
+                    else
+                    {
+                        // Moving up - ignore platform
+                        position.Y += changeY;
+                    }
+                    break;
+            }
+        }
+
+        private void HandleHorizontalCollision(ref float changeX, List<(Rectangle, CollisionType)> collisions)
+        {
+            var (tileRect, colType) = collisions[0];
+            switch (colType)
+            {
+                default:
+                case CollisionType.Solid:
+                case CollisionType.Rough:
+                case CollisionType.Slippery:
+                    if (changeX > 0)
+                    {
+                        // Moving right - hit left side of tile
+                        position.X = tileRect.Left - size[0];
+                    }
+                    else if (changeX < 0)
+                    {
+                        // Moving left - hit right side of tile
+                        position.X = tileRect.Right;
+                    }
+                    changeX = 0;
+                    break;
+                case CollisionType.SemiSolid:
+                    // Ignore horizontal collisions with semi-solid tiles
+                    position.X += changeX;
+                    break;
             }
         }
 
@@ -111,11 +149,12 @@ namespace PolyGone
             
             if (verticalCollisions.Count > 0)
             {
-                foreach ((Rectangle tileRect, CollisionType colType) in verticalCollisions)
-                {
-                    HandleVerticalCollisions(ref isOnGround, ref changeY, verticalCollisions);
-                }
-                changeY = 0f;
+                // Determine closest collision tile and prioritize handling. Always prioritize solid tiles first.
+                verticalCollisions = verticalCollisions
+                    .OrderBy(c => Math.Abs(changeY > 0 ? c.Item1.Top - (position.Y + size[1]) : c.Item1.Bottom - position.Y))
+                    .ThenByDescending(c => c.Item2 == CollisionType.Solid ? 1 : 0)
+                    .ToList();
+                HandleVerticalCollision(ref isOnGround, ref changeY, verticalCollisions.Take(1).ToList());
             }
             else
             {
@@ -129,21 +168,11 @@ namespace PolyGone
             
             if (horizontalCollisions.Count > 0)
             {
-                // Resolve horizontal collision
-                foreach ((Rectangle tileRect, CollisionType colType) in horizontalCollisions)
-                {
-                    if (changeX > 0)
-                    {
-                        // Moving right - hit left side of tile
-                        position.X = tileRect.Left - size[0];
-                    }
-                    else if (changeX < 0)
-                    {
-                        // Moving left - hit right side of tile
-                        position.X = tileRect.Right;
-                    }
-                }
-                changeX = 0f;
+                // Determine closest collision tile
+                horizontalCollisions = horizontalCollisions
+                    .OrderBy(c => Math.Abs(changeX > 0 ? c.Item1.Left - (position.X + size[0]) : c.Item1.Right - position.X))
+                    .ToList();
+                HandleHorizontalCollision(ref changeX, horizontalCollisions.Take(1).ToList());
             }
             else
             {
