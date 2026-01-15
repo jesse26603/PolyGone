@@ -156,7 +156,7 @@ namespace PolyGone
             float nextY = position.Y + (changeY * deltaTime);
             Rectangle nextRectY = new Rectangle((int)position.X, (int)nextY, size[0], size[1]);
             List<(Rectangle, CollisionType)> verticalCollisions = GetIntersectingTiles(nextRectY);
-            
+
             if (verticalCollisions.Count > 0)
             {
                 // Determine closest collision tile and prioritize handling. Always prioritize solid tiles first.
@@ -175,7 +175,7 @@ namespace PolyGone
             float nextX = position.X + (changeX * deltaTime);
             Rectangle nextRectX = new Rectangle((int)nextX, (int)position.Y, size[0], size[1]);
             List<(Rectangle, CollisionType)> horizontalCollisions = GetIntersectingTiles(nextRectX);
-            
+
             if (horizontalCollisions.Count > 0)
             {
                 // Determine closest collision tile
@@ -200,24 +200,25 @@ namespace PolyGone
             }
         }
 
+        public float cooldown = 0f;
         public override void Update(GameTime gameTime)
         {
             float deltaTime = (float)Math.Round(gameTime.ElapsedGameTime.TotalSeconds * 60f, 3); // Assuming 60 FPS standard
             Movement(deltaTime);
             // Handle shooting (Don't worky yet but it okay)
-            if (mouseState.LeftButton == ButtonState.Pressed)
+            if (mouseState.LeftButton == ButtonState.Pressed && cooldown <= 0f)
             {
                 bullets.Add(new Bullet(
                 texture: texture,
-                position: new Vector2(blaster.position.X + blaster.size[0] / 2, blaster.position.Y + blaster.size[1] / 2),
-                size: [10, 10],
+                position: new Vector2(blaster.position.X + blaster.size[0] / 2 - 5, blaster.position.Y + blaster.size[1] / 2 - 5),
+                size: new int[2] { 10, 10 },
                 Lifetime: 90 * deltaTime,
                 color: Color.White,
                 xSpeed: (float)(Math.Cos(blaster.rotation) * 10f),
-                ySpeed: (float)(Math.Sin(blaster.rotation) * 10f)
+                ySpeed: (float)(Math.Sin(blaster.rotation) * 10f),
+                srcRect: blaster.srcRect
                 ));
-
-                //if (lifetime == 0f { bullets.Remove(bullet); })
+                cooldown = 12f;
             }
             foreach (var bullet in bullets.ToList())
             {
@@ -228,6 +229,7 @@ namespace PolyGone
                 }
                 bullet.Update(gameTime);
             }
+            cooldown = Math.Max(0f, cooldown - 1f);
             base.Update(gameTime);
         }
 
