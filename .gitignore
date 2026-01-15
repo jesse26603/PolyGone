@@ -15,3 +15,8 @@ obj/
 Content/bin/
 Content/obj/
 *.mgcontent
+
+# Tiled
+*.tmx~
+*.tsx~
+*tiled-session
