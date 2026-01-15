@@ -12,12 +12,15 @@ namespace PolyGone
     {
         public float xSpeed;
         public float ySpeed;
-        public Bullet(Texture2D texture, Vector2 position, int[] size, Color color, float xSpeed, float ySpeed, Rectangle? srcRect = null)
+        public float Lifetime;
+        public Bullet(Texture2D texture, Vector2 position, int[] size, float Lifetime, Color color, float xSpeed, float ySpeed, Rectangle? srcRect = null)
             : base(texture, position, size, color, srcRect)
         {
             this.xSpeed = xSpeed;
             this.ySpeed = ySpeed;
+            this.Lifetime = Lifetime;
         }
+        
 
         internal static void bullet()
         {
