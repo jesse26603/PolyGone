@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Input;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Linq;
 
 namespace PolyGone;
 
@@ -109,9 +110,21 @@ public class GameScene : IScene
     {
         // Update player and camera
         player.Update(gameTime);
-        camera.Follow(player.Rectangle, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
-
-        // Handle scene switching
+        camera.Follow(player.Rectangle, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), new Vector2( tileMap.Keys.Max(k => k.X + 1) * 64, tileMap.Keys.Max(k => k.Y + 1) * 64));
+        
+        // If player is outside world bounds, reset position
+        if (player.position.Y > tileMap.Keys.Max(k => k.Y + 1) * 64)
+        {
+            player.position = new Vector2(100, -100);
+        } else if (player.position.X < 0)
+        {
+            player.position.X = 0;
+            player.changeX = 0;
+        } else if (player.position.X + player.size[0] > tileMap.Keys.Max(k => k.X + 1) * 64)
+        {
+            player.position.X = tileMap.Keys.Max(k => k.X + 1) * 64 - player.size[0];
+            player.changeX = 0;
+        }
     }
     public void Draw(SpriteBatch spriteBatch)
     {

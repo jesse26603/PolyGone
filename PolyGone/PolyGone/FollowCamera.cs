@@ -12,21 +12,13 @@ public class FollowCamera
         this.position = position;
     }
 
-    public void Follow(Rectangle target, Vector2 screenSize)
+    public void Follow(Rectangle target, Vector2 screenSize, Vector2 worldSize)
     {
-        MouseState mouseState = Mouse.GetState();
-        Vector2 mousePosition = mouseState.Position.ToVector2();
-        Vector2 offset = mousePosition - screenSize / 2;
-        float distance = offset.Length();
-        if (distance > 120)
-        {
-            offset = Vector2.Normalize(offset) * 120;
-        }
-        mousePosition = screenSize / 2 + offset;
-        mousePosition.Y = MathHelper.Clamp(mousePosition.Y, screenSize.Y / 2 - 120, screenSize.Y / 2 + 120);
         position = new Vector2(
-            target.X + target.Width / 2 - screenSize.X / 2 + (mousePosition.X - screenSize.X / 2) / 2,
-            target.Y + target.Height / 2 - screenSize.Y / 2 + (mousePosition.Y - screenSize.Y / 2) / 2
+            target.X + target.Width / 2 - screenSize.X / 2,
+            target.Y + target.Height / 2 - screenSize.Y / 2
         );
+        position.X = MathHelper.Clamp(position.X, 0, worldSize.X - screenSize.X);
+        position.Y = MathHelper.Clamp(position.Y, 0, worldSize.Y - screenSize.Y);
     }
 };

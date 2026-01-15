@@ -18,6 +18,13 @@ namespace PolyGone
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             sceneManager = new();
+
+            // Resize window to screen size
+            var screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+            var screenHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+            _graphics.PreferredBackBufferWidth = screenWidth;
+            _graphics.PreferredBackBufferHeight = screenHeight;
+            _graphics.ApplyChanges();
         }
 
         protected override void Initialize()

@@ -13,7 +13,7 @@ namespace PolyGone
     {
         private Dictionary<Vector2, int> collisionMap;
         private KeyboardState keyboardState;
-        private float changeX;
+        public float changeX;
         private float changeY;
         public Player(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, Rectangle? srcRect = null) 
             : base(texture, position, size, color, srcRect)
@@ -194,7 +194,7 @@ namespace PolyGone
         {
             float deltaTime = (float)Math.Round(gameTime.ElapsedGameTime.TotalSeconds * 60f, 3); // Assuming 60 FPS standard
             Movement(deltaTime);
-            
+
             base.Update(gameTime);
         }
 
