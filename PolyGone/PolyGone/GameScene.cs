@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace PolyGone;
 
@@ -26,9 +27,8 @@ public class GameScene : IScene
         this.contentManager = contentManager;
         this.sceneManager = sceneManager;
         this.graphics = graphics;
-        this.tileMap = LoadMap("../../../Content/Maps/Mappy2.csv");
-        this.collisionMap = LoadMap("../../../Content/Maps/Mappy2_collisions.csv");
-        this.textureStore = GetTextureStore(32, new int[2] { 4, 4 });
+        LoadMapFromJson("../../../Content/Maps/TestLevel.json");
+        textureStore = GetTextureStore(32, new int[2] { 4, 4 });
     }
 
     // Generates a list of rectangles representing individual textures in a texture atlas
@@ -45,33 +45,51 @@ public class GameScene : IScene
         return textureStore;
     }
 
-    // Loads a tile map from a CSV file and returns a dictionary mapping tile positions to tile IDs
-    public Dictionary<Vector2, int> LoadMap(string filepath)
+    // Loads tile and collision maps from a JSON file exported from Tiled
+    public void LoadMapFromJson(string filepath)
+    {
+        // Read and parse JSON file
+        string jsonContent = File.ReadAllText(filepath);
+        using JsonDocument doc = JsonDocument.Parse(jsonContent);
+        
+        // Get root and layers
+        JsonElement root = doc.RootElement;
+        JsonElement layers = root.GetProperty("layers");
+        
+        int width = root.GetProperty("width").GetInt32();
+        
+        tileMap = new Dictionary<Vector2, int>();
+        collisionMap = new Dictionary<Vector2, int>();
+        
+        foreach (JsonElement layer in layers.EnumerateArray())
         {
-            Dictionary<Vector2, int> result = new();
-            StreamReader reader = new(filepath);
-
-            int y = 0;
-            string line;
-            while ((line = reader.ReadLine()) != null)
+            string layerName = layer.GetProperty("name").GetString();
+            JsonElement dataArray = layer.GetProperty("data");
+            
+            int index = 0;
+            foreach (JsonElement tile in dataArray.EnumerateArray())
             {
-                string[] items = line.Split(',');
-                for (int x = 0; x < items.Length; x++)
+                int tileValue = tile.GetInt32();
+                int x = index % width;
+                int y = index / width;
+                
+                if (tileValue > 0)
                 {
-                    if (int.TryParse(items[x], out int value))
+                    // Tiled uses 1-based indexing, convert to 0-based
+                    if (layerName == "Tiles")
                     {
-                        if (value > -1)
-                        {
-                            result[new Vector2(x, y)] = value;
-                        }
+                        tileMap[new Vector2(x, y)] = tileValue - 1;
+                    }
+                    else if (layerName == "Collisions")
+                    {
+                        collisionMap[new Vector2(x, y)] = tileValue - 1;
                     }
                 }
-
-                y++;
+                
+                index++;
             }
-
-            return result;
         }
+    }
 
     public void Load()
     {
@@ -99,10 +117,12 @@ public class GameScene : IScene
     }
     public void Update(GameTime gameTime)
     {
-
+        // Update player and camera
         player.Update(gameTime);
         camera.Follow(player.Rectangle, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
         player.blaster.Follow(player.Rectangle, camera.position);
+
+        // Handle scene switching
     }
     public void Draw(SpriteBatch spriteBatch)
     {
