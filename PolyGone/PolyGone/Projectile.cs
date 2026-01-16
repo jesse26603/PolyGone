@@ -19,13 +19,6 @@ namespace PolyGone
             this.ySpeed = ySpeed;
             this.Lifetime = Lifetime;
         }
-        
-
-        internal static void bullet()
-        {
-            throw new NotImplementedException();
-        }
-
         //Fire projectiles from blaster to global mouse position
         public override void Update(GameTime gameTime)
         {
