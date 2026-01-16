@@ -232,8 +232,8 @@ namespace PolyGone
 
         public override void Draw(SpriteBatch spriteBatch, Vector2 offset)
         {
-            blaster.Draw(spriteBatch, offset);
             base.Draw(spriteBatch, offset);
+            blaster.Draw(spriteBatch, offset);
             foreach (var bullet in bullets)
             {
                 bullet.Draw(spriteBatch, offset);
