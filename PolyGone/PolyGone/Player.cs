@@ -205,7 +205,7 @@ namespace PolyGone
         {
             float deltaTime = (float)Math.Round(gameTime.ElapsedGameTime.TotalSeconds * 60f, 3); // Assuming 60 FPS standard
             Movement(deltaTime);
-            // Handle shooting (Don't worky yet but it okay)
+            // Handle shooting (To be implemented)
             if (mouseState.LeftButton == ButtonState.Pressed && cooldown <= 0f)
             {
                 bullets.Add(new Bullet(
