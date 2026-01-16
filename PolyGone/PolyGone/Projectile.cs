@@ -8,7 +8,7 @@ namespace PolyGone
 
     class Bullet : Sprite
     {
-        public float xSpeed;
+        public readonly float xSpeed;
         public readonly float ySpeed;
         public float Lifetime;
         public Bullet(Texture2D texture, Vector2 position, int[] size, float lifetime, Color color, float xSpeed, float ySpeed, Rectangle? srcRect = null)
