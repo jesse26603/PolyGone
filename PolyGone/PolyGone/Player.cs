@@ -131,7 +131,6 @@ namespace PolyGone
             {
                 changeX -= 1f;
                 changeX = Math.Max(changeX, -5f);
-
             }
             else if (keyboardState.IsKeyDown(Keys.D))
             {
