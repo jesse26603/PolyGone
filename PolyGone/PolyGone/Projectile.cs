@@ -12,12 +12,12 @@ namespace PolyGone
         public float xSpeed;
         public readonly float ySpeed;
         public float Lifetime;
-        public Bullet(Texture2D texture, Vector2 position, int[] size, float Lifetime, Color color, float xSpeed, float ySpeed, Rectangle? srcRect = null)
+        public Bullet(Texture2D texture, Vector2 position, int[] size, float lifetime, Color color, float xSpeed, float ySpeed, Rectangle? srcRect = null)
             : base(texture, position, size, color, srcRect)
         {
             this.xSpeed = xSpeed;
             this.ySpeed = ySpeed;
-            this.Lifetime = Lifetime;
+            this.Lifetime = lifetime;
         }
         //Fire projectiles from blaster to global mouse position
         public override void Update(GameTime gameTime)
