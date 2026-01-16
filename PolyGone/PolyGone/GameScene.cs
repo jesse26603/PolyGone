@@ -17,7 +17,7 @@ public class GameScene : IScene
     private Player player;
     private FollowCamera camera;
     private Blaster blaster;
-    private GraphicsDeviceManager graphics;
+    private readonly GraphicsDeviceManager graphics;
     private Dictionary<Vector2, int> tileMap;
     private Dictionary<Vector2, int> collisionMap;
     private List<Rectangle> textureStore;
