@@ -227,6 +227,7 @@ namespace PolyGone
                 bullet.Update(gameTime);
             }
             cooldown = Math.Max(0f, cooldown - 1f);
+            blaster.Update(gameTime);
             base.Update(gameTime);
         }
 
