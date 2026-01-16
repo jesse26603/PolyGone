@@ -199,7 +199,7 @@ namespace PolyGone
             }
         }
 
-        public float cooldown = 0f;
+        private float cooldown = 0f;
         public override void Update(GameTime gameTime)
         {
             float deltaTime = (float)Math.Round(gameTime.ElapsedGameTime.TotalSeconds * 60f, 3); // Assuming 60 FPS standard
