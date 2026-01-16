@@ -49,8 +49,10 @@ namespace PolyGone
 
         public override void Draw(SpriteBatch spriteBatch, Vector2 offset)
         {
-            // Blaster-specific draw logic can go here
-            base.Draw(spriteBatch, offset);
+            // Draw the blaster with rotation around its center
+            Vector2 origin = new Vector2(size[0] / 2f, size[1] / 2f);
+            Vector2 drawPosition = position + offset + origin;
+            spriteBatch.Draw(texture, drawPosition, srcRect, color, rotation, origin, 1f, SpriteEffects.None, 0f);
         }
     }
 }
