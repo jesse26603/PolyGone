@@ -19,7 +19,7 @@ namespace PolyGone
         public Blaster blaster { get; private set; }
         public readonly List<Bullet> bullets;
 
-        public Player(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, Blaster blaster, Rectangle? srcRect = null)
+        public Player(Texture2D texture, Vector2 position, int[] size, Color color, Rectangle? srcRect, Dictionary<Vector2, int> collisionMap, Blaster blaster)
             : base(texture, position, size, color, srcRect)
         {
             this.collisionMap = collisionMap;
