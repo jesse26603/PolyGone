@@ -122,9 +122,6 @@ namespace PolyGone
         private void Movement(float deltaTime)
         {
             keyboardState = Keyboard.GetState();
-            mouseState = Mouse.GetState();
-
-
 
             // Handle horizontal input
             if (keyboardState.IsKeyDown(Keys.A))
@@ -205,17 +202,18 @@ namespace PolyGone
             float deltaTime = (float)Math.Round(gameTime.ElapsedGameTime.TotalSeconds * 60f, 3); // Assuming 60 FPS standard
             Movement(deltaTime);
             // Handle shooting (To be implemented)
+            mouseState = Mouse.GetState();
             if (mouseState.LeftButton == ButtonState.Pressed && cooldown <= 0f)
             {
                 bullets.Add(new Bullet(
-                texture: texture,
-                position: new Vector2(blaster.position.X + blaster.size[0] / 2 - 5, blaster.position.Y + blaster.size[1] / 2 - 5),
-                size: new int[2] { 10, 10 },
-                Lifetime: 90f,
-                color: Color.White,
-                xSpeed: (float)(Math.Cos(blaster.rotation) * 10f),
-                ySpeed: (float)(Math.Sin(blaster.rotation) * 10f),
-                srcRect: blaster.srcRect
+                    texture: texture,
+                    position: new Vector2(blaster.position.X + blaster.size[0] / 2 - 5, blaster.position.Y + blaster.size[1] / 2 - 5),
+                    size: new int[2] { 10, 10 },
+                    Lifetime: 90f,
+                    color: Color.White,
+                    xSpeed: (float)(Math.Cos(blaster.rotation) * 10f),
+                    ySpeed: (float)(Math.Sin(blaster.rotation) * 10f),
+                    srcRect: blaster.srcRect
                 ));
                 cooldown = 12f;
             }
