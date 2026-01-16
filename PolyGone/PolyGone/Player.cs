@@ -17,7 +17,7 @@ namespace PolyGone
         private float changeX;
         private float changeY;
         public Blaster blaster { get; private set; }
-        public List<Bullet> bullets;
+        public readonly List<Bullet> bullets;
 
         public Player(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, Blaster blaster, Rectangle? srcRect = null)
             : base(texture, position, size, color, srcRect)
