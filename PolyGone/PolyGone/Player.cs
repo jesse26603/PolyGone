@@ -11,7 +11,7 @@ namespace PolyGone
 {
     internal class Player : Sprite
     {
-        private Dictionary<Vector2, int> collisionMap;
+        private readonly Dictionary<Vector2, int> collisionMap;
         private KeyboardState keyboardState;
         private MouseState mouseState;
         private float changeX;
