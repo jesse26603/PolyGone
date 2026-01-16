@@ -120,7 +120,7 @@ public class GameScene : IScene
         // Update player and camera
         player.Update(gameTime);
         camera.Follow(player.Rectangle, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
-
+        player.blaster.Follow(player.Rectangle, camera.position); // Temporary Fix
         // Handle scene switching
     }
     public void Draw(SpriteBatch spriteBatch)
