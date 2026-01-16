@@ -22,8 +22,10 @@ namespace PolyGone
         //Fire projectiles from blaster to global mouse position
         public override void Update(GameTime gameTime)
         {
-            position.X += xSpeed;
-            position.Y += ySpeed;
+            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            position.X += xSpeed * deltaTime;
+            position.Y += ySpeed * deltaTime;
             base.Update(gameTime);
         }
     }
