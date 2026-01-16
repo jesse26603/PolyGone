@@ -11,14 +11,20 @@ namespace PolyGone
 {
     internal class Player : Sprite
     {
-        private Dictionary<Vector2, int> collisionMap;
+        private readonly Dictionary<Vector2, int> collisionMap;
         private KeyboardState keyboardState;
+        private MouseState mouseState;
         public float changeX;
         private float changeY;
-        public Player(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, Rectangle? srcRect = null) 
+        public Blaster blaster { get; private set; }
+        public readonly List<Bullet> bullets;
+
+        public Player(Texture2D texture, Vector2 position, int[] size, Color color, Rectangle? srcRect, Dictionary<Vector2, int> collisionMap, Blaster blaster)
             : base(texture, position, size, color, srcRect)
         {
             this.collisionMap = collisionMap;
+            this.blaster = blaster;
+            this.bullets = new List<Bullet>();
         }
 
         private List<(Rectangle, CollisionType)> GetIntersectingTiles(Rectangle target)
@@ -131,9 +137,9 @@ namespace PolyGone
             else
             {
                 // Apply friction only when no input
-                if (Math.Abs(changeX) > 0.5f) 
+                if (Math.Abs(changeX) > 0.5f)
                     changeX *= 0.8f;
-                else 
+                else
                     changeX = 0f;
             }
 
@@ -146,7 +152,7 @@ namespace PolyGone
             float nextY = position.Y + (changeY * deltaTime);
             Rectangle nextRectY = new Rectangle((int)position.X, (int)nextY, size[0], size[1]);
             List<(Rectangle, CollisionType)> verticalCollisions = GetIntersectingTiles(nextRectY);
-            
+
             if (verticalCollisions.Count > 0)
             {
                 // Determine closest collision tile and prioritize handling. Always prioritize solid tiles first.
@@ -165,7 +171,7 @@ namespace PolyGone
             float nextX = position.X + (changeX * deltaTime);
             Rectangle nextRectX = new Rectangle((int)nextX, (int)position.Y, size[0], size[1]);
             List<(Rectangle, CollisionType)> horizontalCollisions = GetIntersectingTiles(nextRectX);
-            
+
             if (horizontalCollisions.Count > 0)
             {
                 // Determine closest collision tile
@@ -190,19 +196,50 @@ namespace PolyGone
             }
         }
 
+        private float cooldown = 0f;
         public override void Update(GameTime gameTime)
         {
             float deltaTime = (float)Math.Round(gameTime.ElapsedGameTime.TotalSeconds * 60f, 3); // Assuming 60 FPS standard
             Movement(deltaTime);
 
+            // Handle shooting (To be implemented)
+            mouseState = Mouse.GetState();
+            if (mouseState.LeftButton == ButtonState.Pressed && cooldown <= 0f)
+            {
+                bullets.Add(new Bullet(
+                    texture: texture,
+                    position: new Vector2(blaster.position.X + blaster.size[0] / 2 - 5, blaster.position.Y + blaster.size[1] / 2 - 5),
+                    size: new int[2] { 10, 10 },
+                    lifetime: 90f,
+                    color: Color.White,
+                    xSpeed: (float)(Math.Cos(blaster.rotation) * 10f),
+                    ySpeed: (float)(Math.Sin(blaster.rotation) * 10f),
+                    srcRect: blaster.srcRect
+                ));
+                cooldown = 12f;
+            }
+            foreach (var bullet in bullets.ToList())
+            {
+                bullet.Lifetime -= 1f;
+                if (bullet.Lifetime <= 0f)
+                {
+                    bullets.Remove(bullet);
+                }
+                bullet.Update(gameTime);
+            }
+            cooldown = Math.Max(0f, cooldown - 1f);
+            blaster.Update(gameTime);
             base.Update(gameTime);
         }
 
         public override void Draw(SpriteBatch spriteBatch, Vector2 offset)
         {
-            // Player-specific draw logic can go here
-
             base.Draw(spriteBatch, offset);
+            blaster.Draw(spriteBatch, offset);
+            foreach (var bullet in bullets)
+            {
+                bullet.Draw(spriteBatch, offset);
+            }
         }
     }
 }
