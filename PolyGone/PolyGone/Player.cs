@@ -211,7 +211,7 @@ namespace PolyGone
                 texture: texture,
                 position: new Vector2(blaster.position.X + blaster.size[0] / 2 - 5, blaster.position.Y + blaster.size[1] / 2 - 5),
                 size: new int[2] { 10, 10 },
-                Lifetime: 90 * deltaTime,
+                Lifetime: 90f,
                 color: Color.White,
                 xSpeed: (float)(Math.Cos(blaster.rotation) * 10f),
                 ySpeed: (float)(Math.Sin(blaster.rotation) * 10f),
