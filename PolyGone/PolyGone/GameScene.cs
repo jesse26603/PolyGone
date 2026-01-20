@@ -108,7 +108,7 @@ public class GameScene : IScene
         // Initialize player
         player = new Player(
             texture: texture,
-            position: new Vector2(100, 100),
+            position: new Vector2(100, -100),
             size: new int[2] { 60, 60 },
             color: Color.White,
             srcRect: textureStore[1],
