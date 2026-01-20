@@ -15,13 +15,13 @@ namespace PolyGone
         private KeyboardState keyboardState;
         private MouseState mouseState;
         public Blaster blaster { get; private set; }
-        public readonly List<Bullet> bullets;
+        public readonly List<Projectile> bullets;
 
         public Player(Texture2D texture, Vector2 position, int[] size, Color color, Rectangle? srcRect, Dictionary<Vector2, int> collisionMap, Blaster blaster)
             : base(texture, position, size, color, srcRect, collisionMap)
         {
             this.blaster = blaster;
-            this.bullets = new List<Bullet>();
+            this.bullets = new List<Projectile>();
         }
 
         // Allow dropping through semi-solid platforms when S is pressed
@@ -107,15 +107,16 @@ namespace PolyGone
             mouseState = Mouse.GetState();
             if (mouseState.LeftButton == ButtonState.Pressed && cooldown <= 0f)
             {
-                bullets.Add(new Bullet(
+                bullets.Add(new Projectile(
                     texture: texture,
                     position: new Vector2(blaster.position.X + blaster.size[0] / 2 - 5, blaster.position.Y + blaster.size[1] / 2 - 5),
                     size: new int[2] { 10, 10 },
-                    lifetime: 90f,
+                    lifetime: 200f,
                     color: Color.White,
-                    xSpeed: (float)(Math.Cos(blaster.rotation) * 10f),
-                    ySpeed: (float)(Math.Sin(blaster.rotation) * 10f),
-                    srcRect: blaster.srcRect
+                    xSpeed: (float)(Math.Cos(blaster.rotation) * 750f),
+                    ySpeed: (float)(Math.Sin(blaster.rotation) * 750f),
+                    srcRect: blaster.srcRect,
+                    collisionMap: collisionMap
                 ));
                 cooldown = 12f;
             }
