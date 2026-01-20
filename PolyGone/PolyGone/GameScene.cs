@@ -129,11 +129,9 @@ public class GameScene : IScene
         } else if (player.position.X < 0)
         {
             player.position.X = 0;
-            player.changeX = 0;
         } else if (player.position.X + player.size[0] > tileMap.Keys.Max(k => k.X + 1) * 64)
         {
             player.position.X = tileMap.Keys.Max(k => k.X + 1) * 64 - player.size[0];
-            player.changeX = 0;
         }
         player.blaster.Follow(player.Rectangle, camera.position); // Temporary Fix
         // Handle scene switching
