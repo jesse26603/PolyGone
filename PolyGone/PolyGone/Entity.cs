@@ -16,14 +16,16 @@ class Entity : Sprite
     protected float changeX;
     protected float changeY;
     protected bool isOnGround;
+    protected int health;
 
-    public Entity(Texture2D texture, Vector2 position, int[] size, Color color, Rectangle? srcRect, Dictionary<Vector2, int>? collisionMap = null)
+    public Entity(Texture2D texture, Vector2 position, int[] size, int health = 100, Color color = default, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null)
         : base(texture, position, size, color, srcRect)
     {
         this.collisionMap = collisionMap;
         this.changeX = 0f;
         this.changeY = 0f;
         this.isOnGround = false;
+        this.health = health;
     }
 
     protected virtual List<(Rectangle, CollisionType)> GetIntersectingTiles(Rectangle target)

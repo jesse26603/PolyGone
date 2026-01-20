@@ -17,8 +17,8 @@ namespace PolyGone
         public Blaster blaster { get; private set; }
         public readonly List<Projectile> bullets;
 
-        public Player(Texture2D texture, Vector2 position, int[] size, Color color, Rectangle? srcRect, Dictionary<Vector2, int> collisionMap, Blaster blaster)
-            : base(texture, position, size, color, srcRect, collisionMap)
+        public Player(Texture2D texture, Vector2 position, int[] size, int health, Color color, Rectangle? srcRect, Dictionary<Vector2, int> collisionMap, Blaster blaster)
+            : base(texture, position, size, health, color, srcRect, collisionMap)
         {
             this.blaster = blaster;
             this.bullets = new List<Projectile>();
@@ -112,6 +112,7 @@ namespace PolyGone
                     position: new Vector2(blaster.position.X + blaster.size[0] / 2 - 5, blaster.position.Y + blaster.size[1] / 2 - 5),
                     size: new int[2] { 10, 10 },
                     lifetime: 200f,
+                    health: 1,
                     color: Color.White,
                     xSpeed: (float)(Math.Cos(blaster.rotation) * 750f),
                     ySpeed: (float)(Math.Sin(blaster.rotation) * 750f),

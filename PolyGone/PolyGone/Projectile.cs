@@ -11,16 +11,16 @@ namespace PolyGone
     {
         public readonly float xSpeed;
         public readonly float ySpeed;
-        public float Lifetime;
-        public Projectile(Texture2D texture, Vector2 position, int[] size, float lifetime, Color color, float xSpeed, float ySpeed, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null)
-            : base(texture, position, size, color, srcRect, collisionMap)
+        public float Lifetime; // Seperate from Entity health for projectiles
+        public Projectile(Texture2D texture, Vector2 position, int[] size, float lifetime, int health, Color color, float xSpeed, float ySpeed, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null)
+            : base(texture, position, size, health, color, srcRect, collisionMap)
         {
             this.xSpeed = xSpeed;
             this.ySpeed = ySpeed;
             this.Lifetime = lifetime;
         }
 
-        //Fire projectiles from blaster to global mouse position
+        // Fire projectiles from blaster to global mouse position
         public override void Update(GameTime gameTime)
         {
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;

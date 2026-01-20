@@ -110,6 +110,7 @@ public class GameScene : IScene
             texture: texture,
             position: new Vector2(100, -100),
             size: new int[2] { 60, 60 },
+            health: 100,
             color: Color.White,
             srcRect: textureStore[1],
             collisionMap: collisionMap,
