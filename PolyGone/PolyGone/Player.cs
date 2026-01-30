@@ -18,6 +18,7 @@ namespace PolyGone
         private float changeY;
         public Blaster blaster { get; private set; }
         public readonly List<Bullet> bullets;
+        public List<Item> items;
 
         public Player(Texture2D texture, Vector2 position, int[] size, Color color, Rectangle? srcRect, Dictionary<Vector2, int> collisionMap, Blaster blaster)
             : base(texture, position, size, color, srcRect)
@@ -25,6 +26,7 @@ namespace PolyGone
             this.collisionMap = collisionMap;
             this.blaster = blaster;
             this.bullets = new List<Bullet>();
+            this.items = new List<Item>();
         }
 
         private List<(Rectangle, CollisionType)> GetIntersectingTiles(Rectangle target)
@@ -53,8 +55,6 @@ namespace PolyGone
             {
                 default:
                 case CollisionType.Solid:
-                case CollisionType.Rough:
-                case CollisionType.Slippery:
                     if (changeY > 0)
                     {
                         // Falling down - land on top of tile
@@ -67,6 +67,22 @@ namespace PolyGone
                         position.Y = tileRect.Bottom;
                     }
                     changeY = 0;
+                    break;
+
+                case CollisionType.Rough:
+                case CollisionType.Slippery:
+                    if (changeY > 0)
+                    {
+                        // Falling down - land on top of tile
+                        position.Y = tileRect.Top - size[1];
+                        changeY = 0;
+                    }
+                    else if (changeY < 0)
+                    {
+                        // Moving up - hit ceiling
+                        position.Y = tileRect.Bottom;
+                        changeY = 0;
+                    }
                     break;
                 case CollisionType.SemiSolid:
                     if (keyboardState.IsKeyDown(Keys.S))
@@ -192,7 +208,39 @@ namespace PolyGone
             // Jumping
             if (isOnGround && keyboardState.IsKeyDown(Keys.Space))
             {
+                if (items.Any(i => i.ItemType == "BetterJump"))
+                {
+                    changeY = -32f; // good jump
+                }
+                else
                 changeY = -16f;
+            }
+            //Item spawning debug
+            if (keyboardState.IsKeyDown(Keys.D1))
+            {
+                if (!items.Any(i => i.ItemType == "Blaster"))
+                {
+                    items.Add(new Item(
+                        texture: texture,
+                        position: new Vector2(0, 0),
+                        size: new int[2] { 32, 32 },
+                        color: Color.White,
+                        itemType: "Blaster"
+                    ));
+                }
+            }
+            if (keyboardState.IsKeyDown(Keys.D2))
+            {
+                if (!items.Any(i => i.ItemType == "BetterJump"))
+                {
+                    items.Add(new Item(
+                        texture: texture,
+                        position: new Vector2(0, 0),
+                        size: new int[2] { 32, 32 },
+                        color: Color.White,
+                        itemType: "BetterJump"
+                    ));
+                }
             }
         }
 
@@ -204,38 +252,44 @@ namespace PolyGone
 
             // Handle shooting (To be implemented)
             mouseState = Mouse.GetState();
-            if (mouseState.LeftButton == ButtonState.Pressed && cooldown <= 0f)
+            if (items.Any(i => i.ItemType == "Blaster"))
             {
-                bullets.Add(new Bullet(
-                    texture: texture,
-                    position: new Vector2(blaster.position.X + blaster.size[0] / 2 - 5, blaster.position.Y + blaster.size[1] / 2 - 5),
-                    size: new int[2] { 10, 10 },
-                    lifetime: 90f,
-                    color: Color.White,
-                    xSpeed: (float)(Math.Cos(blaster.rotation) * 10f),
-                    ySpeed: (float)(Math.Sin(blaster.rotation) * 10f),
-                    srcRect: blaster.srcRect
-                ));
-                cooldown = 12f;
-            }
-            foreach (var bullet in bullets.ToList())
-            {
-                bullet.Lifetime -= 1f;
-                if (bullet.Lifetime <= 0f)
+                if (mouseState.LeftButton == ButtonState.Pressed && cooldown <= 0f)
                 {
-                    bullets.Remove(bullet);
+                    bullets.Add(new Bullet(
+                        texture: texture,
+                        position: new Vector2(blaster.position.X + blaster.size[0] / 2 - 5, blaster.position.Y + blaster.size[1] / 2 - 5),
+                        size: new int[2] { 10, 10 },
+                        lifetime: 90f,
+                        color: Color.White,
+                        xSpeed: (float)(Math.Cos(blaster.rotation) * 750f),
+                        ySpeed: (float)(Math.Sin(blaster.rotation) * 750f),
+                        srcRect: blaster.srcRect
+                    ));
+                    cooldown = 12f;
                 }
-                bullet.Update(gameTime);
+                foreach (var bullet in bullets.ToList())
+                {
+                    bullet.Lifetime -= 1f;
+                    if (bullet.Lifetime <= 0f)
+                    {
+                        bullets.Remove(bullet);
+                    }
+                    bullet.Update(gameTime);
+                }
+                cooldown = Math.Max(0f, cooldown - 1f);
+                blaster.Update(gameTime);
+                base.Update(gameTime);
             }
-            cooldown = Math.Max(0f, cooldown - 1f);
-            blaster.Update(gameTime);
-            base.Update(gameTime);
         }
 
         public override void Draw(SpriteBatch spriteBatch, Vector2 offset)
         {
             base.Draw(spriteBatch, offset);
-            blaster.Draw(spriteBatch, offset);
+            if (items.Any(i => i.ItemType == "Blaster"))
+            {
+                blaster.Draw(spriteBatch, offset);
+            }
             foreach (var bullet in bullets)
             {
                 bullet.Draw(spriteBatch, offset);
