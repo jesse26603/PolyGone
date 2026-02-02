@@ -44,16 +44,16 @@
 </data>
  </layer>
  <objectgroup id="4" name="Objects">
-  <object id="1" type="Player" gid="2" x="96" y="864" width="32" height="32"/>
-  <object id="2" gid="3" x="320" y="544" width="32" height="32">
+  <object id="1" type="PlayerSpawn" gid="2" x="96" y="864" width="32" height="32"/>
+  <object id="2" type="EnemySpawn" gid="3" x="320" y="544" width="32" height="32">
    <properties>
     <property name="Jumping" type="bool" value="true"/>
    </properties>
   </object>
-  <object id="3" gid="3" x="577" y="608" width="32" height="32"/>
-  <object id="4" gid="3" x="1505" y="736" width="32" height="32"/>
-  <object id="5" gid="3" x="2208" y="865" width="32" height="32"/>
-  <object id="6" gid="3" x="833" y="254" width="32" height="32"/>
+  <object id="3" type="EnemySpawn" gid="3" x="577" y="608" width="32" height="32"/>
+  <object id="4" type="EnemySpawn" gid="3" x="1505" y="736" width="32" height="32"/>
+  <object id="5" type="EnemySpawn" gid="3" x="2208" y="865" width="32" height="32"/>
+  <object id="6" type="EnemySpawn" gid="3" x="833" y="254" width="32" height="32"/>
  </objectgroup>
  <layer id="3" name="Collisions" width="90" height="30" opacity="0.5">
   <data encoding="csv">
