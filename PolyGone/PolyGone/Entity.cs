@@ -13,7 +13,7 @@ class Entity : Sprite
     protected float changeX;
     protected float changeY;
     protected bool isOnGround;
-    protected int health;
+    protected readonly int health;
 
     public Entity(Texture2D texture, Vector2 position, int[] size, int health = 100, Color color = default, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null)
         : base(texture, position, size, color, srcRect)
