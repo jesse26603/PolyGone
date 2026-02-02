@@ -10,7 +10,7 @@ namespace PolyGone
     {
         public readonly float xSpeed;
         public readonly float ySpeed;
-        public float Lifetime; // Seperate from Entity health for projectiles
+        public float Lifetime; // Separate from Entity health for projectiles
         public Projectile(Texture2D texture, Vector2 position, int[] size, float lifetime, int health, Color color, float xSpeed, float ySpeed, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null)
             : base(texture, position, size, health, color, srcRect, collisionMap)
         {
