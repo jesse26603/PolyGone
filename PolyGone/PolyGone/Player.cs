@@ -216,31 +216,25 @@ namespace PolyGone
                 changeY = -16f;
             }
             //Item spawning debug
-            if (keyboardState.IsKeyDown(Keys.D1))
+            if (keyboardState.IsKeyDown(Keys.D1) && !items.Any(i => i.ItemType == "Blaster"))
             {
-                if (!items.Any(i => i.ItemType == "Blaster"))
-                {
-                    items.Add(new Item(
-                        texture: texture,
-                        position: new Vector2(0, 0),
-                        size: new int[2] { 32, 32 },
-                        color: Color.White,
-                        itemType: "Blaster"
-                    ));
-                }
+                items.Add(new Item(
+                    texture: texture,
+                    position: new Vector2(0, 0),
+                    size: new int[2] { 32, 32 },
+                    color: Color.White,
+                    itemType: "Blaster"
+                ));
             }
-            if (keyboardState.IsKeyDown(Keys.D2))
+            if (keyboardState.IsKeyDown(Keys.D2) && !items.Any(i => i.ItemType == "BetterJump"))
             {
-                if (!items.Any(i => i.ItemType == "BetterJump"))
-                {
-                    items.Add(new Item(
-                        texture: texture,
-                        position: new Vector2(0, 0),
-                        size: new int[2] { 32, 32 },
-                        color: Color.White,
-                        itemType: "BetterJump"
-                    ));
-                }
+                items.Add(new Item(
+                    texture: texture,
+                    position: new Vector2(0, 0),
+                    size: new int[2] { 32, 32 },
+                    color: Color.White,
+                    itemType: "BetterJump"
+                ));
             }
         }
 
