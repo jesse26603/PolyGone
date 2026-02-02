@@ -169,19 +169,15 @@ public class GameScene : IScene
             blaster: blaster
         );
         // Initialize enemies from spawn positions
-        foreach (var spawnPos in enemySpawns)
-        {
-            Entity enemy = new Entity(
-                texture: texture,
-                position: spawnPos,
-                size: new int[2] { 60, 60 },
-                health: 50,
-                color: Color.White,
-                srcRect: textureStore[2],
-                collisionMap: collisionMap
-            );
-            enemies.Add(enemy);
-        }
+        enemies.AddRange(enemySpawns.Select(spawnPos => new Entity(
+            texture: texture,
+            position: spawnPos,
+            size: new int[2] { 60, 60 },
+            health: 50,
+            color: Color.White,
+            srcRect: textureStore[2],
+            collisionMap: collisionMap
+        )));
     }
     public void Update(GameTime gameTime)
     {
