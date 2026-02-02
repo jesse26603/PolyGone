@@ -6,7 +6,7 @@ namespace PolyGone
 
     class Item : Sprite
     {
-        public string ItemType;
+        public readonly string ItemType;
         public Item(Texture2D texture, Vector2 position, int[] size, Color color, string itemType, Rectangle? srcRect = null)
             : base(texture, position, size, color, srcRect)
         {
