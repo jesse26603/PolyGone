@@ -131,10 +131,7 @@ public class GameScene : IScene
                             break;
                     }
                 }
-            } else
-            {
-                continue;
-            }
+            } 
         }
         
         // Validate that a player spawn was found
