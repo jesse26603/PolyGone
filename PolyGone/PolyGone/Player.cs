@@ -23,7 +23,7 @@ namespace PolyGone
         }
 
         // Allow dropping through semi-solid platforms when S is pressed
-        protected override void HandleVerticalCollision(ref bool isOnGround, ref float changeY, List<(Rectangle, CollisionType)> collisions)
+        protected override void HandleVerticalCollision(ref bool onGround, ref float deltaY, List<(Rectangle, CollisionType)> collisions)
         {
             var (tileRect, colType) = collisions[0];
             switch (colType)
@@ -32,32 +32,32 @@ namespace PolyGone
                 case CollisionType.Solid:
                 case CollisionType.Rough:
                 case CollisionType.Slippery:
-                    if (changeY > 0)
+                    if (deltaY > 0)
                     {
                         position.Y = tileRect.Top - size[1];
-                        isOnGround = true;
+                        onGround = true;
                     }
-                    else if (changeY < 0)
+                    else if (deltaY < 0)
                     {
                         position.Y = tileRect.Bottom;
                     }
-                    changeY = 0;
+                    deltaY = 0;
                     break;
                 case CollisionType.SemiSolid:
                     if (keyboardState.IsKeyDown(Keys.S))
                     {
                         // Drop through platform
-                        position.Y += changeY;
+                        position.Y += deltaY;
                     }
-                    else if (changeY > 0 && (position.Y + size[1]) <= tileRect.Top + 10)
+                    else if (deltaY > 0 && (position.Y + size[1]) <= tileRect.Top + 10)
                     {
                         position.Y = tileRect.Top - size[1];
-                        changeY = 0;
-                        isOnGround = true;
+                        deltaY = 0;
+                        onGround = true;
                     }
                     else
                     {
-                        position.Y += changeY;
+                        position.Y += deltaY;
                     }
                     break;
             }
