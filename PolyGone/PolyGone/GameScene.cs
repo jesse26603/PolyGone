@@ -51,7 +51,9 @@ public class GameScene : IScene
     // Adjusts coordinates from Tiled's coordinate system to the game's coordinate system
     public Vector2 AdjustCoordinates(float x, float y)
     {
-        return new Vector2(x * 2, y * 2 - 64); // Adjust for Tiled's y-origin at bottom-left
+        // Scale from 32px Tiled tiles to 64px game tiles (x2), then shift y up 64px because
+        // Tiled stores object y at the bottom of the object while the game uses a top-left origin.
+        return new Vector2(x * 2, y * 2 - 64);
     }
 
     // Loads tile and collision maps from a JSON file exported from Tiled
