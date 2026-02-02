@@ -22,6 +22,7 @@ public class GameScene : IScene
     private Dictionary<Vector2, int> collisionMap;
     private List<Rectangle> textureStore;
     private Vector2 playerPos;
+    private bool playerSpawnFound = false;
     private List<Vector2> enemySpawns = new(); // Store enemy spawn positions
     private List<Entity> enemies = new(); // Placeholder for enemy list
 
@@ -117,6 +118,7 @@ public class GameScene : IScene
                                 obj.GetProperty("x").GetSingle(),
                                 obj.GetProperty("y").GetSingle()
                             );
+                            playerSpawnFound = true;
                             break;
                         case "EnemySpawn":
                             Vector2 enemyPos = AdjustCoordinates(
@@ -133,6 +135,15 @@ public class GameScene : IScene
             {
                 continue;
             }
+        }
+        
+        // Validate that a player spawn was found
+        if (!playerSpawnFound)
+        {
+            throw new InvalidOperationException(
+                $"Map file '{filepath}' is missing a required PlayerSpawn object in the Objects layer. " +
+                "Please ensure the map contains exactly one object with type='PlayerSpawn'."
+            );
         }
     }
 
