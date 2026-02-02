@@ -2,11 +2,10 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Linq;
+using System;
 
 namespace PolyGone;
 
@@ -22,6 +21,9 @@ public class GameScene : IScene
     private Dictionary<Vector2, int> tileMap;
     private Dictionary<Vector2, int> collisionMap;
     private List<Rectangle> textureStore;
+    private Vector2 playerPos;
+    private List<Vector2> enemySpawns = new(); // Store enemy spawn positions
+    private List<Entity> enemies = new(); // Placeholder for enemy list
 
     public GameScene(ContentManager contentManager, SceneManager sceneManager, GraphicsDeviceManager graphics)
     {
@@ -46,6 +48,12 @@ public class GameScene : IScene
         return textureStore;
     }
 
+    // Adjusts coordinates from Tiled's coordinate system to the game's coordinate system
+    public Vector2 AdjustCoordinates(float x, float y)
+    {
+        return new Vector2(x * 2, y * 2 - 64); // Adjust for Tiled's y-origin at bottom-left
+    }
+
     // Loads tile and collision maps from a JSON file exported from Tiled
     public void LoadMapFromJson(string filepath)
     {
@@ -65,29 +73,63 @@ public class GameScene : IScene
         foreach (JsonElement layer in layers.EnumerateArray())
         {
             string layerName = layer.GetProperty("name").GetString();
-            JsonElement dataArray = layer.GetProperty("data");
-            
-            int index = 0;
-            foreach (JsonElement tile in dataArray.EnumerateArray())
+            // Process tile and collision layers
+            if (layerName != "Objects")
             {
-                int tileValue = tile.GetInt32();
-                int x = index % width;
-                int y = index / width;
+                JsonElement dataArray = layer.GetProperty("data");
                 
-                if (tileValue > 0)
+                int index = 0;
+                foreach (JsonElement tile in dataArray.EnumerateArray())
                 {
-                    // Tiled uses 1-based indexing, convert to 0-based
-                    if (layerName == "Tiles")
+                    int tileValue = tile.GetInt32();
+                    int x = index % width;
+                    int y = index / width;
+                    
+                    if (tileValue > 0)
                     {
-                        tileMap[new Vector2(x, y)] = tileValue - 1;
+                        // Tiled uses 1-based indexing, convert to 0-based
+                        if (layerName == "Tiles")
+                        {
+                            tileMap[new Vector2(x, y)] = tileValue - 1;
+                        }
+                        else if (layerName == "Collisions")
+                        {
+                            collisionMap[new Vector2(x, y)] = tileValue - 1;
+                        }
                     }
-                    else if (layerName == "Collisions")
+                    
+                    index++;
+                }
+            }
+            // Process object layer for entity spawns and other objects
+            else if (layerName == "Objects")
+            {
+                List<JsonElement> objects = layer.GetProperty("objects").EnumerateArray().ToList();
+                foreach (JsonElement obj in objects)
+                {
+                    string objType = obj.GetProperty("type").GetString();
+                    switch (objType)
                     {
-                        collisionMap[new Vector2(x, y)] = tileValue - 1;
+                        case "PlayerSpawn":
+                            playerPos = AdjustCoordinates(
+                                obj.GetProperty("x").GetSingle(),
+                                obj.GetProperty("y").GetSingle()
+                            );
+                            break;
+                        case "EnemySpawn":
+                            Vector2 enemyPos = AdjustCoordinates(
+                                obj.GetProperty("x").GetSingle(),
+                                obj.GetProperty("y").GetSingle()
+                            );
+                            enemySpawns.Add(enemyPos);
+                            break;
+                        default:
+                            break;
                     }
                 }
-                
-                index++;
+            } else
+            {
+                continue;
             }
         }
     }
@@ -108,7 +150,7 @@ public class GameScene : IScene
         // Initialize player
         player = new Player(
             texture: texture,
-            position: new Vector2(100, -100),
+            position: playerPos,
             size: new int[2] { 60, 60 },
             health: 100,
             color: Color.White,
@@ -116,6 +158,20 @@ public class GameScene : IScene
             collisionMap: collisionMap,
             blaster: blaster
         );
+        // Initialize enemies from spawn positions
+        foreach (var spawnPos in enemySpawns)
+        {
+            Entity enemy = new Entity(
+                texture: texture,
+                position: spawnPos,
+                size: new int[2] { 60, 60 },
+                health: 50,
+                color: Color.White,
+                srcRect: textureStore[2],
+                collisionMap: collisionMap
+            );
+            enemies.Add(enemy);
+        }
     }
     public void Update(GameTime gameTime)
     {
@@ -135,7 +191,11 @@ public class GameScene : IScene
             player.position.X = tileMap.Keys.Max(k => k.X + 1) * 64 - player.size[0];
         }
         player.blaster.Follow(player.Rectangle, camera.position); // Temporary Fix
-        // Handle scene switching
+        // Update enemies
+        foreach (var enemy in enemies)
+        {
+            enemy.Update(gameTime);
+        }
     }
     public void Draw(SpriteBatch spriteBatch)
     {
@@ -149,6 +209,10 @@ public class GameScene : IScene
             );
             Rectangle src = textureStore[tile.Value];
             spriteBatch.Draw(texture, dest, src, Color.White);
+        }
+        foreach (var enemy in enemies)
+        {
+            enemy.Draw(spriteBatch, camera.position);
         }
         player.Draw(spriteBatch, camera.position);
     }
