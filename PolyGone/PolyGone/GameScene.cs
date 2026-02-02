@@ -24,7 +24,7 @@ public class GameScene : IScene
     private Vector2 playerPos;
     private bool playerSpawnFound = false;
     private readonly List<Vector2> enemySpawns = new(); // Store enemy spawn positions
-    private List<Entity> enemies = new(); // Placeholder for enemy list
+    private readonly List<Entity> enemies = new(); // Placeholder for enemy list
 
     public GameScene(ContentManager contentManager, SceneManager sceneManager, GraphicsDeviceManager graphics)
     {
