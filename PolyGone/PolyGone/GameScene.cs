@@ -105,7 +105,7 @@ public class GameScene : IScene
                 }
             }
             // Process object layer for entity spawns and other objects
-            else if (layerName == "Objects")
+            else
             {
                 List<JsonElement> objects = layer.GetProperty("objects").EnumerateArray().ToList();
                 foreach (JsonElement obj in objects)
