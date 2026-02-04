@@ -15,8 +15,8 @@ class Entity : Sprite
     protected bool isOnGround;
     protected int health;
     protected float invincibilityFrames;
-    protected float friction; // Horizontal friction coefficient (0-1, where 1 = no friction)
-    protected Vector2 defaultPosition;
+    protected float friction; // Horizontal friction multiplier in range [0, 1]; 1 keeps full velocity (no friction), 0 stops movement immediately (maximum friction)
+
 
     public Entity(Texture2D texture, Vector2 position, int[] size, int health = 100, Color color = default, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null)
         : base(texture, position, size, color, srcRect)
@@ -115,11 +115,6 @@ class Entity : Sprite
         // Override in derived classes to handle specific collision behavior
     }
 
-    protected virtual void PathingUpdate(float deltaTime, params object[] args)
-    {
-        // Default implementation does nothing
-        // Override in derived classes for AI pathing behavior
-    }
 
     public virtual void HandleDeath()
     {
@@ -196,17 +191,9 @@ class Entity : Sprite
         if (collisionMap == null) return true;
         
         // Check from the bottom corner in the direction of movement
-        float checkX;
-        if (direction > 0)
-        {
-            // Moving right: check from bottom-right corner, slightly ahead
-            checkX = position.X + size[0] + 1f;
-        }
-        else
-        {
-            // Moving left: check from bottom-left corner, slightly ahead (to the left)
-            checkX = position.X - 1f;
-        }
+        float checkX = direction > 0
+            ? position.X + size[0] + 1f   // Moving right: check from bottom-right corner, slightly ahead
+            : position.X - 1f;            // Moving left: check from bottom-left corner, slightly ahead (to the left)
         
         float checkY = position.Y + size[1] + 1f; // Just below feet
         

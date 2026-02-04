@@ -186,6 +186,7 @@ public class GameScene : IScene
     {
         // Reset player
         player.position = playerPos;
+        player.health = 100;
         player.bullets.Clear();
         
         // Reset enemies
@@ -266,7 +267,11 @@ public class GameScene : IScene
         player.EntityCollisionUpdate(allEntities);
         foreach (var enemy in enemies)
         {
-            enemy.EntityCollisionUpdate(allEntities);
+            // Only process collisions for enemies that are still alive
+            if (enemy.health > 0)
+            {
+                enemy.EntityCollisionUpdate(allEntities);
+            }
         }
     }
     public void Draw(SpriteBatch spriteBatch)

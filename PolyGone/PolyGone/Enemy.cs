@@ -28,9 +28,20 @@ class Enemy : Entity
                     invincibilityFrames = 30f; // 0.5 second invincibility at 60fps
                     // Knockback effect
                     float knockbackStrength = 8f;
-                    changeX += projectile.xSpeed > 0 ? knockbackStrength : -knockbackStrength;
-                    changeY -= knockbackStrength; // Knock upwards
-                    
+                    Vector2 projectileVelocity = new Vector2(projectile.xSpeed, projectile.ySpeed);
+                    if (projectileVelocity != Vector2.Zero)
+                    {
+                        projectileVelocity.Normalize();
+                        changeX += projectileVelocity.X * knockbackStrength;
+                        changeY += projectileVelocity.Y * knockbackStrength;
+                    }
+                    else
+                    {
+                        // Fallback: if projectile has no velocity, apply a simple upward knockback
+                        changeY -= knockbackStrength;
+                    }
+                    // Expire the projectile so it cannot damage this or other enemies again
+                    projectile.lifetime = 0f;
                 }
                 break;
         }
@@ -69,10 +80,6 @@ class Enemy : Entity
         changeX = patrolDirection * patrolSpeed;
     }
 
-    public void SetPatrolSpeed(float speed)
-    {
-        this.patrolSpeed = speed;
-    }
 
     public override void Update(GameTime gameTime)
     {

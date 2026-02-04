@@ -20,7 +20,7 @@ namespace PolyGone
         {
             this.blaster = blaster;
             this.bullets = new List<Projectile>();
-            this.cooldown = 12f;
+            this.cooldown = 0f;
             this.friction = 0.8f; // Player has more friction for tighter control
         }
 
@@ -102,7 +102,7 @@ namespace PolyGone
                         invincibilityFrames = 60f;
                     }
                     break;
-                case Enemy enemy:
+                case Enemy:
                     // Only take damage if not invincible
                     if (invincibilityFrames <= 0f)
                     {

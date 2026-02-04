@@ -8,8 +8,7 @@ namespace PolyGone
     public enum Owner
     {
         Player,
-        Enemy,
-        Neutral
+        Enemy
     }
 
     class Projectile : Entity
