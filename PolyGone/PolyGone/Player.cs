@@ -14,15 +14,16 @@ namespace PolyGone
         private MouseState mouseState;
         public Blaster blaster { get; private set; }
         public readonly List<Projectile> bullets;
-
+        private float cooldown;
         public Player(Texture2D texture, Vector2 position, int[] size, int health, Color color, Rectangle? srcRect, Dictionary<Vector2, int> collisionMap, Blaster blaster)
             : base(texture, position, size, health, color, srcRect, collisionMap)
         {
             this.blaster = blaster;
             this.bullets = new List<Projectile>();
+            this.cooldown = 12f;
+            this.friction = 0.8f; // Player has more friction for tighter control
         }
 
-        // Allow dropping through semi-solid platforms when S is pressed
         protected override void HandleVerticalCollision(ref bool onGround, ref float deltaY, List<(Rectangle, CollisionType)> collisions)
         {
             var (tileRect, colType) = collisions[0];
@@ -79,13 +80,6 @@ namespace PolyGone
                 changeX += 1f;
                 changeX = Math.Min(changeX, 5f);
             }
-            else
-            {
-                if (Math.Abs(changeX) > 0.5f)
-                    changeX *= 0.8f;
-                else
-                    changeX = 0f;
-            }
 
             // Jumping
             if (isOnGround && keyboardState.IsKeyDown(Keys.Space))
@@ -94,8 +88,42 @@ namespace PolyGone
             }
         }
 
+        protected override void OnEntityCollision(Entity other)
+        {
+            switch (other)
+            {
+                default:
+                    break;
+                case Projectile projectile:
+                    // Only take damage from enemy projectiles
+                    if (projectile.owner == Owner.Enemy && invincibilityFrames <= 0f)
+                    {
+                        health -= projectile.damage;
+                        invincibilityFrames = 60f;
+                    }
+                    break;
+                case Enemy enemy:
+                    // Only take damage if not invincible
+                    if (invincibilityFrames <= 0f)
+                    {
+                        // Take 40 damage
+                        health -= 40;
+                        
+                        // Calculate knockback direction (away from enemy)
+                        float knockbackX = position.X < other.position.X ? -10f : 10f;
+                        float knockbackY = -20f;
+                        
+                        // Apply knockback
+                        changeX = knockbackX;
+                        changeY = knockbackY / 2; // Reduced vertical knockback for better feel
+                        
+                        // Set invincibility frames (roughly 1 second at 60fps)
+                        invincibilityFrames = 60f;
+                    }
+                    break;
+            }
+        }
 
-        private float cooldown = 0f;
         public override void Update(GameTime gameTime)
         {
             HandleInput();
@@ -114,15 +142,16 @@ namespace PolyGone
                     color: Color.White,
                     xSpeed: (float)(Math.Cos(blaster.rotation) * 750f),
                     ySpeed: (float)(Math.Sin(blaster.rotation) * 750f),
+                    owner: Owner.Player,
                     srcRect: blaster.srcRect,
                     collisionMap: collisionMap
                 ));
-                cooldown = 12f;
+                cooldown = 12f; // Cooldown of 0.2 seconds at 60fps
             }
             foreach (var bullet in bullets.ToList())
             {
-                bullet.Lifetime -= 1f;
-                if (bullet.Lifetime <= 0f)
+                bullet.lifetime -= 1f;
+                if (bullet.lifetime <= 0f)
                 {
                     bullets.Remove(bullet);
                 }

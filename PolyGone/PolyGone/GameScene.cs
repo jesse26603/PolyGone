@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System.IO;
 using System.Text.Json;
 using System.Linq;
@@ -169,38 +170,103 @@ public class GameScene : IScene
             blaster: blaster
         );
         // Initialize enemies from spawn positions
-        enemies.AddRange(enemySpawns.Select(spawnPos => new Entity(
+        enemies.AddRange(enemySpawns.Select(spawnPos => new Enemy(
             texture: texture,
             position: spawnPos,
             size: new int[2] { 60, 60 },
             health: 50,
             color: Color.White,
             srcRect: textureStore[2],
-            collisionMap: collisionMap
+            collisionMap: collisionMap,
+            patrolSpeed: 1f
         )));
     }
+    
+    private void Reset()
+    {
+        // Reset player
+        player.position = playerPos;
+        player.bullets.Clear();
+        
+        // Reset enemies
+        enemies.Clear();
+        enemies.AddRange(enemySpawns.Select(spawnPos => new Enemy(
+            texture: texture,
+            position: spawnPos,
+            size: new int[2] { 60, 60 },
+            health: 50,
+            color: Color.White,
+            srcRect: textureStore[2],
+            collisionMap: collisionMap,
+            patrolSpeed: 1f
+        )));
+    }
+    
     public void Update(GameTime gameTime)
     {
+        // Check for reset input
+        KeyboardState keyboardState = Keyboard.GetState();
+        if (keyboardState.IsKeyDown(Keys.R))
+        {
+            Reset();
+            return;
+        }
+        
+        // Gather all entities for collision detection
+        List<Entity> allEntities = [player, .. enemies, .. player.bullets];
+        
         // Update player and camera
         player.Update(gameTime);
         camera.Follow(player.Rectangle, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), new Vector2( tileMap.Keys.Max(k => k.X + 1) * 64, tileMap.Keys.Max(k => k.Y + 1) * 64));
         
-        // If player is outside world bounds, reset position
-        if (player.position.Y > tileMap.Keys.Max(k => k.Y + 1) * 64)
+        // Check all entities for out-of-bounds
+        float worldMaxY = tileMap.Keys.Max(k => k.Y + 1) * 64;
+        float worldMaxX = tileMap.Keys.Max(k => k.X + 1) * 64;
+        
+        // Check player bounds
+        if (player.position.Y > worldMaxY)
         {
-            player.position = new Vector2(100, -100);
-        } else if (player.position.X < 0)
+            player.HandleDeath();
+        }
+        else if (player.position.X < 0)
         {
             player.position.X = 0;
-        } else if (player.position.X + player.size[0] > tileMap.Keys.Max(k => k.X + 1) * 64)
-        {
-            player.position.X = tileMap.Keys.Max(k => k.X + 1) * 64 - player.size[0];
         }
+        else if (player.position.X + player.size[0] > worldMaxX)
+        {
+            player.position.X = worldMaxX - player.size[0];
+        }
+        
+        // Check enemies for falling out of bounds
+        foreach (var enemy in enemies.ToList())
+        {
+            if (enemy.position.Y > worldMaxY)
+            {
+                enemy.HandleDeath();
+            }
+            else if (enemy.position.X < 0)
+            {
+                enemy.position.X = 0;
+            }
+            else if (enemy.position.X + enemy.size[0] > worldMaxX)
+            {
+                enemy.position.X = worldMaxX - enemy.size[0];
+            }
+        }
+        
         player.blaster.Follow(player.Rectangle, camera.position); // Temporary Fix
+        
         // Update enemies
         foreach (var enemy in enemies)
         {
             enemy.Update(gameTime);
+        }
+        
+        // Handle entity-to-entity collisions
+        player.EntityCollisionUpdate(allEntities);
+        foreach (var enemy in enemies)
+        {
+            enemy.EntityCollisionUpdate(allEntities);
         }
     }
     public void Draw(SpriteBatch spriteBatch)
