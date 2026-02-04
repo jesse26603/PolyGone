@@ -47,7 +47,7 @@ class Enemy : Entity
         }
     }
 
-    private void PatrolUpdate(float deltaTime)
+    private void PatrolUpdate()
     {
         // Don't patrol during knockback/invincibility
         if (invincibilityFrames > 0f)
@@ -83,10 +83,8 @@ class Enemy : Entity
 
     public override void Update(GameTime gameTime)
     {
-        float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        
         // Update patrol behavior
-        PatrolUpdate(deltaTime);
+        PatrolUpdate();
         
         base.Update(gameTime);
     }
