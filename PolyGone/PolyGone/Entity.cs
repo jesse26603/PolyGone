@@ -13,7 +13,10 @@ class Entity : Sprite
     protected float changeX;
     protected float changeY;
     protected bool isOnGround;
-    protected readonly int health;
+    public int health;
+    protected float invincibilityFrames;
+    protected float friction; // Horizontal friction multiplier in range [0, 1]; 1 keeps full velocity (no friction), 0 stops movement immediately (maximum friction)
+
 
     public Entity(Texture2D texture, Vector2 position, int[] size, int health = 100, Color color = default, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null)
         : base(texture, position, size, color, srcRect)
@@ -23,6 +26,8 @@ class Entity : Sprite
         this.changeY = 0f;
         this.isOnGround = false;
         this.health = health;
+        this.invincibilityFrames = 0f;
+        this.friction = 0.9f; // Default friction
     }
 
     protected virtual List<(Rectangle, CollisionType)> GetIntersectingTiles(Rectangle target)
@@ -51,15 +56,8 @@ class Entity : Sprite
             case CollisionType.Solid:
             case CollisionType.Rough:
             case CollisionType.Slippery:
-                if (deltaY > 0)
-                {
-                    position.Y = tileRect.Top - size[1];
-                    onGround = true;
-                }
-                else if (deltaY < 0)
-                {
-                    position.Y = tileRect.Bottom;
-                }
+                position.Y = deltaY > 0 ? tileRect.Top - size[1] : tileRect.Bottom;
+                onGround = deltaY > 0;
                 deltaY = 0;
                 break;
             case CollisionType.SemiSolid:
@@ -87,20 +85,42 @@ class Entity : Sprite
             case CollisionType.Solid:
             case CollisionType.Rough:
             case CollisionType.Slippery:
-                if (deltaX > 0)
-                {
-                    position.X = tileRect.Left - size[0];
-                }
-                else if (deltaX < 0)
-                {
-                    position.X = tileRect.Right;
-                }
+                position.X = deltaX > 0 ? tileRect.Left - size[0] : tileRect.Right;
                 deltaX = 0;
                 break;
             case CollisionType.SemiSolid:
                 position.X += deltaX;
                 break;
         }
+    }
+
+    protected virtual List<Entity> GetIntersectingEntities(Rectangle target, List<Entity> others)
+    {
+        var intersectingEntities = new List<Entity>();
+        foreach (var other in others)
+        {
+            if (other == this) continue;
+            Rectangle otherRect = other.Rectangle;
+            if (target.Intersects(otherRect))
+            {
+                intersectingEntities.Add(other);
+            }
+        }
+        return intersectingEntities;
+    }
+
+    protected virtual void OnEntityCollision(Entity other)
+    {
+        // Default implementation does nothing
+        // Override in derived classes to handle specific collision behavior
+    }
+
+
+    public virtual void HandleDeath()
+    {
+        // Default implementation resets position and health
+        position = new Vector2(100, -100);
+        health = 100;
     }
 
     // Physics and collision update for non-player entities (no input)
@@ -143,12 +163,56 @@ class Entity : Sprite
         {
             position.X = nextX;
         }
+
+        // Apply friction to horizontal movement
+        if (Math.Abs(changeX) > 0.5f)
+            changeX *= friction;
+        else
+            changeX = 0f;
+
+        // Round positions to prevent sub-pixel jittering
+        position.X = (float)Math.Round(position.X);
+        position.Y = (float)Math.Round(position.Y);
+    }
+
+    public void EntityCollisionUpdate(List<Entity> others)
+    {
+        Rectangle currentRect = new Rectangle((int)position.X, (int)position.Y, size[0], size[1]);
+        var intersectingEntities = GetIntersectingEntities(currentRect, others);
+        foreach (var other in intersectingEntities)
+        {
+            OnEntityCollision(other);
+        }
+    }
+
+    // Check if there's ground ahead in the movement direction
+    protected virtual bool IsGroundAhead(float direction)
+    {
+        if (collisionMap == null) return true;
+        
+        // Check from the bottom corner in the direction of movement
+        float checkX = direction > 0
+            ? position.X + size[0] + 1f   // Moving right: check from bottom-right corner, slightly ahead
+            : position.X - 1f;            // Moving left: check from bottom-left corner, slightly ahead (to the left)
+        
+        float checkY = position.Y + size[1] + 1f; // Just below feet
+        
+        // Check if there's a tile at that position
+        Rectangle checkRect = new Rectangle((int)checkX, (int)checkY, 1, 1);
+        var tiles = GetIntersectingTiles(checkRect);
+        
+        return tiles.Count > 0;
     }
 
     public override void Update(GameTime gameTime)
     {
         float deltaTime = (float)Math.Round(gameTime.ElapsedGameTime.TotalSeconds * 60f, 3);
         PhysicsUpdate(deltaTime);
+        invincibilityFrames = Math.Max(0f, invincibilityFrames - 1f);
+        if (health <= 0)
+        {
+            HandleDeath();
+        }
         base.Update(gameTime);
     }
 
