@@ -96,6 +96,7 @@ namespace PolyGone
             {
                 changeY = -16f;
             }
+            
             // Fast-fall
             // if (!isOnGround && keyboardState.IsKeyDown(Keys.S) && changeY >= 0 && ffCooldown <= 0f)
             // {
