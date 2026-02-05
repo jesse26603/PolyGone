@@ -8,10 +8,10 @@ namespace PolyGone
 
     class Projectile : Entity
     {
-        public readonly float xSpeed;
-        public readonly float ySpeed;
+        public readonly double xSpeed;
+        public readonly double ySpeed;
         public float Lifetime; // Separate from Entity health for projectiles
-        public Projectile(Texture2D texture, Vector2 position, int[] size, float lifetime, int health, Color color, float xSpeed, float ySpeed, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null)
+        public Projectile(Texture2D texture, Vector2 position, int[] size, float lifetime, int health, Color color, double xSpeed, double ySpeed, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null)
             : base(texture, position, size, health, color, srcRect, collisionMap)
         {
             this.xSpeed = xSpeed;
@@ -24,9 +24,9 @@ namespace PolyGone
         {
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            position.X += xSpeed * deltaTime;
-            position.Y += ySpeed * deltaTime;
-
+            position.X += (float)(xSpeed * deltaTime);
+            position.Y += (float)(ySpeed * deltaTime);
+            
             // Round positions to prevent sub-pixel jittering
             position.X = (float)Math.Round(position.X);
             position.Y = (float)Math.Round(position.Y);

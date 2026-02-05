@@ -143,10 +143,6 @@ class Entity : Sprite
         {
             position.X = nextX;
         }
-
-        // Round positions to prevent sub-pixel jittering
-        position.X = (float)Math.Round(position.X);
-        position.Y = (float)Math.Round(position.Y);
     }
 
     public override void Update(GameTime gameTime)
