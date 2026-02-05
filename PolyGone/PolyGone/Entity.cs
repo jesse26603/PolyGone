@@ -13,7 +13,7 @@ class Entity : Sprite
     protected float changeX;
     protected float changeY;
     protected bool isOnGround;
-    protected int health;
+    public int health;
     protected float invincibilityFrames;
     protected float friction; // Horizontal friction multiplier in range [0, 1]; 1 keeps full velocity (no friction), 0 stops movement immediately (maximum friction)
 
