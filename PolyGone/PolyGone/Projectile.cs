@@ -26,7 +26,7 @@ namespace PolyGone
 
             position.X += (float)(xSpeed * deltaTime);
             position.Y += (float)(ySpeed * deltaTime);
-            
+
             // Round positions to prevent sub-pixel jittering
             position.X = (float)Math.Round(position.X);
             position.Y = (float)Math.Round(position.Y);

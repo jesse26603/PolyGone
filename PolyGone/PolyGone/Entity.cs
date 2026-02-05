@@ -152,5 +152,5 @@ class Entity : Sprite
         base.Update(gameTime);
     }
 
-    
+
 }
