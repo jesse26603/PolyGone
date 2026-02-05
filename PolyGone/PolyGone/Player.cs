@@ -51,7 +51,7 @@ namespace PolyGone
                     {
                         // Drop through platform
                         position.Y += deltaY;
-                        ffCooldown = 8; // Prevent bouncing back up
+                        ffCooldown = 4f; // Prevent bouncing back up
                     }
                     else if (deltaY > 0 && (position.Y + size[1]) <= tileRect.Top + 10 && ffCooldown <= 0f)
                     {
