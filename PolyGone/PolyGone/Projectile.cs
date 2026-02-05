@@ -32,9 +32,9 @@ namespace PolyGone
         {
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            position.X += xSpeed * deltaTime;
-            position.Y += ySpeed * deltaTime;
-
+            position.X += (float)(xSpeed * deltaTime);
+            position.Y += (float)(ySpeed * deltaTime);
+            
             // Round positions to prevent sub-pixel jittering
             position.X = (float)Math.Round(position.X);
             position.Y = (float)Math.Round(position.Y);

@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Numerics;
+using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace PolyGone
 {
@@ -13,6 +15,7 @@ namespace PolyGone
         private KeyboardState keyboardState;
         private MouseState mouseState;
         public Blaster blaster { get; private set; }
+        private float ffCooldown = 0f;
         public readonly List<Projectile> bullets;
         private float cooldown;
         public Player(Texture2D texture, Vector2 position, int[] size, int health, Color color, Rectangle? srcRect, Dictionary<Vector2, int> collisionMap, Blaster blaster)
@@ -49,8 +52,9 @@ namespace PolyGone
                     {
                         // Drop through platform
                         position.Y += deltaY;
+                        ffCooldown = 4f; // Prevent bouncing back up
                     }
-                    else if (deltaY > 0 && (position.Y + size[1]) <= tileRect.Top + 10)
+                    else if (deltaY > 0 && (position.Y + size[1]) <= tileRect.Top + 10 && ffCooldown <= 0f)
                     {
                         position.Y = tileRect.Top - size[1];
                         deltaY = 0;
@@ -86,6 +90,18 @@ namespace PolyGone
             {
                 changeY = -16f;
             }
+            
+            // Fast-fall
+            // if (!isOnGround && keyboardState.IsKeyDown(Keys.S) && changeY >= 0 && ffCooldown <= 0f)
+            // {
+            //     changeY += 0.3f;
+            //     changeY = Math.Max(changeY, 25f);
+            // }
+            // else
+            // {
+            //     // Apply gravity
+            //     return;
+            // }
         }
 
         protected override void OnEntityCollision(Entity other)
@@ -148,6 +164,7 @@ namespace PolyGone
                 ));
                 cooldown = 12f; // Cooldown of 0.2 seconds at 60fps
             }
+
             foreach (var bullet in bullets.ToList())
             {
                 bullet.lifetime -= 1f;
@@ -159,6 +176,7 @@ namespace PolyGone
             }
             cooldown = Math.Max(0f, cooldown - 1f);
             blaster.Update(gameTime);
+            ffCooldown = Math.Max(0f, ffCooldown - 1f);
         }
 
         public override void Draw(SpriteBatch spriteBatch, Vector2 offset)

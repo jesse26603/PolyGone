@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Math = System.Math;
 
 namespace PolyGone
 {
@@ -17,7 +18,7 @@ namespace PolyGone
             // Get mouse position
             MouseState mouseState = Mouse.GetState();
             Vector2 mousePosition = mouseState.Position.ToVector2();
-            
+
             // Convert mouse position from screen space to world space
             Vector2 worldMousePosition = mousePosition + cameraOffset;
 
@@ -34,7 +35,7 @@ namespace PolyGone
                 (float)System.Math.Cos(angle) * radius,
                 (float)System.Math.Sin(angle) * radius
             );
-            
+
             // Offset to center the blaster sprite on its position
             position -= new Vector2(size[0] / 2f, size[1] / 2f);
         }
