@@ -9,8 +9,8 @@ class Enemy : Entity
     private float patrolSpeed;
     private float patrolDirection = 1f; // 1 for right, -1 for left
     
-    public Enemy(Texture2D texture, Vector2 position, int[] size, int health = 100, Color color = default, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null, float patrolSpeed = 1f)
-        : base(texture, position, size, health, color, srcRect, collisionMap)
+    public Enemy(Texture2D texture, Vector2 position, int[] size, int health = 100, Color color = default, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null, float patrolSpeed = 1f, int[]? visualSize = null)
+        : base(texture, position, size, health, color, srcRect, collisionMap, visualSize)
     {
         this.friction = 0.9f; // Enemy has default friction
         this.patrolSpeed = patrolSpeed;

@@ -167,7 +167,8 @@ public class GameScene : IScene
             color: Color.White,
             srcRect: textureStore[1],
             collisionMap: collisionMap,
-            blaster: blaster
+            blaster: blaster,
+            visualSize: new int[2] { 64, 64 }
         );
         // Initialize enemies from spawn positions
         enemies.AddRange(enemySpawns.Select(spawnPos => new Enemy(
@@ -178,7 +179,8 @@ public class GameScene : IScene
             color: Color.White,
             srcRect: textureStore[2],
             collisionMap: collisionMap,
-            patrolSpeed: 1f
+            patrolSpeed: 1f,
+            visualSize: new int[2] { 64, 64 }
         )));
     }
     
@@ -199,7 +201,8 @@ public class GameScene : IScene
             color: Color.White,
             srcRect: textureStore[2],
             collisionMap: collisionMap,
-            patrolSpeed: 1f
+            patrolSpeed: 1f,
+            visualSize: new int[2] { 64, 64 }
         )));
     }
     

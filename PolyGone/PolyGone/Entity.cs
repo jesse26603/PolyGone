@@ -16,9 +16,11 @@ class Entity : Sprite
     public int health;
     protected float invincibilityFrames;
     protected float friction; // Horizontal friction multiplier in range [0, 1]; 1 keeps full velocity (no friction), 0 stops movement immediately (maximum friction)
+    protected int[] visualSize; // Visual size for drawing (can be larger than hitbox)
+    protected Vector2 hitboxOffset; // Offset to center the hitbox within the visual sprite
 
 
-    public Entity(Texture2D texture, Vector2 position, int[] size, int health = 100, Color color = default, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null)
+    public Entity(Texture2D texture, Vector2 position, int[] size, int health = 100, Color color = default, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null, int[]? visualSize = null)
         : base(texture, position, size, color, srcRect)
     {
         this.collisionMap = collisionMap;
@@ -28,6 +30,12 @@ class Entity : Sprite
         this.health = health;
         this.invincibilityFrames = 0f;
         this.friction = 0.9f; // Default friction
+        this.visualSize = visualSize ?? size; // Use provided visual size or default to hitbox size
+        // Calculate offset so hitbox bottom aligns with visual bottom
+        this.hitboxOffset = new Vector2(
+            (this.visualSize[0] - size[0]) / 2f, // Center horizontally
+            this.visualSize[1] - size[1] // Align bottom edges
+        );
     }
 
     protected virtual List<(Rectangle, CollisionType)> GetIntersectingTiles(Rectangle target)
@@ -85,6 +93,7 @@ class Entity : Sprite
             case CollisionType.Solid:
             case CollisionType.Rough:
             case CollisionType.Slippery:
+                // Standard wall collision
                 position.X = deltaX > 0 ? tileRect.Left - size[0] : tileRect.Right;
                 deltaX = 0;
                 break;
@@ -162,6 +171,42 @@ class Entity : Sprite
         else
         {
             position.X = nextX;
+            
+            // Gap centering: when moving horizontally through a 1-tile vertical gap, center the player
+            if (Math.Abs(changeX) > 0.5f)
+            {
+                // Check for walls above and below to detect a 1-tile gap
+                int tileAbove = (int)((position.Y - 1) / 64);
+                int tileBelow = (int)((position.Y + size[1] + 1) / 64);
+                int currentTileX = (int)((position.X + size[0] / 2) / 64);
+                
+                if (collisionMap != null)
+                {
+                    var keyAbove = new Vector2(currentTileX, tileAbove);
+                    var keyBelow = new Vector2(currentTileX, tileBelow);
+                    
+                    bool wallAbove = collisionMap.ContainsKey(keyAbove) && collisionMap[keyAbove] != -1;
+                    bool wallBelow = collisionMap.ContainsKey(keyBelow) && collisionMap[keyBelow] != -1;
+                    
+                    // If there are walls above and below (1-tile gap), center horizontally in the tile
+                    if (wallAbove && wallBelow)
+                    {
+                        float tileCenter = currentTileX * 64 + 32;
+                        float playerCenter = position.X + size[0] / 2;
+                        float offset = tileCenter - playerCenter;
+                        
+                        // Gently nudge toward center (max 1 pixel per frame)
+                        if (Math.Abs(offset) > 1f)
+                        {
+                            position.X += Math.Sign(offset) * 1f;
+                        }
+                        else if (Math.Abs(offset) > 0.1f)
+                        {
+                            position.X += offset;
+                        }
+                    }
+                }
+            }
         }
 
         // Apply friction to horizontal movement
@@ -169,10 +214,6 @@ class Entity : Sprite
             changeX *= friction;
         else
             changeX = 0f;
-
-        // Round positions to prevent sub-pixel jittering
-        position.X = (float)Math.Round(position.X);
-        position.Y = (float)Math.Round(position.Y);
     }
 
     public void EntityCollisionUpdate(List<Entity> others)
@@ -214,6 +255,68 @@ class Entity : Sprite
             HandleDeath();
         }
         base.Update(gameTime);
+    }
+
+    public override void Draw(SpriteBatch spriteBatch, Vector2 offset)
+    {
+        // Draw using visual size, offset by hitboxOffset to center the sprite on the hitbox
+        // Round positions only for drawing to prevent sub-pixel rendering issues
+        float drawX = (float)Math.Floor(position.X - hitboxOffset.X - offset.X);
+        float drawY = (float)Math.Floor(position.Y - hitboxOffset.Y - offset.Y);
+        
+        // Check if visual sprite would clip through tiles and adjust if needed
+        if (collisionMap != null)
+        {
+            Rectangle visualRect = new Rectangle(
+                (int)(position.X - hitboxOffset.X),
+                (int)(position.Y - hitboxOffset.Y),
+                visualSize[0],
+                visualSize[1]
+            );
+            
+            var visualCollisions = GetIntersectingTiles(visualRect);
+            
+            // Adjust drawing position to prevent clipping
+            foreach (var (tileRect, colType) in visualCollisions)
+            {
+                // Only adjust for solid collision types
+                if (colType == CollisionType.Solid || colType == CollisionType.Rough || colType == CollisionType.Slippery)
+                {
+                    // Check if hitbox is not colliding (meaning only visual extends into tile)
+                    Rectangle hitboxRect = new Rectangle((int)position.X, (int)position.Y, size[0], size[1]);
+                    if (!hitboxRect.Intersects(tileRect))
+                    {
+                        // Adjust Y if visual top extends above the tile
+                        float visualTop = position.Y - hitboxOffset.Y;
+                        if (visualTop < tileRect.Bottom && position.Y >= tileRect.Bottom)
+                        {
+                            drawY = tileRect.Bottom - offset.Y;
+                        }
+                        
+                        // Adjust X if visual extends into tile horizontally
+                        float visualLeft = position.X - hitboxOffset.X;
+                        float visualRight = visualLeft + visualSize[0];
+                        
+                        if (visualLeft < tileRect.Right && position.X >= tileRect.Right)
+                        {
+                            drawX = tileRect.Right - offset.X;
+                        }
+                        else if (visualRight > tileRect.Left && (position.X + size[0]) <= tileRect.Left)
+                        {
+                            drawX = tileRect.Left - visualSize[0] - offset.X;
+                        }
+                    }
+                }
+            }
+        }
+        
+        Rectangle adjustedRectangle = new Rectangle(
+            (int)drawX,
+            (int)drawY,
+            visualSize[0],
+            visualSize[1]
+        );
+        spriteBatch.Draw(texture, adjustedRectangle, srcRect, color);
     }
 
     
