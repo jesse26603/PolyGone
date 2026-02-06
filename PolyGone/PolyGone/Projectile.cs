@@ -5,18 +5,26 @@ using System.Collections.Generic;
 
 namespace PolyGone
 {
+    public enum Owner
+    {
+        Player,
+        Enemy
+    }
 
     class Projectile : Entity
     {
-        public readonly double xSpeed;
-        public readonly double ySpeed;
-        public float Lifetime; // Separate from Entity health for projectiles
-        public Projectile(Texture2D texture, Vector2 position, int[] size, float lifetime, int health, Color color, double xSpeed, double ySpeed, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null)
+        public readonly float xSpeed;
+        public readonly float ySpeed;
+        public float lifetime; // Separate from Entity health for projectiles
+        public readonly Owner owner; // Who fired this projectile
+        public int damage => 40; // Fixed damage for now
+        public Projectile(Texture2D texture, Vector2 position, int[] size, float lifetime, int health, Color color, float xSpeed, float ySpeed, Owner owner, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null)
             : base(texture, position, size, health, color, srcRect, collisionMap)
         {
             this.xSpeed = xSpeed;
             this.ySpeed = ySpeed;
-            this.Lifetime = lifetime;
+            this.lifetime = lifetime;
+            this.owner = owner;
         }
 
         // Fire projectiles from blaster to global mouse position
@@ -38,7 +46,7 @@ namespace PolyGone
                 var collisions = GetIntersectingTiles(projectileRect);
                 if (collisions.Count > 0)
                 {
-                    Lifetime = 0;
+                    lifetime = 0;
                 }
             }
         }
