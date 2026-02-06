@@ -259,14 +259,13 @@ namespace PolyGone
                         float playerCenter = position.X + size[0] / 2;
                         float offset = tileCenter - playerCenter;
                         
-                        // Very strong nudge toward center (max 6 pixels per frame)
-                        if (Math.Abs(offset) > 6f)
+                        // Use same nudge logic as horizontal funneling
+                        if (Math.Abs(offset) > 0.1f)
                         {
-                            position.X += Math.Sign(offset) * 6f;
-                        }
-                        else if (Math.Abs(offset) > 0.1f)
-                        {
-                            position.X += offset;
+                            float nudge = Math.Sign(offset) * 15f;
+                            if (Math.Abs(nudge) > Math.Abs(offset))
+                                nudge = offset;
+                            position.X += nudge;
                         }
                     }
                 }
