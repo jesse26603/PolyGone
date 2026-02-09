@@ -12,6 +12,10 @@ namespace PolyGone
 
     internal class Player : Entity
     {
+        // Constants for gap centering nudge strengths
+        private const float VERTICAL_GAP_NUDGE_STRENGTH = 20f; // Strong nudge for vertical movement through gaps
+        private const float HORIZONTAL_GAP_NUDGE_STRENGTH = 15f; // Medium nudge for horizontal gap funneling
+        
         private KeyboardState keyboardState;
         private MouseState mouseState;
         public Blaster blaster { get; private set; }
@@ -128,13 +132,9 @@ namespace PolyGone
 
         protected override void PhysicsUpdate(float deltaTime)
         {
-            // Don't apply gravity if coyote time is active (prevents falling off ledges during grace period)
-            if (coyoteTime <= 0f)
-            {
-                // Apply gravity
-                changeY += 0.7f;
-                changeY = Math.Min(changeY, 14f);
-            }
+            // Apply gravity (always, even during coyote time)
+            changeY += 0.7f;
+            changeY = Math.Min(changeY, 14f);
 
             // Vertical collision and movement
             isOnGround = false;
@@ -157,27 +157,27 @@ namespace PolyGone
                 if (collisionMap != null && Math.Abs(changeY) > 0.1f)
                 {
                     // Get the current tile column the player is in
-                    int playerTileX = (int)((position.X + size[0] / 2) / 64);
-                    int playerTileY = (int)((position.Y + size[1] / 2) / 64);
+                    int playerTileX = (int)((position.X + size[0] / 2f) / TILE_SIZE);
+                    int playerTileY = (int)((position.Y + size[1] / 2f) / TILE_SIZE);
                     
                     // Check if there are solid walls directly to the left and right
                     var keyLeft = new Vector2(playerTileX - 1, playerTileY);
                     var keyRight = new Vector2(playerTileX + 1, playerTileY);
                     
-                    bool wallLeft = collisionMap.ContainsKey(keyLeft) && collisionMap[keyLeft] != -1;
-                    bool wallRight = collisionMap.ContainsKey(keyRight) && collisionMap[keyRight] != -1;
+                    bool wallLeft = IsSolidWall(keyLeft);
+                    bool wallRight = IsSolidWall(keyRight);
                     
                     // If surrounded by walls on left and right (in a 1-tile wide gap), center strongly
                     if (wallLeft && wallRight)
                     {
-                        float tileCenter = playerTileX * 64 + 32;
-                        float playerCenter = position.X + size[0] / 2;
+                        float tileCenter = playerTileX * TILE_SIZE + TILE_HALF_SIZE;
+                        float playerCenter = position.X + size[0] / 2f;
                         float offset = tileCenter - playerCenter;
                         
-                        // Very strong and immediate centering (up to 20 pixels per frame)
+                        // Very strong and immediate centering for vertical gaps
                         if (Math.Abs(offset) > 0.1f)
                         {
-                            float nudge = Math.Sign(offset) * 20f;
+                            float nudge = Math.Sign(offset) * VERTICAL_GAP_NUDGE_STRENGTH;
                             if (Math.Abs(nudge) > Math.Abs(offset))
                                 nudge = offset;
                             position.X += nudge;
@@ -204,68 +204,37 @@ namespace PolyGone
                 // Gap funneling: when walking over a 1-tile gap and pressing S, funnel down through it
                 if (isOnGround && keyboardState.IsKeyDown(Keys.S) && collisionMap != null)
                 {
-                    int playerTileX = (int)((position.X + size[0] / 2) / 64);
-                    int playerTileY = (int)((position.Y + size[1] / 2) / 64);
+                    int playerTileX = (int)((position.X + size[0] / 2f) / TILE_SIZE);
+                    int playerTileY = (int)((position.Y + size[1] / 2f) / TILE_SIZE);
                     
-                    // Check if there's a semi-solid directly below
+                    // Check if there's a semi-solid platform directly below
                     var keyBelow = new Vector2(playerTileX, playerTileY + 1);
-                    bool semiSolidBelow = collisionMap.ContainsKey(keyBelow) && collisionMap[keyBelow] != -1;
+                    bool semiSolidBelow = collisionMap.TryGetValue(keyBelow, out int belowTileId) &&
+                                          belowTileId != -1 &&
+                                          CollisionTypeMapper.GetCollisionType(belowTileId) == CollisionType.SemiSolid;
                     
                     if (semiSolidBelow)
                     {
-                        // Check if there are walls on left and right (1-tile gap scenario)
+                        // Check if there are solid walls on left and right (1-tile gap scenario)
                         var keyLeft = new Vector2(playerTileX - 1, playerTileY);
                         var keyRight = new Vector2(playerTileX + 1, playerTileY);
                         
-                        bool wallLeft = collisionMap.ContainsKey(keyLeft) && collisionMap[keyLeft] != -1;
-                        bool wallRight = collisionMap.ContainsKey(keyRight) && collisionMap[keyRight] != -1;
+                        bool wallLeft = IsSolidWall(keyLeft);
+                        bool wallRight = IsSolidWall(keyRight);
                         
                         if (wallLeft && wallRight)
                         {
-                            // Center horizontally in the gap
-                            float tileCenter = playerTileX * 64 + 32;
-                            float playerCenter = position.X + size[0] / 2;
+                            float tileCenter = playerTileX * TILE_SIZE + TILE_HALF_SIZE;
+                            float playerCenter = position.X + size[0] / 2f;
                             float offset = tileCenter - playerCenter;
                             
                             if (Math.Abs(offset) > 0.1f)
                             {
-                                float nudge = Math.Sign(offset) * 15f;
+                                float nudge = Math.Sign(offset) * HORIZONTAL_GAP_NUDGE_STRENGTH;
                                 if (Math.Abs(nudge) > Math.Abs(offset))
                                     nudge = offset;
                                 position.X += nudge;
                             }
-                        }
-                    }
-                }
-                
-                // Gap centering: when moving through a 1-tile vertical gap, center horizontally
-                if (collisionMap != null)
-                {
-                    // Check for walls above and below to detect a 1-tile gap
-                    int tileAbove = (int)((position.Y - 1) / 64);
-                    int tileBelow = (int)((position.Y + size[1] + 1) / 64);
-                    int currentTileX = (int)((position.X + size[0] / 2) / 64);
-                    
-                    var keyAbove = new Vector2(currentTileX, tileAbove);
-                    var keyBelow = new Vector2(currentTileX, tileBelow);
-                    
-                    bool wallAbove = collisionMap.ContainsKey(keyAbove) && collisionMap[keyAbove] != -1;
-                    bool wallBelow = collisionMap.ContainsKey(keyBelow) && collisionMap[keyBelow] != -1;
-                    
-                    // If there are walls above and below (1-tile gap), center horizontally in the tile
-                    if (wallAbove && wallBelow)
-                    {
-                        float tileCenter = currentTileX * 64 + 32;
-                        float playerCenter = position.X + size[0] / 2;
-                        float offset = tileCenter - playerCenter;
-                        
-                        // Use same nudge logic as horizontal funneling
-                        if (Math.Abs(offset) > 0.1f)
-                        {
-                            float nudge = Math.Sign(offset) * 15f;
-                            if (Math.Abs(nudge) > Math.Abs(offset))
-                                nudge = offset;
-                            position.X += nudge;
                         }
                     }
                 }
@@ -282,17 +251,12 @@ namespace PolyGone
         {
             HandleInput();
             
-            // Update coyote time: set to 6 frames when grounded, otherwise decrease
-            if (isOnGround)
-            {
-                coyoteTime = 6f; // 0.1 seconds at 60fps
-            }
-            else
-            {
-                coyoteTime = Math.Max(0f, coyoteTime - 1f);
-            }
-            
             base.Update(gameTime);
+            
+            // Update coyote time after physics update to use current frame's ground state
+            coyoteTime = isOnGround
+                ? 6f // 0.1 seconds at 60fps
+                : Math.Max(0f, coyoteTime - 1f);
 
             // Handle shooting
             mouseState = Mouse.GetState();
