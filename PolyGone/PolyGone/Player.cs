@@ -170,7 +170,7 @@ namespace PolyGone
                     // If surrounded by walls on left and right (in a 1-tile wide gap), center strongly
                     if (wallLeft && wallRight)
                     {
-                        float tileCenter = playerTileX * (float)TILE_SIZE + TILE_HALF_SIZE;
+                        float tileCenter = playerTileX * TILE_SIZE + TILE_HALF_SIZE;
                         float playerCenter = position.X + size[0] / 2f;
                         float offset = tileCenter - playerCenter;
                         
@@ -224,8 +224,7 @@ namespace PolyGone
                         
                         if (wallLeft && wallRight)
                         {
-                            // Center horizontally in the gap
-                            float tileCenter = playerTileX * (float)TILE_SIZE + TILE_HALF_SIZE;
+                            float tileCenter = playerTileX * TILE_SIZE + TILE_HALF_SIZE;
                             float playerCenter = position.X + size[0] / 2f;
                             float offset = tileCenter - playerCenter;
                             

@@ -21,7 +21,7 @@ class Entity : Sprite
     
     // Constants for tile-based calculations
     protected const int TILE_SIZE = 64;
-    protected const int TILE_HALF_SIZE = 32;
+    protected const int TILE_HALF_SIZE = TILE_SIZE / 2;
 
 
     public Entity(Texture2D texture, Vector2 position, int[] size, int health = 100, Color color = default, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null, int[]? visualSize = null)
@@ -203,7 +203,7 @@ class Entity : Sprite
                 // If there are walls above and below (1-tile gap), center horizontally in the tile
                 if (wallAbove && wallBelow)
                 {
-                    float tileCenter = currentTileX * (float)TILE_SIZE + TILE_HALF_SIZE;
+                    float tileCenter = currentTileX * TILE_SIZE + TILE_HALF_SIZE;
                     float playerCenter = position.X + size[0] / 2f;
                     float offset = tileCenter - playerCenter;
                     
