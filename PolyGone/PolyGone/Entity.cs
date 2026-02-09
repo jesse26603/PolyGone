@@ -16,8 +16,12 @@ class Entity : Sprite
     public int health;
     protected float invincibilityFrames;
     protected float friction; // Horizontal friction multiplier in range [0, 1]; 1 keeps full velocity (no friction), 0 stops movement immediately (maximum friction)
-    protected int[] visualSize; // Visual size for drawing (can be larger than hitbox)
+    protected readonly int[] visualSize; // Visual size for drawing (can be larger than hitbox)
     protected Vector2 hitboxOffset; // Offset to center the hitbox within the visual sprite
+    
+    // Constants for tile-based calculations
+    protected const int TILE_SIZE = 64;
+    protected const int TILE_HALF_SIZE = 32;
 
 
     public Entity(Texture2D texture, Vector2 position, int[] size, int health = 100, Color color = default, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null, int[]? visualSize = null)
@@ -45,7 +49,7 @@ class Entity : Sprite
         foreach (var tile in collisionMap)
         {
             if (tile.Value == -1) continue;
-            Rectangle tileRect = new Rectangle((int)tile.Key.X * 64, (int)tile.Key.Y * 64, 64, 64);
+            Rectangle tileRect = new Rectangle((int)tile.Key.X * TILE_SIZE, (int)tile.Key.Y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             CollisionType colType = CollisionTypeMapper.GetCollisionType(tile.Value);
             if (target.Intersects(tileRect))
             {
@@ -53,6 +57,16 @@ class Entity : Sprite
             }
         }
         return intersectingTiles;
+    }
+    
+    // Helper method to check if a tile is a solid wall (not semi-solid platform)
+    protected bool IsSolidWall(Vector2 tileKey)
+    {
+        if (collisionMap == null) return false;
+        if (!collisionMap.TryGetValue(tileKey, out int tileId) || tileId == -1) return false;
+        
+        CollisionType colType = CollisionTypeMapper.GetCollisionType(tileId);
+        return colType == CollisionType.Solid || colType == CollisionType.Rough || colType == CollisionType.Slippery;
     }
 
     protected virtual void HandleVerticalCollision(ref bool onGround, ref float deltaY, List<(Rectangle, CollisionType)> collisions)
@@ -173,37 +187,34 @@ class Entity : Sprite
             position.X = nextX;
             
             // Gap centering: when moving horizontally through a 1-tile vertical gap, center the player
-            if (Math.Abs(changeX) > 0.5f)
+            if (Math.Abs(changeX) > 0.5f && collisionMap != null)
             {
                 // Check for walls above and below to detect a 1-tile gap
-                int tileAbove = (int)((position.Y - 1) / 64);
-                int tileBelow = (int)((position.Y + size[1] + 1) / 64);
-                int currentTileX = (int)((position.X + size[0] / 2) / 64);
+                int tileAbove = (int)((position.Y - 1f) / TILE_SIZE);
+                int tileBelow = (int)((position.Y + size[1] + 1f) / TILE_SIZE);
+                int currentTileX = (int)((position.X + size[0] / 2f) / TILE_SIZE);
                 
-                if (collisionMap != null)
+                var keyAbove = new Vector2(currentTileX, tileAbove);
+                var keyBelow = new Vector2(currentTileX, tileBelow);
+                
+                bool wallAbove = IsSolidWall(keyAbove);
+                bool wallBelow = IsSolidWall(keyBelow);
+                
+                // If there are walls above and below (1-tile gap), center horizontally in the tile
+                if (wallAbove && wallBelow)
                 {
-                    var keyAbove = new Vector2(currentTileX, tileAbove);
-                    var keyBelow = new Vector2(currentTileX, tileBelow);
+                    float tileCenter = currentTileX * (float)TILE_SIZE + TILE_HALF_SIZE;
+                    float playerCenter = position.X + size[0] / 2f;
+                    float offset = tileCenter - playerCenter;
                     
-                    bool wallAbove = collisionMap.ContainsKey(keyAbove) && collisionMap[keyAbove] != -1;
-                    bool wallBelow = collisionMap.ContainsKey(keyBelow) && collisionMap[keyBelow] != -1;
-                    
-                    // If there are walls above and below (1-tile gap), center horizontally in the tile
-                    if (wallAbove && wallBelow)
+                    // Gently nudge toward center (max 1 pixel per frame)
+                    if (Math.Abs(offset) > 1f)
                     {
-                        float tileCenter = currentTileX * 64 + 32;
-                        float playerCenter = position.X + size[0] / 2;
-                        float offset = tileCenter - playerCenter;
-                        
-                        // Gently nudge toward center (max 1 pixel per frame)
-                        if (Math.Abs(offset) > 1f)
-                        {
-                            position.X += Math.Sign(offset) * 1f;
-                        }
-                        else if (Math.Abs(offset) > 0.1f)
-                        {
-                            position.X += offset;
-                        }
+                        position.X += Math.Sign(offset) * 1f;
+                    }
+                    else if (Math.Abs(offset) > 0.1f)
+                    {
+                        position.X += offset;
                     }
                 }
             }
