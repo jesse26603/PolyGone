@@ -209,8 +209,7 @@ namespace PolyGone
                     
                     // Check if there's a semi-solid directly below
                     var keyBelow = new Vector2(playerTileX, playerTileY + 1);
-                    bool semiSolidBelow = collisionMap.TryGetValue(keyBelow, out int belowTileId) &&
-                                          GetCollisionType(belowTileId) == CollisionType.SemiSolid;
+                    bool semiSolidBelow = collisionMap.ContainsKey(keyBelow) && collisionMap[keyBelow] != -1;
                     
                     if (semiSolidBelow)
                     {
