@@ -9,11 +9,18 @@ class Enemy : Entity
     private float patrolSpeed;
     private float patrolDirection = 1f; // 1 for right, -1 for left
     
+    // Multi-hit damage system
+    private float damageWindow = 0f; // Frames remaining in damage window
+    private int accumulatedDamage = 0; // Damage accumulated during current window
+    private List<Projectile> hitProjectiles = new List<Projectile>(); // Track projectiles that hit during window
+    private const float DAMAGE_WINDOW_DURATION = 2f; // 2 frames to accumulate damage
+    
     public Enemy(Texture2D texture, Vector2 position, int[] size, int health = 100, Color color = default, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null, float patrolSpeed = 1f, int[]? visualSize = null)
         : base(texture, position, size, health, color, srcRect, collisionMap, visualSize)
     {
         this.friction = 0.9f; // Enemy has default friction
         this.patrolSpeed = patrolSpeed;
+        this.hitProjectiles = new List<Projectile>();
     }
 
     protected override void OnEntityCollision(Entity other)
@@ -21,28 +28,73 @@ class Enemy : Entity
         switch (other)
         {
             case Projectile projectile:
-                // Only take damage from player projectiles if not invincible
-                if (projectile.owner == Owner.Player && invincibilityFrames <= 0f)
+                // Only take damage from player projectiles
+                if (projectile.owner == Owner.Player)
                 {
-                    TakeDamage(projectile.damage, 30f);
-                    // Knockback effect
-                    float knockbackStrength = 8f;
-                    Vector2 projectileVelocity = new Vector2(projectile.xSpeed, projectile.ySpeed);
-                    if (projectileVelocity != Vector2.Zero)
-                    {
-                        projectileVelocity.Normalize();
-                        changeX += projectileVelocity.X * knockbackStrength;
-                        changeY += projectileVelocity.Y * knockbackStrength;
-                    }
-                    else
-                    {
-                        // Fallback: if projectile has no velocity, apply a simple upward knockback
-                        changeY -= knockbackStrength;
-                    }
-                    // Expire the projectile so it cannot damage this or other enemies again
-                    projectile.lifetime = 0f;
+                    HandleProjectileHit(projectile);
                 }
                 break;
+        }
+    }
+
+    private void HandleProjectileHit(Projectile projectile)
+    {
+        // Skip if already hit by this projectile or if in invincibility frames
+        if (hitProjectiles.Contains(projectile) || invincibilityFrames > 0f)
+            return;
+
+        // If no damage window is active, start a new one
+        if (damageWindow <= 0f)
+        {
+            damageWindow = DAMAGE_WINDOW_DURATION;
+            accumulatedDamage = 0;
+            hitProjectiles.Clear();
+        }
+
+        // Add this projectile's damage to accumulated damage
+        accumulatedDamage += projectile.damage;
+        hitProjectiles.Add(projectile);
+
+        // Expire the projectile so it doesn't hit other enemies
+        projectile.lifetime = 0f;
+
+        // Apply knockback from the first projectile only (to prevent excessive knockback)
+        if (hitProjectiles.Count == 1)
+        {
+            ApplyKnockback(projectile);
+        }
+    }
+
+    private void ApplyKnockback(Projectile projectile)
+    {
+        float knockbackStrength = 8f;
+        Vector2 projectileVelocity = new Vector2(projectile.xSpeed, projectile.ySpeed);
+        if (projectileVelocity != Vector2.Zero)
+        {
+            projectileVelocity.Normalize();
+            changeX += projectileVelocity.X * knockbackStrength;
+            changeY += projectileVelocity.Y * knockbackStrength;
+        }
+        else
+        {
+            // Fallback: if projectile has no velocity, apply a simple upward knockback
+            changeY -= knockbackStrength;
+        }
+    }
+
+    private void UpdateDamageWindow()
+    {
+        if (damageWindow > 0f)
+        {
+            damageWindow -= 1f;
+            
+            // When damage window closes, apply accumulated damage and start invincibility
+            if (damageWindow <= 0f && accumulatedDamage > 0)
+            {
+                TakeDamage(accumulatedDamage, 30f); // 30 frame invincibility after damage window
+                accumulatedDamage = 0;
+                hitProjectiles.Clear();
+            }
         }
     }
 
@@ -82,6 +134,9 @@ class Enemy : Entity
 
     public override void Update(GameTime gameTime)
     {
+        // Update damage window system
+        UpdateDamageWindow();
+        
         // Update patrol behavior
         PatrolUpdate();
         

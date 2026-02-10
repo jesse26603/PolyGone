@@ -17,18 +17,20 @@ namespace PolyGone
         private const float HORIZONTAL_GAP_NUDGE_STRENGTH = 15f; // Medium nudge for horizontal gap funneling
         
         private KeyboardState keyboardState;
-        private MouseState mouseState;
-        public Blaster blaster { get; private set; }
+        private KeyboardState previousKeyboardState;
+        private List<Item> inventory = new List<Item>();
+        private int currentWeaponIndex = 0; // Index of currently equipped weapon
+        public readonly List<Projectile> bullets = new List<Projectile>(); // Shared projectile list for all weapons
         private float ffCooldown = 0f;
-        public readonly List<Projectile> bullets;
-        private float cooldown;
         private float coyoteTime = 0f; // Allows jumping shortly after leaving a platform
-        public Player(Texture2D texture, Vector2 position, int[] size, int health, Color color, Rectangle? srcRect, Dictionary<Vector2, int> collisionMap, Blaster blaster, int[]? visualSize = null)
+        public Player(Texture2D texture, Vector2 position, int[] size, int health, Color color, Rectangle? srcRect, Dictionary<Vector2, int> collisionMap, Texture2D blasterTexture, int[]? visualSize = null)
             : base(texture, position, size, health, color, srcRect, collisionMap, visualSize)
         {
-            this.blaster = blaster;
-            this.bullets = new List<Projectile>();
-            this.cooldown = 0f;
+            // Create both weapon types and add to inventory
+            var blaster = new Blaster(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.White, collisionMap, bullets, srcRect);
+            var shotgun = new Shotgun(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.Red, collisionMap, bullets, srcRect);
+            inventory.Add(blaster);
+            inventory.Add(shotgun);
             this.friction = 0.8f; // Player has more friction for tighter control
         }
 
@@ -76,8 +78,19 @@ namespace PolyGone
         // Handle player input and jumping
         private void HandleInput()
         {
+            previousKeyboardState = keyboardState;
             keyboardState = Keyboard.GetState();
             int moveDirection = 0;
+
+            // Weapon switching
+            if (keyboardState.IsKeyDown(Keys.D1) && !previousKeyboardState.IsKeyDown(Keys.D1))
+            {
+                currentWeaponIndex = 0; // Switch to blaster
+            }
+            else if (keyboardState.IsKeyDown(Keys.D2) && !previousKeyboardState.IsKeyDown(Keys.D2))
+            {
+                currentWeaponIndex = 1; // Switch to shotgun
+            }
 
             // Horizontal movement
             if (keyboardState.IsKeyDown(Keys.A) && !keyboardState.IsKeyDown(Keys.D)) moveDirection = -1;
@@ -196,7 +209,24 @@ namespace PolyGone
             }
         }
 
+        // Helper method to get the currently equipped blaster from inventory
+        public Blaster GetBlaster()
+        {
+            var blasters = inventory.OfType<Blaster>().ToList();
+            if (currentWeaponIndex < blasters.Count)
+                return blasters[currentWeaponIndex];
+            return blasters.FirstOrDefault();
+        }
+
+        // Public property to access current blaster for backward compatibility
+        public Blaster blaster => GetBlaster();
+
         public override void Update(GameTime gameTime)
+        {
+            Update(gameTime, Vector2.Zero);
+        }
+
+        public void Update(GameTime gameTime, Vector2 cameraOffset)
         {
             HandleInput();
             
@@ -207,26 +237,16 @@ namespace PolyGone
                 ? 6f // 0.1 seconds at 60fps
                 : Math.Max(0f, coyoteTime - 1f);
 
-            // Handle shooting
-            mouseState = Mouse.GetState();
-            if (mouseState.LeftButton == ButtonState.Pressed && cooldown <= 0f)
+            // Update only the currently equipped weapon
+            var currentBlaster = GetBlaster();
+            if (currentBlaster != null)
             {
-                bullets.Add(new Projectile(
-                    texture: texture,
-                    position: new Vector2(blaster.position.X + blaster.size[0] / 2 - 5, blaster.position.Y + blaster.size[1] / 2 - 5),
-                    size: new int[2] { 10, 10 },
-                    lifetime: 200f,
-                    health: 1,
-                    color: Color.White,
-                    xSpeed: (float)(Math.Cos(blaster.rotation) * 750f),
-                    ySpeed: (float)(Math.Sin(blaster.rotation) * 750f),
-                    owner: Owner.Player,
-                    srcRect: blaster.srcRect,
-                    collisionMap: collisionMap
-                ));
-                cooldown = 12f; // Cooldown of 0.2 seconds at 60fps
+                currentBlaster.Follow(new Rectangle((int)position.X, (int)position.Y, size[0], size[1]), cameraOffset);
+                currentBlaster.Use();
+                currentBlaster.Update(gameTime);
             }
-
+            
+            // Update all bullets (shared across all weapons)
             foreach (var bullet in bullets.ToList())
             {
                 bullet.lifetime -= 1f;
@@ -236,15 +256,19 @@ namespace PolyGone
                 }
                 bullet.Update(gameTime);
             }
-            cooldown = Math.Max(0f, cooldown - 1f);
-            blaster.Update(gameTime);
+            
             ffCooldown = Math.Max(0f, ffCooldown - 1f);
         }
 
         public override void Draw(SpriteBatch spriteBatch, Vector2 offset)
         {
             base.Draw(spriteBatch, offset);
-            blaster.Draw(spriteBatch, offset);
+            
+            // Draw only the currently equipped weapon
+            var currentBlaster = GetBlaster();
+            currentBlaster?.Draw(spriteBatch, offset);
+            
+            // Draw all bullets (shared across all weapons)
             foreach (var bullet in bullets)
             {
                 bullet.Draw(spriteBatch, offset);
