@@ -24,8 +24,7 @@ class Enemy : Entity
                 // Only take damage from player projectiles if not invincible
                 if (projectile.owner == Owner.Player && invincibilityFrames <= 0f)
                 {
-                    health -= projectile.damage;
-                    invincibilityFrames = 30f; // 0.5 second invincibility at 60fps
+                    TakeDamage(projectile.damage, 30f);
                     // Knockback effect
                     float knockbackStrength = 8f;
                     Vector2 projectileVelocity = new Vector2(projectile.xSpeed, projectile.ySpeed);

@@ -132,119 +132,68 @@ namespace PolyGone
 
         protected override void PhysicsUpdate(float deltaTime)
         {
-            // Apply gravity (always, even during coyote time)
-            changeY += 0.7f;
-            changeY = Math.Min(changeY, 14f);
+            // Call base physics update for standard collision handling
+            base.PhysicsUpdate(deltaTime);
+        }
 
-            // Vertical collision and movement
-            isOnGround = false;
-            float nextY = position.Y + (changeY * deltaTime);
-            Rectangle nextRectY = new Rectangle((int)position.X, (int)nextY, size[0], size[1]);
-            var verticalCollisions = GetIntersectingTiles(nextRectY);
-            if (verticalCollisions.Count > 0)
+        protected override void OnVerticalMovementComplete(float deltaTime)
+        {
+            // Player-specific vertical gap centering (stronger than base)
+            if (Math.Abs(changeY) > 0.1f && collisionMap != null)
             {
-                verticalCollisions = verticalCollisions
-                    .OrderBy(c => Math.Abs(changeY > 0 ? c.Item1.Top - (position.Y + size[1]) : c.Item1.Bottom - position.Y))
-                    .ThenByDescending(c => c.Item2 == CollisionType.Solid ? 1 : 0)
-                    .ToList();
-                HandleVerticalCollision(ref isOnGround, ref changeY, verticalCollisions.Take(1).ToList());
-            }
-            else
-            {
-                position.Y = nextY;
+                int playerTileX = (int)((position.X + size[0] / 2f) / TILE_SIZE);
+                int playerTileY = (int)((position.Y + size[1] / 2f) / TILE_SIZE);
                 
-                // Gap centering for vertical movement: center horizontally when moving through a 1-tile wide gap
-                if (collisionMap != null && Math.Abs(changeY) > 0.1f)
+                var keyLeft = new Vector2(playerTileX - 1, playerTileY);
+                var keyRight = new Vector2(playerTileX + 1, playerTileY);
+                
+                if (IsSolidWall(keyLeft) && IsSolidWall(keyRight))
                 {
-                    // Get the current tile column the player is in
-                    int playerTileX = (int)((position.X + size[0] / 2f) / TILE_SIZE);
-                    int playerTileY = (int)((position.Y + size[1] / 2f) / TILE_SIZE);
-                    
-                    // Check if there are solid walls directly to the left and right
+                    ApplyGapCentering(playerTileX, VERTICAL_GAP_NUDGE_STRENGTH);
+                }
+            }
+        }
+
+        protected override void OnHorizontalMovementComplete(float deltaTime)
+        {
+            // Gap funneling: when walking over a 1-tile gap and pressing S, funnel down through it
+            if (isOnGround && keyboardState.IsKeyDown(Keys.S) && collisionMap != null)
+            {
+                int playerTileX = (int)((position.X + size[0] / 2f) / TILE_SIZE);
+                int playerTileY = (int)((position.Y + size[1] / 2f) / TILE_SIZE);
+                
+                // Check if there's a semi-solid platform directly below
+                var keyBelow = new Vector2(playerTileX, playerTileY + 1);
+                bool semiSolidBelow = collisionMap.TryGetValue(keyBelow, out int belowTileId) &&
+                                      belowTileId != -1 &&
+                                      CollisionTypeMapper.GetCollisionType(belowTileId) == CollisionType.SemiSolid;
+                
+                if (semiSolidBelow)
+                {
                     var keyLeft = new Vector2(playerTileX - 1, playerTileY);
                     var keyRight = new Vector2(playerTileX + 1, playerTileY);
                     
-                    bool wallLeft = IsSolidWall(keyLeft);
-                    bool wallRight = IsSolidWall(keyRight);
-                    
-                    // If surrounded by walls on left and right (in a 1-tile wide gap), center strongly
-                    if (wallLeft && wallRight)
+                    if (IsSolidWall(keyLeft) && IsSolidWall(keyRight))
                     {
-                        float tileCenter = playerTileX * TILE_SIZE + TILE_HALF_SIZE;
-                        float playerCenter = position.X + size[0] / 2f;
-                        float offset = tileCenter - playerCenter;
-                        
-                        // Very strong and immediate centering for vertical gaps
-                        if (Math.Abs(offset) > 0.1f)
-                        {
-                            float nudge = Math.Sign(offset) * VERTICAL_GAP_NUDGE_STRENGTH;
-                            if (Math.Abs(nudge) > Math.Abs(offset))
-                                nudge = offset;
-                            position.X += nudge;
-                        }
+                        ApplyGapCentering(playerTileX, HORIZONTAL_GAP_NUDGE_STRENGTH);
                     }
                 }
             }
+        }
 
-            // Horizontal collision and movement
-            float nextX = position.X + (changeX * deltaTime);
-            Rectangle nextRectX = new Rectangle((int)nextX, (int)position.Y, size[0], size[1]);
-            var horizontalCollisions = GetIntersectingTiles(nextRectX);
-            if (horizontalCollisions.Count > 0)
+        private void ApplyGapCentering(int tileX, float nudgeStrength)
+        {
+            float tileCenter = tileX * TILE_SIZE + TILE_HALF_SIZE;
+            float playerCenter = position.X + size[0] / 2f;
+            float offset = tileCenter - playerCenter;
+            
+            if (Math.Abs(offset) > 0.1f)
             {
-                horizontalCollisions = horizontalCollisions
-                    .OrderBy(c => Math.Abs(changeX > 0 ? c.Item1.Left - (position.X + size[0]) : c.Item1.Right - position.X))
-                    .ToList();
-                HandleHorizontalCollision(ref changeX, horizontalCollisions.Take(1).ToList());
+                float nudge = Math.Sign(offset) * nudgeStrength;
+                if (Math.Abs(nudge) > Math.Abs(offset))
+                    nudge = offset;
+                position.X += nudge;
             }
-            else
-            {
-                position.X = nextX;
-                
-                // Gap funneling: when walking over a 1-tile gap and pressing S, funnel down through it
-                if (isOnGround && keyboardState.IsKeyDown(Keys.S) && collisionMap != null)
-                {
-                    int playerTileX = (int)((position.X + size[0] / 2f) / TILE_SIZE);
-                    int playerTileY = (int)((position.Y + size[1] / 2f) / TILE_SIZE);
-                    
-                    // Check if there's a semi-solid platform directly below
-                    var keyBelow = new Vector2(playerTileX, playerTileY + 1);
-                    bool semiSolidBelow = collisionMap.TryGetValue(keyBelow, out int belowTileId) &&
-                                          belowTileId != -1 &&
-                                          CollisionTypeMapper.GetCollisionType(belowTileId) == CollisionType.SemiSolid;
-                    
-                    if (semiSolidBelow)
-                    {
-                        // Check if there are solid walls on left and right (1-tile gap scenario)
-                        var keyLeft = new Vector2(playerTileX - 1, playerTileY);
-                        var keyRight = new Vector2(playerTileX + 1, playerTileY);
-                        
-                        bool wallLeft = IsSolidWall(keyLeft);
-                        bool wallRight = IsSolidWall(keyRight);
-                        
-                        if (wallLeft && wallRight)
-                        {
-                            float tileCenter = playerTileX * TILE_SIZE + TILE_HALF_SIZE;
-                            float playerCenter = position.X + size[0] / 2f;
-                            float offset = tileCenter - playerCenter;
-                            
-                            if (Math.Abs(offset) > 0.1f)
-                            {
-                                float nudge = Math.Sign(offset) * HORIZONTAL_GAP_NUDGE_STRENGTH;
-                                if (Math.Abs(nudge) > Math.Abs(offset))
-                                    nudge = offset;
-                                position.X += nudge;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Apply friction to horizontal movement
-            if (Math.Abs(changeX) > 0.5f)
-                changeX *= friction;
-            else
-                changeX = 0f;
         }
 
         public override void Update(GameTime gameTime)
