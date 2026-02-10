@@ -8,6 +8,7 @@ namespace PolyGone
     class Blaster : Sprite
     {
         public float rotation = 0f;
+        public Vector2 worldMousePosition { get; private set; }
         public Blaster(Texture2D texture, Vector2 position, int[] size, Color color, Rectangle? srcRect = null)
             : base(texture, position, size, color, srcRect)
         {
@@ -20,11 +21,11 @@ namespace PolyGone
             Vector2 mousePosition = mouseState.Position.ToVector2();
 
             // Convert mouse position from screen space to world space
-            Vector2 worldMousePosition = mousePosition + cameraOffset;
+            worldMousePosition = mousePosition + cameraOffset;
 
-            // Calculate angle to mouse from player center
+            // Calculate angle to mouse from target center
             Vector2 targetCenter = new Vector2(target.Center.X, target.Center.Y);
-            float angle = (float)System.Math.Atan2(worldMousePosition.Y - targetCenter.Y, worldMousePosition.X - targetCenter.X);
+            float angle = (float)Math.Atan2(worldMousePosition.Y - targetCenter.Y, worldMousePosition.X - targetCenter.X);
 
             // Set rotation to point at mouse
             rotation = angle;
@@ -32,8 +33,8 @@ namespace PolyGone
             // Position blaster in circle around target center
             float radius = 50f; // Adjust this value to change orbit distance
             position = targetCenter + new Vector2(
-                (float)System.Math.Cos(angle) * radius,
-                (float)System.Math.Sin(angle) * radius
+                (float)Math.Cos(angle) * radius,
+                (float)Math.Sin(angle) * radius
             );
 
             // Offset to center the blaster sprite on its position

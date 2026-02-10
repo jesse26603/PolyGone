@@ -219,6 +219,9 @@ public class GameScene : IScene
         // Gather all entities for collision detection
         List<Entity> allEntities = [player, .. enemies, .. player.bullets];
         
+        // Update blaster to follow player and point at mouse
+        player.blaster.Follow(player.Rectangle, camera.position);
+        
         // Update player and camera
         player.Update(gameTime);
         camera.Follow(player.Rectangle, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), new Vector2( tileMap.Keys.Max(k => k.X + 1) * 64, tileMap.Keys.Max(k => k.Y + 1) * 64));
@@ -257,8 +260,6 @@ public class GameScene : IScene
                 enemy.position.X = worldMaxX - enemy.size[0];
             }
         }
-        
-        player.blaster.Follow(player.Rectangle, camera.position); // Temporary Fix
         
         // Update enemies
         foreach (var enemy in enemies)
