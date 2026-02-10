@@ -14,7 +14,7 @@ namespace PolyGone
         protected float cooldown;
         protected Dictionary<Vector2, int> collisionMap;
         public Blaster(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, List<Projectile> sharedBullets, Rectangle? srcRect = null)
-            : base(texture, position, size, color, srcRect)
+            : base(texture, position, size, color, "Blaster", "Basic energy weapon", srcRect)
         {
             this.bullets = sharedBullets; // Use shared bullets list
             this.cooldown = 0f;

@@ -284,5 +284,8 @@ public class GameScene : IScene
             enemy.Draw(spriteBatch, camera.position);
         }
         player.Draw(spriteBatch, camera.position);
+        
+        // Draw item indicators at fixed screen position using textureStore[1]
+        player.DrawItemIndicators(spriteBatch, texture, textureStore[1]);
     }
 }

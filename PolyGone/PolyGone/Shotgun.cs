@@ -11,6 +11,8 @@ namespace PolyGone
         public Shotgun(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, List<Projectile> sharedBullets, Rectangle? srcRect = null)
             : base(texture, position, size, color, collisionMap, sharedBullets, srcRect)
         {
+            Name = "Shotgun";
+            Description = "Spread-fire weapon with multiple projectiles";
         }
 
         public override void Use()

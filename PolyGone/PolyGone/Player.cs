@@ -18,19 +18,33 @@ namespace PolyGone
         
         private KeyboardState keyboardState;
         private KeyboardState previousKeyboardState;
-        private List<Item> inventory = new List<Item>();
+        private List<Item> weaponInventory = new List<Item>(); // Weapons (blasters/shotguns)
+        private List<Item> itemInventory = new List<Item>(); // Regular items (double jump, speed boost, etc.)
         private int currentWeaponIndex = 0; // Index of currently equipped weapon
         public readonly List<Projectile> bullets = new List<Projectile>(); // Shared projectile list for all weapons
         private float ffCooldown = 0f;
         private float coyoteTime = 0f; // Allows jumping shortly after leaving a platform
+        
+        // Public property to access changeY for items
+        public float ChangeY => changeY;
+        
         public Player(Texture2D texture, Vector2 position, int[] size, int health, Color color, Rectangle? srcRect, Dictionary<Vector2, int> collisionMap, Texture2D blasterTexture, int[]? visualSize = null)
             : base(texture, position, size, health, color, srcRect, collisionMap, visualSize)
         {
-            // Create both weapon types and add to inventory
+            // Create both weapon types and add to weapon inventory
             var blaster = new Blaster(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.White, collisionMap, bullets, srcRect);
             var shotgun = new Shotgun(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.Red, collisionMap, bullets, srcRect);
-            inventory.Add(blaster);
-            inventory.Add(shotgun);
+            weaponInventory.Add(blaster);
+            weaponInventory.Add(shotgun);
+            
+            // Create sample items and add to item inventory
+            var doubleJump = new DoubleJumpItem(texture, Vector2.Zero, new int[] { 32, 32 }, Color.Blue, srcRect);
+            var speedBoost = new SpeedBoostItem(texture, Vector2.Zero, new int[] { 32, 32 }, Color.Yellow, srcRect);
+            var healingGlow = new HealingGlowItem(texture, Vector2.Zero, new int[] { 32, 32 }, Color.Green, srcRect);
+            itemInventory.Add(doubleJump);
+            itemInventory.Add(speedBoost);
+            itemInventory.Add(healingGlow);
+            
             this.friction = 0.8f; // Player has more friction for tighter control
         }
 
@@ -92,18 +106,46 @@ namespace PolyGone
                 currentWeaponIndex = 1; // Switch to shotgun
             }
 
-            // Horizontal movement
+            // Item management (Q, E, R keys for items 0, 1, 2)
+            if (keyboardState.IsKeyDown(Keys.D3) && !previousKeyboardState.IsKeyDown(Keys.D3))
+            {
+                ToggleItem(0);
+            }
+            else if (keyboardState.IsKeyDown(Keys.D4) && !previousKeyboardState.IsKeyDown(Keys.D4))
+            {
+                ToggleItem(1);
+            }
+            else if (keyboardState.IsKeyDown(Keys.D5) && !previousKeyboardState.IsKeyDown(Keys.D5))
+            {
+                ToggleItem(2);
+            }
+
+            // Horizontal movement with speed boost consideration
             if (keyboardState.IsKeyDown(Keys.A) && !keyboardState.IsKeyDown(Keys.D)) moveDirection = -1;
             else if (keyboardState.IsKeyDown(Keys.D) && !keyboardState.IsKeyDown(Keys.A)) moveDirection = 1; 
-            // Apply acceleration
-            changeX += moveDirection * 1f;
-            changeX = MathHelper.Clamp(changeX, -5f, 5f);
+            
+            // Apply acceleration with speed boost
+            float speedMultiplier = GetSpeedBoostMultiplier();
+            changeX += moveDirection * 1f * speedMultiplier;
+            changeX = MathHelper.Clamp(changeX, -5f * speedMultiplier, 5f * speedMultiplier);
 
-            // Jumping with coyote time (allows jump for a few frames after leaving platform)
-            if ((isOnGround || coyoteTime > 0f) && keyboardState.IsKeyDown(Keys.Space))
+            // Jumping with coyote time and double jump
+            bool spacePressed = keyboardState.IsKeyDown(Keys.Space);
+            bool wasOnGroundLastFrame = isOnGround;
+            
+            if ((isOnGround || coyoteTime > 0f) && spacePressed)
             {
                 changeY = -16f;
                 coyoteTime = 0f; // Reset coyote time after jumping
+            }
+            else
+            {
+                // Check for double jump
+                var doubleJumpItem = GetActiveDoubleJumpItem();
+                if (doubleJumpItem != null && doubleJumpItem.TryDoubleJump(this, spacePressed, wasOnGroundLastFrame))
+                {
+                    changeY = -16f; // Same jump strength for double jump
+                }
             }
         }
 
@@ -209,10 +251,43 @@ namespace PolyGone
             }
         }
 
-        // Helper method to get the currently equipped blaster from inventory
+        // Item management methods
+        private void ToggleItem(int itemIndex)
+        {
+            if (itemIndex >= 0 && itemIndex < itemInventory.Count)
+            {
+                var item = itemInventory[itemIndex];
+                if (item.IsActive)
+                {
+                    item.Remove(this);
+                }
+                else
+                {
+                    item.Apply(this);
+                }
+            }
+        }
+
+        private float GetSpeedBoostMultiplier()
+        {
+            var speedBoostItem = itemInventory.OfType<SpeedBoostItem>().FirstOrDefault();
+            return speedBoostItem?.GetSpeedMultiplier() ?? 1.0f;
+        }
+
+        private DoubleJumpItem GetActiveDoubleJumpItem()
+        {
+            return itemInventory.OfType<DoubleJumpItem>().FirstOrDefault(item => item.IsActive);
+        }
+
+        private HealingGlowItem GetActiveHealingGlowItem()
+        {
+            return itemInventory.OfType<HealingGlowItem>().FirstOrDefault(item => item.IsActive);
+        }
+
+        // Helper method to get the currently equipped blaster from weapon inventory
         public Blaster GetBlaster()
         {
-            var blasters = inventory.OfType<Blaster>().ToList();
+            var blasters = weaponInventory.OfType<Blaster>().ToList();
             if (currentWeaponIndex < blasters.Count)
                 return blasters[currentWeaponIndex];
             return blasters.FirstOrDefault();
@@ -257,11 +332,36 @@ namespace PolyGone
                 bullet.Update(gameTime);
             }
             
+            // Update active items
+            foreach (var item in itemInventory.Where(item => item.IsActive))
+            {
+                item.Update(gameTime);
+            }
+            
             ffCooldown = Math.Max(0f, ffCooldown - 1f);
         }
 
         public override void Draw(SpriteBatch spriteBatch, Vector2 offset)
         {
+            // Check if we should draw with healing glow
+            var healingGlow = GetActiveHealingGlowItem();
+            bool shouldGlow = healingGlow?.ShouldGlow() ?? false;
+            
+            if (shouldGlow)
+            {
+                // Draw glow outline first (behind the player) - 68x68 total size
+                Color glowColor = healingGlow.GetGlowColor();
+                for (int x = -4; x <= 4; x++)
+                {
+                    for (int y = -4; y <= 4; y++)
+                    {
+                        if (x == 0 && y == 0) continue; // Skip center
+                        Vector2 glowOffset = new Vector2(x, y);
+                        spriteBatch.Draw(texture, position - offset + glowOffset, srcRect, glowColor);
+                    }
+                }
+            }
+            
             base.Draw(spriteBatch, offset);
             
             // Draw only the currently equipped weapon
@@ -272,6 +372,21 @@ namespace PolyGone
             foreach (var bullet in bullets)
             {
                 bullet.Draw(spriteBatch, offset);
+            }
+        }
+
+        // Method to draw item indicators at fixed screen positions (called from GameScene)
+        public void DrawItemIndicators(SpriteBatch spriteBatch, Texture2D itemTexture, Rectangle itemSrcRect)
+        {
+            // Draw item indicators in fixed screen position (not affected by camera)
+            Vector2 indicatorStart = new Vector2(20, 20); // Fixed top-left screen position
+            int spacing = 25;
+
+            for (int i = 0; i < itemInventory.Count && i < 3; i++)
+            {
+                var item = itemInventory[i];
+                Vector2 indicatorPos = indicatorStart + new Vector2(i * spacing, 0);
+                item.DrawIndicator(spriteBatch, indicatorPos, itemTexture, itemSrcRect, i);
             }
         }
     }

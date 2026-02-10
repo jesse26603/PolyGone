@@ -14,6 +14,7 @@ class Entity : Sprite
     protected float changeY;
     protected bool isOnGround;
     public int health;
+    public int maxHealth;
     protected float invincibilityFrames;
     protected float friction; // Horizontal friction multiplier in range [0, 1]; 1 keeps full velocity (no friction), 0 stops movement immediately (maximum friction)
     protected readonly int[] visualSize; // Visual size for drawing (can be larger than hitbox)
@@ -32,6 +33,7 @@ class Entity : Sprite
         this.changeY = 0f;
         this.isOnGround = false;
         this.health = health;
+        this.maxHealth = health; // Set max health to initial health
         this.invincibilityFrames = 0f;
         this.friction = 0.9f; // Default friction
         this.visualSize = visualSize ?? size; // Use provided visual size or default to hitbox size
