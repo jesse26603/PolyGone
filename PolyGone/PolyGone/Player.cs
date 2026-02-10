@@ -263,8 +263,8 @@ namespace PolyGone
             if (mouseState.LeftButton == ButtonState.Pressed && cooldown <= 0f)
             {
                 // Calculate direction from bullet spawn point directly to mouse for accuracy
-                Vector2 spawnPos = new Vector2(blaster.position.X + blaster.size[0] / 2 - 5, blaster.position.Y + blaster.size[1] / 2 - 5);
-                Vector2 aimDir = blaster.worldMousePosition - new Vector2(spawnPos.X + 5, spawnPos.Y + 5);
+                Vector2 spawnPos = new Vector2(blaster.position.X + blaster.size[0] / 2f - 5f, blaster.position.Y + blaster.size[1] / 2f - 5f);
+                Vector2 aimDir = blaster.worldMousePosition - new Vector2(spawnPos.X + 5f, spawnPos.Y + 5f);
                 float aimAngle = (float)Math.Atan2(aimDir.Y, aimDir.X);
 
                 bullets.Add(new Projectile(
