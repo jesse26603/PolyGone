@@ -219,12 +219,12 @@ public class GameScene : IScene
         // Gather all entities for collision detection
         List<Entity> allEntities = [player, .. enemies, .. player.bullets];
         
-        // Update blaster to follow player and point at mouse
-        player.blaster.Follow(player.Rectangle, camera.position);
-        
-        // Update player and camera
+        // Update player and camera first to get current frame positions
         player.Update(gameTime);
         camera.Follow(player.Rectangle, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), new Vector2( tileMap.Keys.Max(k => k.X + 1) * 64, tileMap.Keys.Max(k => k.Y + 1) * 64));
+        
+        // Update blaster to follow player and point at mouse using current frame positions
+        player.blaster.Follow(player.Rectangle, camera.position);
         
         // Check all entities for out-of-bounds
         float worldMaxY = tileMap.Keys.Max(k => k.Y + 1) * 64;
