@@ -357,7 +357,7 @@ namespace PolyGone
                     {
                         if (x == 0 && y == 0) continue; // Skip center
                         Vector2 glowOffset = new Vector2(x, y);
-                        spriteBatch.Draw(texture, position - offset + glowOffset, srcRect, glowColor);
+                        spriteBatch.Draw(texture, position - offset + hitboxOffset + glowOffset, srcRect, glowColor);
                     }
                 }
             }
