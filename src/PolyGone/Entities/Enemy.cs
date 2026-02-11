@@ -20,7 +20,6 @@ class Enemy : Entity
     {
         this.friction = 0.9f; // Enemy has default friction
         this.patrolSpeed = patrolSpeed;
-        this.hitProjectiles = new List<Projectile>();
     }
 
     protected override void OnEntityCollision(Entity other)

@@ -81,7 +81,7 @@ namespace PolyGone.Items
         }
     }
 
-    // Double Jump Item - allows player to jump again when player ChangeY >= 0
+    // Double Jump Item - allows player to jump again while falling or at peak of jump
     class DoubleJumpItem : Item
     {
         private bool hasDoubleJumped = false;
