@@ -32,9 +32,9 @@ namespace PolyGone
             : base(texture, position, size, health, color, srcRect, collisionMap, visualSize)
         {
             // Create both weapon types and add to weapon inventory
-            var blaster = new Blaster(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.White, collisionMap, bullets, srcRect);
+            this.blaster = new Blaster(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.White, collisionMap, bullets, srcRect);
             var shotgun = new Shotgun(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.Red, collisionMap, bullets, srcRect);
-            weaponInventory.Add(blaster);
+            weaponInventory.Add(this.blaster);
             weaponInventory.Add(shotgun);
             
             // Create sample items and add to item inventory
