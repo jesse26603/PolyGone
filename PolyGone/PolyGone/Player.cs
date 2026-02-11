@@ -287,10 +287,28 @@ namespace PolyGone
         // Helper method to get the currently equipped blaster from weapon inventory
         public Blaster GetBlaster()
         {
-            var blasters = weaponInventory.OfType<Blaster>().ToList();
-            if (currentWeaponIndex < blasters.Count)
-                return blasters[currentWeaponIndex];
-            return blasters.FirstOrDefault();
+            Blaster firstBlaster = null;
+            int blasterIndex = 0;
+
+            foreach (var weapon in weaponInventory)
+            {
+                if (weapon is Blaster blasterWeapon)
+                {
+                    if (firstBlaster == null)
+                    {
+                        firstBlaster = blasterWeapon;
+                    }
+
+                    if (blasterIndex == currentWeaponIndex)
+                    {
+                        return blasterWeapon;
+                    }
+
+                    blasterIndex++;
+                }
+            }
+
+            return firstBlaster;
         }
 
         // Public property to access current blaster for backward compatibility
