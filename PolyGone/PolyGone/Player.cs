@@ -19,7 +19,7 @@ namespace PolyGone
         private KeyboardState keyboardState;
         private KeyboardState previousKeyboardState;
         private readonly List<Item> weaponInventory = new List<Item>(); // Weapons (blasters/shotguns)
-        private List<Item> itemInventory = new List<Item>(); // Regular items (double jump, speed boost, etc.)
+        private readonly List<Item> itemInventory = new List<Item>(); // Regular items (double jump, speed boost, etc.)
         private int currentWeaponIndex = 0; // Index of currently equipped weapon
         public readonly List<Projectile> bullets = new List<Projectile>(); // Shared projectile list for all weapons
         private float ffCooldown = 0f;
