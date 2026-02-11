@@ -12,7 +12,7 @@ class Enemy : Entity
     // Multi-hit damage system
     private float damageWindow = 0f; // Frames remaining in damage window
     private int accumulatedDamage = 0; // Damage accumulated during current window
-    private List<Projectile> hitProjectiles = new List<Projectile>(); // Track projectiles that hit during window
+    private readonly List<Projectile> hitProjectiles = new List<Projectile>(); // Track projectiles that hit during window
     private const float DAMAGE_WINDOW_DURATION = 2f; // 2 frames to accumulate damage
     
     public Enemy(Texture2D texture, Vector2 position, int[] size, int health = 100, Color color = default, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null, float patrolSpeed = 1f, int[]? visualSize = null)

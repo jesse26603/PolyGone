@@ -207,12 +207,11 @@ public class GameScene : IScene
             return;
         }
         
-        // Gather all entities for collision detection
-        List<Entity> allEntities = [player, .. enemies, .. player.bullets];
-        
-        // Update player and camera
-        player.Update(gameTime, camera.position);
+        // Update camera first so player weapon aiming uses current frame's camera position
         camera.Follow(player.Rectangle, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), new Vector2( tileMap.Keys.Max(k => k.X + 1) * 64, tileMap.Keys.Max(k => k.Y + 1) * 64));
+        
+        // Update player with current camera position
+        player.Update(gameTime, camera.position);
         
         // Check all entities for out-of-bounds
         float worldMaxY = tileMap.Keys.Max(k => k.Y + 1) * 64;
@@ -254,6 +253,9 @@ public class GameScene : IScene
         {
             enemy.Update(gameTime);
         }
+        
+        // Gather all entities for collision detection after all updates
+        List<Entity> allEntities = [player, .. enemies, .. player.bullets];
         
         // Handle entity-to-entity collisions
         player.EntityCollisionUpdate(allEntities);

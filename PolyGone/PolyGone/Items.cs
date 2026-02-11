@@ -35,7 +35,7 @@ namespace PolyGone
         }
 
         // Draw the item indicator at a fixed screen position
-        public virtual void DrawIndicator(SpriteBatch spriteBatch, Vector2 indicatorPosition, Texture2D itemTexture, Rectangle srcRect, int itemIndex)
+        public virtual void DrawIndicator(SpriteBatch spriteBatch, Vector2 indicatorPosition, Texture2D itemTexture, Rectangle sourceRect, int itemIndex)
         {
             int indicatorWidth = 20;
             int indicatorHeight = 20;
@@ -52,7 +52,7 @@ namespace PolyGone
             Color backgroundColor = IsActive ? GetActiveColor() : GetInactiveColor();
 
             // Draw the textured background with color tint
-            spriteBatch.Draw(itemTexture, indicatorRect, srcRect, backgroundColor);
+            spriteBatch.Draw(itemTexture, indicatorRect, sourceRect, backgroundColor);
 
             // Draw key number indicator (small rectangle in corner)
             Rectangle keyIndicator = new Rectangle(
@@ -81,7 +81,7 @@ namespace PolyGone
         }
     }
 
-    // Double Jump Item - allows player to jump again when deltaY <= 0
+    // Double Jump Item - allows player to jump again when player ChangeY >= 0
     class DoubleJumpItem : Item
     {
         private bool hasDoubleJumped = false;

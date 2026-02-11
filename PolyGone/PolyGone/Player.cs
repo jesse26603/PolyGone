@@ -106,7 +106,7 @@ namespace PolyGone
                 currentWeaponIndex = 1; // Switch to shotgun
             }
 
-            // Item management (Q, E, R keys for items 0, 1, 2)
+            // Item management (3, 4, 5 keys for items 0, 1, 2)
             if (keyboardState.IsKeyDown(Keys.D3) && !previousKeyboardState.IsKeyDown(Keys.D3))
             {
                 ToggleItem(0);
@@ -339,15 +339,19 @@ namespace PolyGone
                 currentBlaster.Update(gameTime);
             }
             
-            // Update all bullets (shared across all weapons)
-            foreach (var bullet in bullets.ToList())
+            // Update all bullets (shared across all weapons) - iterate backwards for safe removal
+            for (int i = bullets.Count - 1; i >= 0; i--)
             {
+                var bullet = bullets[i];
                 bullet.lifetime -= 1f;
                 if (bullet.lifetime <= 0f)
                 {
-                    bullets.Remove(bullet);
+                    bullets.RemoveAt(i);
                 }
-                bullet.Update(gameTime);
+                else
+                {
+                    bullet.Update(gameTime);
+                }
             }
             
             // Update active items
@@ -403,7 +407,7 @@ namespace PolyGone
             for (int i = 0; i < itemInventory.Count && i < 3; i++)
             {
                 var item = itemInventory[i];
-                Vector2 indicatorPos = indicatorStart + new Vector2(i * spacing, 0);
+                Vector2 indicatorPos = indicatorStart + new Vector2((float)i * spacing, 0);
                 item.DrawIndicator(spriteBatch, indicatorPos, itemTexture, itemSrcRect, i);
             }
         }
