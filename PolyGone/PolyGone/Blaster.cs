@@ -12,7 +12,7 @@ namespace PolyGone
         public float rotation = 0f;
         protected readonly List<Projectile> bullets; // Reference to shared bullets list
         protected float cooldown;
-        protected Dictionary<Vector2, int> collisionMap;
+        protected readonly Dictionary<Vector2, int> collisionMap;
         public Blaster(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, List<Projectile> sharedBullets, Rectangle? srcRect = null)
             : base(texture, position, size, color, "Blaster", "Basic energy weapon", srcRect)
         {
@@ -56,7 +56,7 @@ namespace PolyGone
             {
                 bullets.Add(new Projectile(
                     texture: texture,
-                    position: new Vector2(position.X + size[0] / 2 - 5, position.Y + size[1] / 2 - 5),
+                    position: new Vector2(position.X + size[0] / 2f - 5f, position.Y + size[1] / 2f - 5f),
                     size: new int[2] { 10, 10 },
                     lifetime: 200f,
                     health: 1,

@@ -14,7 +14,7 @@ class Entity : Sprite
     protected float changeY;
     protected bool isOnGround;
     public int health;
-    public int maxHealth;
+    public readonly int maxHealth;
     protected float invincibilityFrames;
     protected float friction; // Horizontal friction multiplier in range [0, 1]; 1 keeps full velocity (no friction), 0 stops movement immediately (maximum friction)
     protected readonly int[] visualSize; // Visual size for drawing (can be larger than hitbox)
@@ -232,7 +232,7 @@ class Entity : Sprite
             // If there are walls above and below (1-tile gap), center horizontally in the tile
             if (wallAbove && wallBelow)
             {
-                float tileCenter = currentTileX * TILE_SIZE + TILE_HALF_SIZE;
+                float tileCenter = (float)currentTileX * TILE_SIZE + TILE_HALF_SIZE;
                 float playerCenter = position.X + size[0] / 2f;
                 float offset = tileCenter - playerCenter;
                 

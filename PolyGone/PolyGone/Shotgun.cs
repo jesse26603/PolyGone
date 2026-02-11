@@ -33,7 +33,7 @@ namespace PolyGone
                     
                     bullets.Add(new Projectile(
                         texture: texture,
-                        position: new Vector2(position.X + size[0] / 2 - 5, position.Y + size[1] / 2 - 5),
+                        position: new Vector2(position.X + size[0] / 2f - 5f, position.Y + size[1] / 2f - 5f),
                         size: new int[2] { 8, 8 }, // Slightly smaller pellets
                         lifetime: 120f, // Shorter range than regular blaster
                         health: 1,

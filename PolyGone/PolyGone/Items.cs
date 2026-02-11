@@ -49,18 +49,7 @@ namespace PolyGone
             );
 
             // Determine colors based on item type and status
-            Color backgroundColor;
-            
-            if (IsActive)
-            {
-                // Active items have bright backgrounds
-                backgroundColor = GetActiveColor();
-            }
-            else
-            {
-                // Inactive items have dimmed backgrounds
-                backgroundColor = GetInactiveColor();
-            }
+            Color backgroundColor = IsActive ? GetActiveColor() : GetInactiveColor();
 
             // Draw the textured background with color tint
             spriteBatch.Draw(itemTexture, indicatorRect, srcRect, backgroundColor);
