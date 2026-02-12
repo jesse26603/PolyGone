@@ -14,13 +14,13 @@ namespace PolyGone;
 public class GameScene : IScene
 {
     private ContentManager contentManager;
-    private Texture2D texture;
+    private Texture2D texture = null!;
     private SceneManager sceneManager;
-    private Player player;
-    private FollowCamera camera;
+    private Player player = null!;
+    private FollowCamera camera = null!;
     private readonly GraphicsDeviceManager graphics;
-    private Dictionary<Vector2, int> tileMap;
-    private Dictionary<Vector2, int> collisionMap;
+    private Dictionary<Vector2, int> tileMap = null!;
+    private Dictionary<Vector2, int> collisionMap = null!;
     private List<Rectangle> textureStore;
     private Vector2 playerPos;
     private bool playerSpawnFound = false;
@@ -76,7 +76,7 @@ public class GameScene : IScene
         
         foreach (JsonElement layer in layers.EnumerateArray())
         {
-            string layerName = layer.GetProperty("name").GetString();
+            string? layerName = layer.GetProperty("name").GetString();
             // Process tile and collision layers
             if (layerName != "Objects")
             {
@@ -91,13 +91,15 @@ public class GameScene : IScene
                     
                     if (tileValue > 0)
                     {
-                        // Tiled uses 1-based indexing, convert to 0-based
+                        // Subtract the firstgid to get texture atlas index
+                        // BasicTiles tileset has firstgid=17, so we subtract 17
                         if (layerName == "Tiles")
                         {
-                            tileMap[new Vector2(x, y)] = tileValue - 1;
+                            tileMap[new Vector2(x, y)] = tileValue - 17;
                         }
                         else if (layerName == "Collisions")
                         {
+                            // CollisionTiles tileset has firstgid=1, so we subtract 1
                             collisionMap[new Vector2(x, y)] = tileValue - 1;
                         }
                     }
@@ -111,17 +113,17 @@ public class GameScene : IScene
                 List<JsonElement> objects = layer.GetProperty("objects").EnumerateArray().ToList();
                 foreach (JsonElement obj in objects)
                 {
-                    string objType = obj.GetProperty("type").GetString();
+                    string? objType = obj.GetProperty("type").GetString();
                     switch (objType)
                     {
-                        case "PlayerSpawn":
+                        case "Player":
                             playerPos = AdjustCoordinates(
                                 obj.GetProperty("x").GetSingle(),
                                 obj.GetProperty("y").GetSingle()
                             );
                             playerSpawnFound = true;
                             break;
-                        case "EnemySpawn":
+                        case "Enemy":
                             Vector2 enemyPos = AdjustCoordinates(
                                 obj.GetProperty("x").GetSingle(),
                                 obj.GetProperty("y").GetSingle()
