@@ -4,8 +4,10 @@ using Microsoft.Xna.Framework.Input;
 using Math = System.Math;
 using System.Collections.Generic;
 using System.Linq;
+using PolyGone.Items;
+using PolyGone.Entities;
 
-namespace PolyGone
+namespace PolyGone.Weapons
 {
     class Blaster : Item
     {
