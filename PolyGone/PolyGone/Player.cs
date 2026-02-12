@@ -32,10 +32,8 @@ namespace PolyGone
             : base(texture, position, size, health, color, srcRect, collisionMap, visualSize)
         {
             // Create both weapon types and add to weapon inventory
-            this.blaster = new Blaster(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.White, collisionMap, bullets, srcRect);
-            var shotgun = new Shotgun(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.Red, collisionMap, bullets, srcRect);
-            weaponInventory.Add(this.blaster);
-            weaponInventory.Add(shotgun);
+            weaponInventory.Add(new Blaster(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.White, collisionMap, bullets, srcRect));
+            weaponInventory.Add(new Shotgun(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.Red, collisionMap, bullets, srcRect));
             
             // Create sample items and add to item inventory
             var doubleJump = new DoubleJumpItem(texture, Vector2.Zero, new int[] { 32, 32 }, Color.Blue, srcRect);
@@ -312,7 +310,7 @@ namespace PolyGone
         }
 
         // Public property to access current blaster for backward compatibility
-        public Blaster blaster => GetBlaster();
+        public Blaster blaster { get { return GetBlaster(); } }
 
         public override void Update(GameTime gameTime)
         {
