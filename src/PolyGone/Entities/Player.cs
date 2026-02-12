@@ -292,22 +292,19 @@ namespace PolyGone.Entities
             Blaster firstBlaster = null;
             int blasterIndex = 0;
 
-            foreach (var weapon in weaponInventory)
+            foreach (var blasterWeapon in weaponInventory.OfType<Blaster>())
             {
-                if (weapon is Blaster blasterWeapon)
+                if (firstBlaster == null)
                 {
-                    if (firstBlaster == null)
-                    {
-                        firstBlaster = blasterWeapon;
-                    }
-
-                    if (blasterIndex == currentWeaponIndex)
-                    {
-                        return blasterWeapon;
-                    }
-
-                    blasterIndex++;
+                    firstBlaster = blasterWeapon;
                 }
+
+                if (blasterIndex == currentWeaponIndex)
+                {
+                    return blasterWeapon;
+                }
+
+                blasterIndex++;
             }
 
             return firstBlaster;
