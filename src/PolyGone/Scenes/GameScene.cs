@@ -7,6 +7,7 @@ using System.IO;
 using System.Text.Json;
 using System.Linq;
 using System;
+using PolyGone.Entities;
 
 namespace PolyGone;
 
@@ -149,7 +150,7 @@ public class GameScene : IScene
         // Load texture atlas and initialize camera
         texture = contentManager.Load<Texture2D>("PolyGoneTileMap");
         camera = new(new Vector2(0, 0));
-        // Initialize player (blaster is created inside Player constructor)
+        // Initialize player
         player = new Player(
             texture: texture,
             position: playerPos,
@@ -207,7 +208,11 @@ public class GameScene : IScene
             return;
         }
         
-        // Update camera first so player weapon aiming uses current frame's camera position
+        // Gather all entities for collision detection
+        List<Entity> allEntities = [player, .. enemies, .. player.bullets];
+        
+        // Update player and camera
+        player.Update(gameTime, camera.position);
         camera.Follow(player.Rectangle, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), new Vector2( tileMap.Keys.Max(k => k.X + 1) * 64, tileMap.Keys.Max(k => k.Y + 1) * 64));
         
         // Update player with current camera position
@@ -287,7 +292,8 @@ public class GameScene : IScene
         }
         player.Draw(spriteBatch, camera.position);
         
-        // Draw item indicators at fixed screen position using textureStore[1]
+        // Draw item indicators (UI overlay, not affected by camera)
+        // Using the same texture and source rectangle as the player sprite
         player.DrawItemIndicators(spriteBatch, texture, textureStore[1]);
     }
 }
