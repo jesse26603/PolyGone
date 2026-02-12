@@ -402,11 +402,13 @@ namespace PolyGone.Entities
         // Method to draw item indicators at fixed screen positions (called from GameScene)
         public void DrawItemIndicators(SpriteBatch spriteBatch, Texture2D itemTexture, Rectangle itemSrcRect)
         {
+            const int MaxDisplayedItems = 3; // Maximum number of items to display
+            
             // Draw item indicators in fixed screen position (not affected by camera)
             Vector2 indicatorStart = new Vector2(20, 20); // Fixed top-left screen position
             int spacing = 25;
 
-            for (int i = 0; i < itemInventory.Count && i < 3; i++)
+            for (int i = 0; i < itemInventory.Count && i < MaxDisplayedItems; i++)
             {
                 var item = itemInventory[i];
                 Vector2 indicatorPos = indicatorStart + new Vector2(i * spacing, 0);

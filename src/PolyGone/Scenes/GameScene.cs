@@ -289,6 +289,7 @@ public class GameScene : IScene
         player.Draw(spriteBatch, camera.position);
         
         // Draw item indicators (UI overlay, not affected by camera)
+        // Using the same texture and source rectangle as the player sprite
         player.DrawItemIndicators(spriteBatch, texture, textureStore[1]);
     }
 }
