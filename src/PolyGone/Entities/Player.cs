@@ -367,11 +367,50 @@ namespace PolyGone.Entities
 
         public override void Draw(SpriteBatch spriteBatch, Vector2 offset)
         {
+            // Check if we should draw with healing glow
+            var healingGlow = GetActiveHealingGlowItem();
+            bool shouldGlow = healingGlow?.ShouldGlow() ?? false;
+            
+            if (shouldGlow)
+            {
+                // Draw glow outline first (behind the player) - 68x68 total size
+                Color glowColor = healingGlow.GetGlowColor();
+                for (int x = -4; x <= 4; x++)
+                {
+                    for (int y = -4; y <= 4; y++)
+                    {
+                        if (x == 0 && y == 0) continue; // Skip center
+                        Vector2 glowOffset = new Vector2(x, y);
+                        spriteBatch.Draw(texture, position - offset + hitboxOffset + glowOffset, srcRect, glowColor);
+                    }
+                }
+            }
+            
             base.Draw(spriteBatch, offset);
-            blaster.Draw(spriteBatch, offset);
+            
+            // Draw only the currently equipped weapon
+            var currentBlaster = GetBlaster();
+            currentBlaster?.Draw(spriteBatch, offset);
+            
+            // Draw all bullets (shared across all weapons)
             foreach (var bullet in bullets)
             {
                 bullet.Draw(spriteBatch, offset);
+            }
+        }
+
+        // Method to draw item indicators at fixed screen positions (called from GameScene)
+        public void DrawItemIndicators(SpriteBatch spriteBatch, Texture2D itemTexture, Rectangle itemSrcRect)
+        {
+            // Draw item indicators in fixed screen position (not affected by camera)
+            Vector2 indicatorStart = new Vector2(20, 20); // Fixed top-left screen position
+            int spacing = 25;
+
+            for (int i = 0; i < itemInventory.Count && i < 3; i++)
+            {
+                var item = itemInventory[i];
+                Vector2 indicatorPos = indicatorStart + new Vector2(i * spacing, 0);
+                item.DrawIndicator(spriteBatch, indicatorPos, itemTexture, itemSrcRect, i);
             }
         }
     }

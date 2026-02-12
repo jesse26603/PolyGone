@@ -287,5 +287,8 @@ public class GameScene : IScene
             enemy.Draw(spriteBatch, camera.position);
         }
         player.Draw(spriteBatch, camera.position);
+        
+        // Draw item indicators (UI overlay, not affected by camera)
+        player.DrawItemIndicators(spriteBatch, texture, textureStore[1]);
     }
 }
