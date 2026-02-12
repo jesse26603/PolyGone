@@ -240,7 +240,7 @@ namespace PolyGone.Entities
 
         private void ApplyGapCentering(int tileX, float nudgeStrength)
         {
-            float tileCenter = tileX * TILE_SIZE + TILE_HALF_SIZE;
+            float tileCenter = (float)tileX * TILE_SIZE + TILE_HALF_SIZE;
             float playerCenter = position.X + size[0] / 2f;
             float offset = tileCenter - playerCenter;
             
