@@ -212,9 +212,6 @@ public class GameScene : IScene
         player.Update(gameTime, camera.position);
         camera.Follow(player.Rectangle, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), new Vector2( tileMap.Keys.Max(k => k.X + 1) * 64, tileMap.Keys.Max(k => k.Y + 1) * 64));
         
-        // Update player with current camera position
-        player.Update(gameTime, camera.position);
-        
         // Check all entities for out-of-bounds
         float worldMaxY = tileMap.Keys.Max(k => k.Y + 1) * 64;
         float worldMaxX = tileMap.Keys.Max(k => k.X + 1) * 64;
