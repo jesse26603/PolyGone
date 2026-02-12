@@ -40,8 +40,8 @@ namespace PolyGone
         {
             // Draw the sprite using the provided SpriteBatch
             Rectangle adjustedRectangle = new Rectangle(
-                (int)(position.X - offset.X),
-                (int)(position.Y - offset.Y),
+                (int)Math.Round(position.X - offset.X),
+                (int)Math.Round(position.Y - offset.Y),
                 size[0],
                 size[1]
             );
