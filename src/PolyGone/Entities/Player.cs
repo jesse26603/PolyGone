@@ -408,7 +408,7 @@ namespace PolyGone.Entities
             for (int i = 0; i < itemInventory.Count && i < MaxDisplayedItems; i++)
             {
                 var item = itemInventory[i];
-                Vector2 indicatorPos = indicatorStart + new Vector2(i * spacing, 0);
+                Vector2 indicatorPos = indicatorStart + new Vector2(i * (float)spacing, 0);
                 item.DrawIndicator(spriteBatch, indicatorPos, itemTexture, itemSrcRect, i);
             }
         }
