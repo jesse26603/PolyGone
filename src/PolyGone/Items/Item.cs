@@ -61,7 +61,7 @@ namespace PolyGone.Items
                 6, 6
             );
             Color keyColor = itemIndex == 0 ? Color.Red : itemIndex == 1 ? Color.Yellow : Color.Blue;
-            spriteBatch.Draw(itemTexture, keyIndicator, srcRect, keyColor);
+            spriteBatch.Draw(itemTexture, keyIndicator, sourceRect, keyColor);
         }
 
         // Virtual methods for item-specific colors
