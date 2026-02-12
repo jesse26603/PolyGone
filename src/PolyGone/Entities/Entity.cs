@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using PolyGone.Items;
 
 namespace PolyGone;
 
@@ -14,7 +15,6 @@ class Entity : Sprite
     protected float changeY;
     protected bool isOnGround;
     public int health;
-    public readonly int maxHealth;
     public readonly int maxHealth;
     protected float invincibilityFrames;
     protected float friction; // Horizontal friction multiplier in range [0, 1]; 1 keeps full velocity (no friction), 0 stops movement immediately (maximum friction)
@@ -34,7 +34,6 @@ class Entity : Sprite
         this.changeY = 0f;
         this.isOnGround = false;
         this.health = health;
-        this.maxHealth = health; // Set max health to initial health
         this.maxHealth = health; // Set max health to initial health
         this.invincibilityFrames = 0f;
         this.friction = 0.9f; // Default friction
@@ -169,18 +168,6 @@ class Entity : Sprite
 
     protected virtual void HandleVerticalMovement(float deltaTime)
     {
-        // Handle vertical movement and collisions
-        HandleVerticalMovement(deltaTime);
-        
-        // Handle horizontal movement and collisions
-        HandleHorizontalMovement(deltaTime);
-
-        // Apply friction to horizontal movement
-        ApplyFriction();
-    }
-
-    protected virtual void HandleVerticalMovement(float deltaTime)
-    {
         isOnGround = false;
         float nextY = position.Y + (changeY * deltaTime);
         Rectangle nextRectY = new Rectangle((int)position.X, (int)nextY, size[0], size[1]);
@@ -200,12 +187,7 @@ class Entity : Sprite
             OnVerticalMovementComplete(deltaTime);
         }
     }
-            OnVerticalMovementComplete(deltaTime);
-        }
-    }
 
-    protected virtual void HandleHorizontalMovement(float deltaTime)
-    {
     protected virtual void HandleHorizontalMovement(float deltaTime)
     {
         float nextX = position.X + (changeX * deltaTime);
@@ -223,51 +205,6 @@ class Entity : Sprite
         else
         {
             position.X = nextX;
-            OnHorizontalMovementComplete(deltaTime);
-        }
-    }
-
-    protected virtual void OnVerticalMovementComplete(float deltaTime)
-    {
-        // Default implementation does nothing
-        // Override in derived classes for specific behavior
-    }
-
-    protected virtual void OnHorizontalMovementComplete(float deltaTime)
-    {
-        // Gap centering: when moving horizontally through a 1-tile vertical gap, center the entity
-        if (Math.Abs(changeX) > 0.5f && collisionMap != null)
-        {
-            // Check for walls above and below to detect a 1-tile gap
-            int tileAbove = (int)((position.Y - 1f) / TILE_SIZE);
-            int tileBelow = (int)((position.Y + size[1] + 1f) / TILE_SIZE);
-            int currentTileX = (int)((position.X + size[0] / 2f) / TILE_SIZE);
-            
-            var keyAbove = new Vector2(currentTileX, tileAbove);
-            var keyBelow = new Vector2(currentTileX, tileBelow);
-            
-            bool wallAbove = IsSolidWall(keyAbove);
-            bool wallBelow = IsSolidWall(keyBelow);
-            
-            // If there are walls above and below (1-tile gap), center horizontally in the tile
-            if (wallAbove && wallBelow)
-            {
-                float tileCenter = (float)currentTileX * TILE_SIZE + TILE_HALF_SIZE;
-                float playerCenter = position.X + size[0] / 2f;
-                float offset = tileCenter - playerCenter;
-                
-                // Gently nudge toward center (max 1 pixel per frame)
-                if (Math.Abs(offset) > 1f)
-                {
-                    position.X += Math.Sign(offset) * 1f;
-                }
-                else if (Math.Abs(offset) > 0.1f)
-                {
-                    position.X += offset;
-                }
-            }
-        }
-    }
             OnHorizontalMovementComplete(deltaTime);
         }
     }
