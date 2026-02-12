@@ -73,6 +73,7 @@ Enhancement suggestions are welcome! Please create an issue with:
   - **Graphics/**: Visual components
   - **Scenes/**: Game scenes and states
   - **Weapons/**: Weapon systems
+  - **Items/**: Item systems
 - Keep files focused on a single responsibility
 - Namespace should be `PolyGone` for all game code
 
@@ -103,4 +104,4 @@ If you have questions about contributing, feel free to:
 - Open an issue with the "question" label
 - Reach out to the maintainers
 
-Thank you for contributing to PolyGone! 🎮
+Thank you for contributing to PolyGone!
