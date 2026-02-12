@@ -6,10 +6,8 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Numerics;
 using Vector2 = Microsoft.Xna.Framework.Vector2;
-using PolyGone.Weapons;
-using PolyGone.Items;
 
-namespace PolyGone.Entities
+namespace PolyGone
 {
 
     internal class Player : Entity
@@ -34,10 +32,8 @@ namespace PolyGone.Entities
             : base(texture, position, size, health, color, srcRect, collisionMap, visualSize)
         {
             // Create both weapon types and add to weapon inventory
-            blaster = new Blaster(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.White, collisionMap, bullets, srcRect);
-            var shotgun = new Shotgun(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.Red, collisionMap, bullets, srcRect);
-            weaponInventory.Add(blaster);
-            weaponInventory.Add(shotgun);
+            weaponInventory.Add(new Blaster(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.White, collisionMap, bullets, srcRect));
+            weaponInventory.Add(new Shotgun(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.Red, collisionMap, bullets, srcRect));
             
             // Create sample items and add to item inventory
             var doubleJump = new DoubleJumpItem(texture, Vector2.Zero, new int[] { 32, 32 }, Color.Blue, srcRect);
@@ -292,26 +288,29 @@ namespace PolyGone.Entities
             Blaster firstBlaster = null;
             int blasterIndex = 0;
 
-            foreach (var blasterWeapon in weaponInventory.OfType<Blaster>())
+            foreach (var weapon in weaponInventory)
             {
-                if (firstBlaster == null)
+                if (weapon is Blaster blasterWeapon)
                 {
-                    firstBlaster = blasterWeapon;
-                }
+                    if (firstBlaster == null)
+                    {
+                        firstBlaster = blasterWeapon;
+                    }
 
-                if (blasterIndex == currentWeaponIndex)
-                {
-                    return blasterWeapon;
-                }
+                    if (blasterIndex == currentWeaponIndex)
+                    {
+                        return blasterWeapon;
+                    }
 
-                blasterIndex++;
+                    blasterIndex++;
+                }
             }
 
             return firstBlaster;
         }
 
         // Public property to access current blaster for backward compatibility
-        public Blaster blaster => GetBlaster();
+        public Blaster blaster { get { return GetBlaster(); } }
 
         public override void Update(GameTime gameTime)
         {
@@ -399,16 +398,14 @@ namespace PolyGone.Entities
         // Method to draw item indicators at fixed screen positions (called from GameScene)
         public void DrawItemIndicators(SpriteBatch spriteBatch, Texture2D itemTexture, Rectangle itemSrcRect)
         {
-            const int MaxDisplayedItems = 3; // Maximum number of items to display
-            
             // Draw item indicators in fixed screen position (not affected by camera)
             Vector2 indicatorStart = new Vector2(20, 20); // Fixed top-left screen position
             int spacing = 25;
 
-            for (int i = 0; i < itemInventory.Count && i < MaxDisplayedItems; i++)
+            for (int i = 0; i < itemInventory.Count && i < 3; i++)
             {
                 var item = itemInventory[i];
-                Vector2 indicatorPos = indicatorStart + new Vector2(i * (float)spacing, 0);
+                Vector2 indicatorPos = indicatorStart + new Vector2((float)i * spacing, 0);
                 item.DrawIndicator(spriteBatch, indicatorPos, itemTexture, itemSrcRect, i);
             }
         }

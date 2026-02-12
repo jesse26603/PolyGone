@@ -6,7 +6,7 @@ namespace PolyGone;
 
 class Enemy : Entity
 {
-    private readonly float patrolSpeed;
+    private float patrolSpeed;
     private float patrolDirection = 1f; // 1 for right, -1 for left
     
     // Multi-hit damage system
@@ -20,6 +20,7 @@ class Enemy : Entity
     {
         this.friction = 0.9f; // Enemy has default friction
         this.patrolSpeed = patrolSpeed;
+        this.hitProjectiles = new List<Projectile>();
     }
 
     protected override void OnEntityCollision(Entity other)
@@ -90,8 +91,7 @@ class Enemy : Entity
             // When damage window closes, apply accumulated damage and start invincibility
             if (damageWindow <= 0f && accumulatedDamage > 0)
             {
-                health -= accumulatedDamage; // Apply accumulated damage
-                invincibilityFrames = 30f; // 30 frame invincibility after damage window
+                TakeDamage(accumulatedDamage, 30f); // 30 frame invincibility after damage window
                 accumulatedDamage = 0;
                 hitProjectiles.Clear();
             }
