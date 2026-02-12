@@ -34,7 +34,7 @@ namespace PolyGone.Entities
             : base(texture, position, size, health, color, srcRect, collisionMap, visualSize)
         {
             // Create both weapon types and add to weapon inventory
-            Blaster blaster = new Blaster(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.White, collisionMap, bullets, srcRect);
+            blaster = new Blaster(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.White, collisionMap, bullets, srcRect);
             var shotgun = new Shotgun(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.Red, collisionMap, bullets, srcRect);
             weaponInventory.Add(blaster);
             weaponInventory.Add(shotgun);
