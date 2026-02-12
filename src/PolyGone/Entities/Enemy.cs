@@ -6,7 +6,7 @@ namespace PolyGone;
 
 class Enemy : Entity
 {
-    private float patrolSpeed;
+    private readonly float patrolSpeed;
     private float patrolDirection = 1f; // 1 for right, -1 for left
     
     // Multi-hit damage system
