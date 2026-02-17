@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
@@ -39,12 +40,13 @@ namespace PolyGone
             position.X = (float)Math.Round(position.X);
             position.Y = (float)Math.Round(position.Y);
 
-            // Check for tile collision and destroy projectile if hit
+            // Check for tile collision and destroy projectile if hit solid tile
             if (collisionMap != null)
             {
                 Rectangle projectileRect = new Rectangle((int)position.X, (int)position.Y, size[0], size[1]);
                 var collisions = GetIntersectingTiles(projectileRect);
-                if (collisions.Count > 0)
+                // Only destroy if hit a solid collision type (not SemiSolid or None)
+                if (collisions.Any(c => c.Item2 != CollisionType.None && c.Item2 != CollisionType.SemiSolid))
                 {
                     lifetime = 0;
                 }

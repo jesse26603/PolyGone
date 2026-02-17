@@ -7,6 +7,7 @@ using System.IO;
 using System.Text.Json;
 using System.Linq;
 using System;
+using PolyGone.Entities;
 
 namespace PolyGone;
 
@@ -17,7 +18,6 @@ public class GameScene : IScene
     private SceneManager sceneManager;
     private Player player;
     private FollowCamera camera;
-    private Blaster blaster;
     private readonly GraphicsDeviceManager graphics;
     private Dictionary<Vector2, int> tileMap;
     private Dictionary<Vector2, int> collisionMap;
@@ -150,14 +150,6 @@ public class GameScene : IScene
         // Load texture atlas and initialize camera
         texture = contentManager.Load<Texture2D>("PolyGoneTileMap");
         camera = new(new Vector2(0, 0));
-        // Initialize blaster
-        blaster = new Blaster(
-            texture: texture,
-            position: new Vector2(0, 0),
-            size: new int[2] { 32, 32 },
-            color: Color.White,
-            srcRect: textureStore[1]
-        );
         // Initialize player
         player = new Player(
             texture: texture,
@@ -167,7 +159,8 @@ public class GameScene : IScene
             color: Color.White,
             srcRect: textureStore[1],
             collisionMap: collisionMap,
-            blaster: blaster
+            blasterTexture: texture,
+            visualSize: new int[2] { 64, 64 }
         );
         // Initialize enemies from spawn positions
         enemies.AddRange(enemySpawns.Select(spawnPos => new Enemy(
@@ -178,7 +171,8 @@ public class GameScene : IScene
             color: Color.White,
             srcRect: textureStore[2],
             collisionMap: collisionMap,
-            patrolSpeed: 1f
+            patrolSpeed: 1f,
+            visualSize: new int[2] { 64, 64 }
         )));
     }
     
@@ -199,7 +193,8 @@ public class GameScene : IScene
             color: Color.White,
             srcRect: textureStore[2],
             collisionMap: collisionMap,
-            patrolSpeed: 1f
+            patrolSpeed: 1f,
+            visualSize: new int[2] { 64, 64 }
         )));
     }
     
@@ -213,11 +208,8 @@ public class GameScene : IScene
             return;
         }
         
-        // Gather all entities for collision detection
-        List<Entity> allEntities = [player, .. enemies, .. player.bullets];
-        
         // Update player and camera
-        player.Update(gameTime);
+        player.Update(gameTime, camera.position);
         camera.Follow(player.Rectangle, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), new Vector2( tileMap.Keys.Max(k => k.X + 1) * 64, tileMap.Keys.Max(k => k.Y + 1) * 64));
         
         // Check all entities for out-of-bounds
@@ -255,13 +247,14 @@ public class GameScene : IScene
             }
         }
         
-        player.blaster.Follow(player.Rectangle, camera.position); // Temporary Fix
-        
         // Update enemies
         foreach (var enemy in enemies)
         {
             enemy.Update(gameTime);
         }
+        
+        // Gather all entities for collision detection after all updates
+        List<Entity> allEntities = [player, .. enemies, .. player.bullets];
         
         // Handle entity-to-entity collisions
         player.EntityCollisionUpdate(allEntities);
@@ -292,5 +285,9 @@ public class GameScene : IScene
             enemy.Draw(spriteBatch, camera.position);
         }
         player.Draw(spriteBatch, camera.position);
+        
+        // Draw item indicators (UI overlay, not affected by camera)
+        // Using the same texture and source rectangle as the player sprite
+        player.DrawItemIndicators(spriteBatch, texture, textureStore[1]);
     }
 }
