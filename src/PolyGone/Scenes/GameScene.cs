@@ -26,6 +26,8 @@ public class GameScene : IScene
     private bool playerSpawnFound = false;
     private readonly List<Vector2> enemySpawns = new(); // Store enemy spawn positions
     private readonly List<Entity> enemies = new(); // Placeholder for enemy list
+    private GoalTrigger goalTrigger; // Win condition trigger
+    private bool levelComplete = false;
 
     public GameScene(ContentManager contentManager, SceneManager sceneManager, GraphicsDeviceManager graphics)
     {
@@ -128,6 +130,15 @@ public class GameScene : IScene
                             );
                             enemySpawns.Add(enemyPos);
                             break;
+                        case "Goal":
+                            Vector2 goalPos = AdjustCoordinates(
+                                obj.GetProperty("x").GetSingle(),
+                                obj.GetProperty("y").GetSingle()
+                            );
+                            int goalWidth = (int)(obj.GetProperty("width").GetSingle() * 2);
+                            int goalHeight = (int)(obj.GetProperty("height").GetSingle() * 2);
+                            goalTrigger = new GoalTrigger(goalPos, goalWidth, goalHeight);
+                            break;
                         default:
                             break;
                     }
@@ -196,6 +207,13 @@ public class GameScene : IScene
             patrolSpeed: 1f,
             visualSize: new int[2] { 64, 64 }
         )));
+        
+        // Reset goal trigger and level completion
+        if (goalTrigger != null)
+        {
+            goalTrigger.Reset();
+        }
+        levelComplete = false;
     }
     
     public void Update(GameTime gameTime)
@@ -205,6 +223,14 @@ public class GameScene : IScene
         if (keyboardState.IsKeyDown(Keys.R))
         {
             Reset();
+            return;
+        }
+        
+        // Check if level is complete
+        if (levelComplete)
+        {
+            // Could transition to next level or exit scene here
+            // For now, just prevent further updates
             return;
         }
         
@@ -266,6 +292,18 @@ public class GameScene : IScene
                 enemy.EntityCollisionUpdate(allEntities);
             }
         }
+        
+        // Check for goal trigger
+        if (goalTrigger != null && !levelComplete)
+        {
+            goalTrigger.CheckTrigger(player.Rectangle);
+            if (goalTrigger.IsTriggered)
+            {
+                levelComplete = true;
+                // Transition to win scene
+                sceneManager.AddScene(new WinScene(contentManager, sceneManager, graphics));
+            }
+        }
     }
     public void Draw(SpriteBatch spriteBatch)
     {
@@ -277,7 +315,7 @@ public class GameScene : IScene
                 64,
                 64
             );
-            Rectangle src = textureStore[tile.Value];
+            Rectangle src = textureStore[tile.Value % textureStore.Count]; // Ensure we don't go out of bounds
             spriteBatch.Draw(texture, dest, src, Color.White);
         }
         foreach (var enemy in enemies)
@@ -285,6 +323,21 @@ public class GameScene : IScene
             enemy.Draw(spriteBatch, camera.position);
         }
         player.Draw(spriteBatch, camera.position);
+        
+        // Draw goal trigger (if it exists)
+        if (goalTrigger != null)
+        {
+            Rectangle goalRect = goalTrigger.GetBounds();
+            Rectangle goalDest = new Rectangle(
+                (int)(goalRect.X - camera.position.X),
+                (int)(goalRect.Y - camera.position.Y),
+                goalRect.Width,
+                goalRect.Height
+            );
+            // Draw goal with a green tint (using tile 0 or any appropriate texture)
+            Color goalColor = goalTrigger.IsTriggered ? Color.Gold : Color.LimeGreen;
+            spriteBatch.Draw(texture, goalDest, textureStore[0], goalColor * 0.5f);
+        }
         
         // Draw item indicators (UI overlay, not affected by camera)
         // Using the same texture and source rectangle as the player sprite

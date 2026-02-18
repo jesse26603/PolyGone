@@ -19,8 +19,7 @@ public class SceneManager
 
 	public void RemoveScene(IScene scene)
 	{
-		sceneStack.Pop();
-	}
+        scene.Unload();
 
 	public IScene GetCurrentScene()
 	{
