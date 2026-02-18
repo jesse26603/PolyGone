@@ -5,14 +5,15 @@ using Math = System.Math;
 using System.Collections.Generic;
 using System.Linq;
 using PolyGone.Items;
+using PolyGone.Entities;
 
 namespace PolyGone.Weapons
 {
     class Blaster : Item
     {
         public float rotation = 0f;
-        public readonly List<Projectile> bullets;
-        public float cooldown;
+        protected readonly List<Projectile> bullets; // Reference to shared bullets list
+        protected float cooldown;
         protected readonly Dictionary<Vector2, int> collisionMap;
         public Blaster(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, List<Projectile> sharedBullets, Rectangle? srcRect = null)
             : base(texture, position, size, color, "Blaster", "Basic energy weapon", srcRect)
