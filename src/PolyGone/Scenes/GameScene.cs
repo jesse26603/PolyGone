@@ -151,7 +151,14 @@ public class GameScene : IScene
     {
         // Load texture atlas and initialize camera
         texture = contentManager.Load<Texture2D>("PolyGoneTileMap");
-        hudFont = contentManager.Load<SpriteFont>("Fonts/PauseMenu");
+        try
+        {
+            hudFont = contentManager.Load<SpriteFont>("Fonts/PauseMenu");
+        }
+        catch (ContentLoadException)
+        {
+            Console.WriteLine("Warning: Could not load SpriteFont 'Fonts/PauseMenu'. HUD text will not be rendered with this font.");
+        }
         camera = new(new Vector2(0, 0));
         // Initialize blaster
         blaster = new Blaster(
