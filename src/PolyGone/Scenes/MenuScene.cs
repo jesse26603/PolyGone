@@ -46,7 +46,12 @@ namespace PolyGone
         {
             if (_font == null)
             {
-                _font = _content.Load<SpriteFont>("Fonts/PauseMenu");
+                // Only attempt to load the font if the compiled asset exists to avoid runtime exceptions
+                var fontAssetPath = Path.Combine(_content.RootDirectory, "Fonts", "PauseMenu.xnb");
+                if (File.Exists(fontAssetPath))
+                {
+                    _font = _content.Load<SpriteFont>("Fonts/PauseMenu");
+                }
             }
         }
 
