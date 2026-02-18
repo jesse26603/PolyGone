@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="3">
  <editorsettings>
-  <export target="../../PolyGone/PolyGone/Content/Maps/FishLevel.json" format="json"/>
+  <export target="../../src/PolyGone/Content/Maps/FishLevel.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="../TiledSets/BasicTiles.tsx"/>
  <tileset firstgid="17" source="../TiledSets/CollisionTiles.tsx"/>
