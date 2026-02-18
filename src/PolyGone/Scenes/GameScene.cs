@@ -34,7 +34,9 @@ public class GameScene : IScene
         this.contentManager = contentManager;
         this.sceneManager = sceneManager;
         this.graphics = graphics;
-        LoadMapFromJson("../../../Content/Maps/" + levelName + ".json");
+        var baseDirectory = AppContext.BaseDirectory;
+        var mapPath = Path.Combine(baseDirectory, "Content", "Maps", levelName + ".json");
+        LoadMapFromJson(mapPath);
         textureStore = GetTextureStore(32, new int[2] { 4, 4 });
     }
 
