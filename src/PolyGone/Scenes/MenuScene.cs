@@ -54,12 +54,12 @@ namespace PolyGone
         {
             keyboardState = Keyboard.GetState();
 
-            if (IsKeyPressed(Keys.W))
+            if (IsKeyPressed(Keys.Up))
             {
                 _selectedIndex = (_selectedIndex - 1 + _options.Length) % _options.Length;
             }
 
-            if (IsKeyPressed(Keys.S))
+            if (IsKeyPressed(Keys.Down))
             {
                 _selectedIndex = (_selectedIndex + 1) % _options.Length;
             }
@@ -104,7 +104,7 @@ namespace PolyGone
             if (_font != null)
             {
                 var viewport = spriteBatch.GraphicsDevice.Viewport;
-                var startY = viewport.Height / 2f - (_options.Length * 40f) / 2f;
+                var startY = viewport.Height / 2f - _options.Length * 40f / 2f;
 
                 for (var i = 0; i < _options.Length; i++)
                 {
