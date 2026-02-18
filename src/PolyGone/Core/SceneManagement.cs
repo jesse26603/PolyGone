@@ -29,6 +29,7 @@ public class SceneManager
 			sceneStack.Pop();
 		}
 	}
+  scene.Unload();
 
 	public IScene GetCurrentScene()
 	{
