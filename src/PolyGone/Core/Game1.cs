@@ -11,6 +11,7 @@ namespace PolyGone
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private SceneManager sceneManager;
+        private KeyboardState _previousKeyboardState;
 
         public Game1()
         {
@@ -33,27 +34,44 @@ namespace PolyGone
 
             base.Initialize();
         }
-        
+
 
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-
             sceneManager.AddScene(new GameScene(Content, sceneManager, _graphics));
-            sceneManager.GetCurrentScene().Load();
+            sceneManager.AddScene(new MenuScene(Content, sceneManager, _graphics));
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            var keyboardState = Keyboard.GetState();
+
+            if ((GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) && !(sceneManager.GetCurrentScene() is PauseScene))
                 Exit();
+
+            if (IsKeyPressed(Keys.P, keyboardState))
+            {
+                if (sceneManager.GetCurrentScene() is PauseScene)
+                {
+                    sceneManager.RemoveScene(sceneManager.GetCurrentScene());
+                }
+                else
+                {
+                    sceneManager.AddScene(new PauseScene(Content, sceneManager, _graphics));
+                }
+            }
 
             // TODO: Add your update logic here
             sceneManager.GetCurrentScene().Update(gameTime);
-
+            _previousKeyboardState = keyboardState;
             base.Update(gameTime);
+        }
+        private bool IsKeyPressed(Keys key, KeyboardState currentState)
+        {
+            return currentState.IsKeyDown(key) && !_previousKeyboardState.IsKeyDown(key);
         }
 
         protected override void Draw(GameTime gameTime)
