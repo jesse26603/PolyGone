@@ -42,6 +42,13 @@ public class WinScene : IScene
         previousMouseState = Mouse.GetState();
     }
 
+    // Clean up resources to prevent memory leaks
+    public void Unload()
+    {
+        pixel?.Dispose();
+        pixel = null;
+    }
+
     public void Update(GameTime gameTime)
     {
         MouseState mouseState = Mouse.GetState();
