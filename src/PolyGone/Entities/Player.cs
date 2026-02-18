@@ -156,6 +156,7 @@ namespace PolyGone
                 if (bullet.lifetime <= 0f)
                 {
                     bullets.Remove(bullet);
+                    continue;
                 }
                 bullet.Update(gameTime);
             }
