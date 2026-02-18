@@ -68,17 +68,17 @@ namespace PolyGone
             {
                 if (_selectedIndex == 0)
                 {
-                    _sceneManager.RemoveScene(this);
+                    _sceneManager.PopScene(this);
                     _sceneManager.AddScene(new GameScene(_content, _sceneManager, _graphics));
                 }
                 else if (_selectedIndex == 1)
                 {
-                    _sceneManager.RemoveScene(this);
+                    _sceneManager.PopScene(this);
                     _sceneManager.AddScene(new GameScene(_content, _sceneManager, _graphics, "goog.."));
                 }
                 else if (_selectedIndex == 2)
                 {
-                    _sceneManager.RemoveScene(this);
+                    _sceneManager.PopScene(this);
                     _sceneManager.AddScene(new GameScene(_content, _sceneManager, _graphics, "FishLevel"));
                 }
                 else if (_selectedIndex == _options.Length - 1)

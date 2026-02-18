@@ -56,7 +56,7 @@ namespace PolyGone
             {
                 if (sceneManager.GetCurrentScene() is PauseScene)
                 {
-                    sceneManager.RemoveScene(sceneManager.GetCurrentScene());
+                    sceneManager.PopScene(sceneManager.GetCurrentScene());
                 }
                 else
                 {

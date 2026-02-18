@@ -62,12 +62,12 @@ namespace PolyGone
             {
                 if (_selectedIndex == 0)
                 {
-                    _sceneManager.RemoveScene(this);
+                    _sceneManager.PopScene(this);
                 }
                 else if (_selectedIndex == 1)
                 {
-                    _sceneManager.RemoveScene(this);
-                    _sceneManager.RemoveScene(_sceneManager.GetCurrentScene());
+                    _sceneManager.PopScene(this);
+                    _sceneManager.PopScene(_sceneManager.GetCurrentScene());
                     _sceneManager.AddScene(new MenuScene(_content, _sceneManager, _graphics));
                 }
             }
