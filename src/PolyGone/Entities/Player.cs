@@ -12,17 +12,13 @@ namespace PolyGone
     internal class Player : Entity
     {
         private KeyboardState keyboardState;
-        private MouseState mouseState;
         public Blaster blaster { get; private set; }
-        public readonly List<Projectile> bullets;
-        public float Cooldown => cooldown;
-        private float cooldown;
+        public List<Projectile> bullets => blaster.bullets;
+        public float Cooldown => blaster.cooldown;
         public Player(Texture2D texture, Vector2 position, int[] size, int health, Color color, Rectangle? srcRect, Dictionary<Vector2, int> collisionMap, Blaster blaster)
             : base(texture, position, size, health, color, srcRect, collisionMap)
         {
             this.blaster = blaster;
-            this.bullets = new List<Projectile>();
-            this.cooldown = 0f;
             this.friction = 0.8f; // Player has more friction for tighter control
         }
 
@@ -131,25 +127,7 @@ namespace PolyGone
             HandleInput();
             base.Update(gameTime);
 
-            // Handle shooting
-            mouseState = Mouse.GetState();
-            if (mouseState.LeftButton == ButtonState.Pressed && cooldown <= 0f)
-            {
-                bullets.Add(new Projectile(
-                    texture: texture,
-                    position: new Vector2(blaster.position.X + blaster.size[0] / 2 - 5, blaster.position.Y + blaster.size[1] / 2 - 5),
-                    size: new int[2] { 10, 10 },
-                    lifetime: 200f,
-                    health: 1,
-                    color: Color.White,
-                    xSpeed: (float)(Math.Cos(blaster.rotation) * 750f),
-                    ySpeed: (float)(Math.Sin(blaster.rotation) * 750f),
-                    owner: Owner.Player,
-                    srcRect: blaster.srcRect,
-                    collisionMap: collisionMap
-                ));
-                cooldown = 12f; // Cooldown of 0.2 seconds at 60fps
-            }
+            blaster.Use();
             foreach (var bullet in bullets.ToList())
             {
                 bullet.lifetime -= 1f;
@@ -160,7 +138,6 @@ namespace PolyGone
                 }
                 bullet.Update(gameTime);
             }
-            cooldown = Math.Max(0f, cooldown - 1f);
             blaster.Update(gameTime);
         }
 
