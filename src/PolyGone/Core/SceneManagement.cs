@@ -17,9 +17,19 @@ public class SceneManager
 		sceneStack.Push(scene);
 	}
 
-	public void RemoveScene(IScene scene)
+	public void PopScene(IScene scene)
 	{
-        scene.Unload();
+		if (sceneStack.Count == 0)
+		{
+			return;
+		}
+
+		if (ReferenceEquals(sceneStack.Peek(), scene))
+		{
+			sceneStack.Pop();
+		}
+	}
+  scene.Unload();
 
 	public IScene GetCurrentScene()
 	{
