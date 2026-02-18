@@ -20,6 +20,7 @@ public class SceneManager
 	public void RemoveScene(IScene scene)
 	{
         scene.Unload();
+	}
 
 	public IScene GetCurrentScene()
 	{
