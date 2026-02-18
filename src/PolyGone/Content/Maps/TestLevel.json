@@ -229,10 +229,6 @@
         {
          "firstgid":17,
          "source":"..\/..\/..\/..\/TiledAssets\/TiledSets\/CollisionTiles.tsx"
-        }, 
-        {
-         "firstgid":33,
-         "source":"..\/..\/..\/..\/TiledAssets\/TiledSets\/BasicTiles.tsx"
         }],
  "tilewidth":32,
  "type":"map",
