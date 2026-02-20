@@ -60,9 +60,9 @@ public class Game1 : Game
             {
                 sceneManager.PopScene(sceneManager.GetCurrentScene());
             }
-            else
+            else if (sceneManager.GetCurrentScene() is GameScene gameScene)
             {
-                sceneManager.AddScene(new PauseScene(Content, sceneManager, _graphics));
+                sceneManager.AddScene(new PauseScene(Content, sceneManager, _graphics, gameScene));
                 // Reset click cooldown when opening pause menu
                 InputManager.ResetClickCooldown();
             }

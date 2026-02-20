@@ -49,6 +49,10 @@ public class GameScene : IScene
 
     // Public method to get the level name for restart functionality
     public string GetLevelName() => levelName;
+    
+    // Public methods to get the current loadout for restart functionality
+    public List<ItemType> GetSelectedItems() => new List<ItemType>(selectedItems);
+    public WeaponType GetSelectedWeapon() => selectedWeapon;
 
     // Generates a list of rectangles representing individual textures in a texture atlas
     public List<Rectangle> GetTextureStore(int textureSize, int[] gridSize)

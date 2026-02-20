@@ -311,9 +311,10 @@ namespace PolyGone
 
         private void StartGame()
         {
-            // Pop this scene and start the game with selected items
+            // Pop this inventory management scene
             _sceneManager.PopScene(this);
-            _sceneManager.PopScene(_sceneManager.GetCurrentScene()); // Pop level select too
+            // Note: LevelSelect (or previous scene) remains on stack for proper back navigation
+            // Add the new game scene
             _sceneManager.AddScene(new GameScene(_content, _sceneManager, _graphics, _levelFile, _selectedItems, _selectedWeapon));
             // Reset click cooldown when starting game
             InputManager.ResetClickCooldown();

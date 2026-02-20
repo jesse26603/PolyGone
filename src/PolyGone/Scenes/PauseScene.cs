@@ -22,15 +22,17 @@ internal class PauseScene : IScene
     private readonly ContentManager _content;
     private readonly SceneManager _sceneManager;
     private readonly GraphicsDeviceManager _graphics;
-    private readonly string[] _options = { "Continue", "Restart with New Loadout", "Exit to Menu" };
+    private readonly GameScene _gameScene;
+    private readonly string[] _options = { "Continue", "Restart Level", "Change Loadout (Restarts Level)", "Exit to Menu" };
     private int _selectedIndex;
 
-    public PauseScene(ContentManager content, SceneManager sceneManager, GraphicsDeviceManager graphics)
+    public PauseScene(ContentManager content, SceneManager sceneManager, GraphicsDeviceManager graphics, GameScene gameScene)
     {
         _pixel = null;
         _content = content;
         _sceneManager = sceneManager;
         _graphics = graphics;
+        _gameScene = gameScene;
         previousKeyboardState = Keyboard.GetState();
         _selectedIndex = 0;
     }
@@ -102,21 +104,34 @@ internal class PauseScene : IScene
         }
         else if (_selectedIndex == 1)
         {
-            // Restart with New Loadout
-            var currentScene = _sceneManager.GetCurrentScene();
-            if (currentScene is GameScene gameScene)
-            {
-                string levelName = gameScene.GetLevelName();
-                _sceneManager.PopScene(this); // Pop pause scene
-                _sceneManager.PopScene(_sceneManager.GetCurrentScene()); // Pop game scene
-                _sceneManager.AddScene(new InventoryManagement(_content, _sceneManager, _graphics, levelName));
-            }
+            // Restart Level - reload with same loadout
+            string levelName = _gameScene.GetLevelName();
+            List<ItemType> currentItems = _gameScene.GetSelectedItems();
+            WeaponType currentWeapon = _gameScene.GetSelectedWeapon();
+            
+            _sceneManager.PopScene(this); // Pop pause scene
+            _sceneManager.PopScene(_gameScene); // Pop game scene
+            // Create fresh game scene with same settings
+            var newGameScene = new GameScene(_content, _sceneManager, _graphics, levelName, currentItems, currentWeapon);
+            _sceneManager.AddScene(newGameScene);
+            InputManager.ResetClickCooldown();
         }
         else if (_selectedIndex == 2)
         {
+            // Change Loadout (Restarts Level) - go back to inventory management
+            string levelName = _gameScene.GetLevelName();
+            _sceneManager.PopScene(this); // Pop pause scene
+            _sceneManager.PopScene(_gameScene); // Pop game scene
+            // Just add inventory management on top of whatever is in the stack
+            var inventoryScene = new InventoryManagement(_content, _sceneManager, _graphics, levelName);
+            _sceneManager.AddScene(inventoryScene);
+            InputManager.ResetClickCooldown();
+        }
+        else if (_selectedIndex == 3)
+        {
             // Exit to Menu
             _sceneManager.PopScene(this);
-            _sceneManager.PopScene(_sceneManager.GetCurrentScene());
+            _sceneManager.PopScene(_gameScene);
             _sceneManager.AddScene(new MenuScene(_content, _sceneManager, _graphics));
         }
     }
