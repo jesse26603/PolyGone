@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PolyGone
 {
-    internal class Sprite
+    public class Sprite
     {
         public Texture2D texture;
         public Vector2 position;

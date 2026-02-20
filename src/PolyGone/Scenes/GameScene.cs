@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Linq;
 using System;
 using PolyGone.Entities;
+using PolyGone.Graphics;
 
 namespace PolyGone;
 
@@ -19,6 +20,7 @@ public class GameScene : IScene
     private SceneManager sceneManager;
     private Player player;
     private FollowCamera camera;
+    private GameUI gameUI;
     private readonly GraphicsDeviceManager graphics;
     private Dictionary<Vector2, int> tileMap;
     private Dictionary<Vector2, int> collisionMap;
@@ -182,6 +184,9 @@ public class GameScene : IScene
             blasterTexture: texture,
             visualSize: new int[2] { 64, 64 }
         );
+        
+        // Initialize GameUI
+        gameUI = new GameUI(player, texture, textureStore[0], hudFont);
         // Initialize enemies from spawn positions
         enemies.AddRange(enemySpawns.Select(spawnPos => new Enemy(
             texture: texture,
@@ -332,17 +337,6 @@ public class GameScene : IScene
             enemy.Draw(spriteBatch, camera.position);
         }
         player.Draw(spriteBatch, camera.position);
-
-        if (hudFont != null)
-        {
-            var viewport = spriteBatch.GraphicsDevice.Viewport;
-            string healthText = $"Health: {player.health}";
-            string cooldownText = $"Cooldown: {player.blaster.Cooldown:0.0}";
-            string combinedText = healthText + "  " + cooldownText;
-            Vector2 textSize = hudFont.MeasureString(combinedText);
-            Vector2 position = new Vector2(10f, viewport.Height - textSize.Y - 50f);
-            spriteBatch.DrawString(hudFont, combinedText, position, Color.White);
-        }
         
         // Draw goal trigger (if it exists)
         if (goalTrigger != null)
@@ -359,8 +353,7 @@ public class GameScene : IScene
             spriteBatch.Draw(texture, goalDest, textureStore[0], goalColor * 0.5f);
         }
         
-        // Draw item indicators (UI overlay, not affected by camera)
-        // Using the same texture and source rectangle as the player sprite
-        player.DrawItemIndicators(spriteBatch, texture, textureStore[1]);
+        // Draw new GameUI (health, cooldown, and active items)
+        gameUI.Draw(spriteBatch);
     }
 }

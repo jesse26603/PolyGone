@@ -4,7 +4,7 @@ using System;
 
 namespace PolyGone.Items
 {
-    class Item : Sprite
+    public class Item : Sprite
     {
         public string Name { get; protected set; }
         public string Description { get; protected set; }
@@ -116,7 +116,7 @@ namespace PolyGone.Items
         // Call this method from Player's HandleInput when checking for jump
         public bool TryDoubleJump(PolyGone.Entities.Player player, bool spacePressed, bool wasOnGround)
         {
-            if (!IsActive) return false;
+            if (!IsActive) { return false; }
 
             // Reset double jump when landing
             if (wasOnGround)
@@ -226,7 +226,7 @@ namespace PolyGone.Items
         // Get the glow color for drawing the player outline
         public Color GetGlowColor()
         {
-            if (!IsActive) return Color.Transparent;
+            if (!IsActive) { return Color.Transparent; }
             
             // Pulsing green glow
             float intensity = (float)(Math.Sin(glowTime * 6) * 0.3f + 0.7f); // Pulse between 0.4 and 1.0

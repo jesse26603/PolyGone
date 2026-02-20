@@ -9,6 +9,8 @@ namespace PolyGone.Weapons
 {
     class Shotgun : Blaster
     {
+        public override float MaxCooldown => 30f; // Shotgun has longer cooldown
+        
         public Shotgun(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, List<Projectile> sharedBullets, Rectangle? srcRect = null)
             : base(texture, position, size, color, collisionMap, sharedBullets, srcRect)
         {

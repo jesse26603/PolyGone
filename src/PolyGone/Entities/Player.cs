@@ -12,7 +12,7 @@ using PolyGone.Items;
 namespace PolyGone.Entities
 {
 
-    internal class Player : Entity
+    public class Player : Entity
     {
         // Constants for gap centering nudge strengths
         private const float VERTICAL_GAP_NUDGE_STRENGTH = 20f; // Strong nudge for vertical movement through gaps
@@ -315,6 +315,12 @@ namespace PolyGone.Entities
 
         // Public property to access current blaster for backward compatibility
         public Blaster blaster => GetBlaster();
+
+        // Public method to access item inventory for UI
+        public List<Item> GetAllItems()
+        {
+            return itemInventory;
+        }
 
         public override void Update(GameTime gameTime)
         {

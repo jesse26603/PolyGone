@@ -9,12 +9,13 @@ using PolyGone.Entities;
 
 namespace PolyGone.Weapons
 {
-    class Blaster : Item
+    public class Blaster : Item
     {
         public float rotation = 0f;
         protected readonly List<Projectile> bullets; // Reference to shared bullets list
         protected float cooldown;
         public float Cooldown => cooldown;
+        public virtual float MaxCooldown => 12f; // Default blaster cooldown
         protected readonly Dictionary<Vector2, int> collisionMap;
         public Blaster(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, List<Projectile> sharedBullets, Rectangle? srcRect = null)
             : base(texture, position, size, color, "Blaster", "Basic energy weapon", srcRect)
