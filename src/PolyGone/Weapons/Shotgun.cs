@@ -9,6 +9,8 @@ namespace PolyGone.Weapons
 {
     class Shotgun : Blaster
     {
+        public override float MaxCooldown => 30f; // Shotgun has longer cooldown
+        
         public Shotgun(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, List<Projectile> sharedBullets, Rectangle? srcRect = null)
             : base(texture, position, size, color, collisionMap, sharedBullets, srcRect)
         {
@@ -18,9 +20,8 @@ namespace PolyGone.Weapons
 
         public override void Use()
         {
-            // Handle shooting with spread
-            MouseState mouseState = Mouse.GetState();
-            if (mouseState.LeftButton == ButtonState.Pressed && cooldown <= 0f)
+            // Handle shooting with spread using InputManager
+            if (InputManager.IsLeftMouseButtonClicked() && cooldown <= 0f)
             {
                 // Shotgun fires 5 projectiles with spread
                 int pelletCount = 5;
@@ -48,6 +49,7 @@ namespace PolyGone.Weapons
                 }
                 
                 cooldown = 30f; // Slower fire rate (0.5 seconds at 60fps)
+                InputManager.ConsumeClick(); // Prevent multiple shots from same click
             }
         }
     }

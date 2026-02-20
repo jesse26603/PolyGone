@@ -4,7 +4,7 @@ using System;
 
 namespace PolyGone.Items
 {
-    class Item : Sprite
+    public class Item : Sprite
     {
         public string Name { get; protected set; }
         public string Description { get; protected set; }
@@ -116,7 +116,7 @@ namespace PolyGone.Items
         // Call this method from Player's HandleInput when checking for jump
         public bool TryDoubleJump(PolyGone.Entities.Player player, bool spacePressed, bool wasOnGround)
         {
-            if (!IsActive) return false;
+            if (!IsActive) { return false; }
 
             // Reset double jump when landing
             if (wasOnGround)
@@ -173,35 +173,31 @@ namespace PolyGone.Items
         }
     }
 
-    // Healing Glow Item - heals player and gives green glowing outline
-    class HealingGlowItem : Item
+    // Healing Glow Item - heals player 10 HP every 2 seconds and gives green glowing outline
+    public class HealingGlowItem : Item
     {
-        private const int HEAL_AMOUNT = 50;
+        private const int HEAL_AMOUNT = 10;
+        private const float HEAL_INTERVAL = 2.0f; // Heal every 2 seconds
         private float glowTime = 0f;
-        private bool hasHealed = false;
+        private float healTimer = 0f;
 
         public HealingGlowItem(Texture2D texture, Vector2 position, int[] size, Color color, Rectangle? srcRect = null)
-            : base(texture, position, size, color, "Healing Glow", "Restores health and grants a protective glow", srcRect)
+            : base(texture, position, size, color, "Healing Glow", "Heals 10 HP every 2 seconds", srcRect)
         {
         }
 
         public override void Apply(PolyGone.Entities.Player player)
         {
             base.Apply(player);
-            if (!hasHealed)
-            {
-                player.health += HEAL_AMOUNT;
-                player.health = Math.Min(player.health, player.maxHealth); // Don't exceed max health
-                hasHealed = true;
-            }
             glowTime = 0f;
+            healTimer = 0f;
         }
 
         public override void Remove(PolyGone.Entities.Player player)
         {
             base.Remove(player);
-            hasHealed = false;
             glowTime = 0f;
+            healTimer = 0f;
         }
 
         protected override Color GetActiveColor()
@@ -223,10 +219,23 @@ namespace PolyGone.Items
             }
         }
 
+        // Call this from Player's Update to apply healing over time
+        public void ApplyHealingOverTime(PolyGone.Entities.Player player, float deltaTime)
+        {
+            if (!IsActive) return;
+            
+            healTimer += deltaTime;
+            if (healTimer >= HEAL_INTERVAL)
+            {
+                healTimer -= HEAL_INTERVAL;
+                player.health = Math.Min(player.health + HEAL_AMOUNT, player.maxHealth);
+            }
+        }
+
         // Get the glow color for drawing the player outline
         public Color GetGlowColor()
         {
-            if (!IsActive) return Color.Transparent;
+            if (!IsActive) { return Color.Transparent; }
             
             // Pulsing green glow
             float intensity = (float)(Math.Sin(glowTime * 6) * 0.3f + 0.7f); // Pulse between 0.4 and 1.0

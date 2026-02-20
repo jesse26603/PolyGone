@@ -7,7 +7,7 @@ using PolyGone.Items;
 
 namespace PolyGone;
 
-class Entity : Sprite
+public class Entity : Sprite
 {
 
     protected readonly Dictionary<Vector2, int>? collisionMap;

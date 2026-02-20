@@ -1,38 +1,25 @@
-/* Main Menu
-[] Level Select (sub-menu)
-[] Options (sub-menu)
-[] Exit Game
-*/
-
-/* Pause Menu
-[] Continue
-[] Exit to Menu
-*/
-using System.Collections.Generic;
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System.IO;
-using System.Text.Json;
-using System.Linq;
-using System;
 
 namespace PolyGone
 {
-    internal class MenuScene : IScene
+    internal class LevelSelect : IScene
     {
-        private Texture2D _pixel;
-        private SpriteFont _font;
+        private Texture2D? _pixel;
+        private SpriteFont? _font;
         private KeyboardState keyboardState;
         private KeyboardState previousKeyboardState;
         private readonly ContentManager _content;
         private readonly SceneManager _sceneManager;
         private readonly GraphicsDeviceManager _graphics;
-        private readonly string[] _options = { "Level Select", "Options", "Exit to Desktop" };
+        private readonly string[] _levelNames = { "Test Level 1", "Test Level 2", "Test Level 3", "Back to Menu" };
+        private readonly string?[] _levelFiles = { "TestLevel", "TestLevel2", "TestLevel3", null };
         private int _selectedIndex;
 
-        public MenuScene(ContentManager content, SceneManager sceneManager, GraphicsDeviceManager graphics)
+        public LevelSelect(ContentManager content, SceneManager sceneManager, GraphicsDeviceManager graphics)
         {
             _pixel = null;
             _content = content;
@@ -46,11 +33,13 @@ namespace PolyGone
         {
             if (_font == null)
             {
-                // Only attempt to load the font if the compiled asset exists to avoid runtime exceptions
-                var fontAssetPath = Path.Combine(_content.RootDirectory, "Fonts", "PauseMenu.xnb");
-                if (File.Exists(fontAssetPath))
+                try
                 {
                     _font = _content.Load<SpriteFont>("Fonts/PauseMenu");
+                }
+                catch
+                {
+                    // Font not available
                 }
             }
         }
@@ -63,12 +52,12 @@ namespace PolyGone
             if (_font != null)
             {
                 var viewport = _graphics.GraphicsDevice.Viewport;
-                var startY = viewport.Height / 2f - _options.Length * 40f / 2f;
+                var startY = viewport.Height / 2f - _levelNames.Length * 40f / 2f;
 
-                for (var i = 0; i < _options.Length; i++)
+                for (var i = 0; i < _levelNames.Length; i++)
                 {
-                    var option = _options[i];
-                    var textSize = _font.MeasureString(option);
+                    var levelName = _levelNames[i];
+                    var textSize = _font.MeasureString(levelName);
                     var position = new Vector2(viewport.Width / 2f - textSize.X / 2f, startY + i * 40f);
                     var bounds = new Rectangle((int)position.X, (int)position.Y, (int)textSize.X, (int)textSize.Y);
 
@@ -89,12 +78,12 @@ namespace PolyGone
             // Keyboard navigation
             if (IsKeyPressed(Keys.Up))
             {
-                _selectedIndex = (_selectedIndex - 1 + _options.Length) % _options.Length;
+                _selectedIndex = (_selectedIndex - 1 + _levelNames.Length) % _levelNames.Length;
             }
 
             if (IsKeyPressed(Keys.Down))
             {
-                _selectedIndex = (_selectedIndex + 1) % _options.Length;
+                _selectedIndex = (_selectedIndex + 1) % _levelNames.Length;
             }
 
             if (IsKeyPressed(Keys.Enter))
@@ -102,25 +91,30 @@ namespace PolyGone
                 ExecuteSelection();
             }
 
+            if (InputManager.IsEscapeKeyPressed())
+            {
+                // Also allow Escape to go back
+                _sceneManager.PopScene(this);
+            }
+
             previousKeyboardState = keyboardState;
         }
 
         private void ExecuteSelection()
         {
-            if (_selectedIndex == 0)
+            if (_selectedIndex == _levelNames.Length - 1)
             {
-                // Level Select
-                _sceneManager.AddScene(new LevelSelect(_content, _sceneManager, _graphics));
+                // Back to Menu
+                _sceneManager.PopScene(this);
             }
-            else if (_selectedIndex == 1)
+            else
             {
-                // Options (placeholder for now)
-                // Could add options scene later
-            }
-            else if (_selectedIndex == 2)
-            {
-                // Exit to Desktop
-                Environment.Exit(0);
+                // Go to inventory management with selected level
+                string? levelFile = _levelFiles[_selectedIndex];
+                if (levelFile != null)
+                {
+                    _sceneManager.AddScene(new InventoryManagement(_content, _sceneManager, _graphics, levelFile));
+                }
             }
         }
 
@@ -132,22 +126,30 @@ namespace PolyGone
                 _pixel.SetData(new[] { Color.White });
             }
 
-            // Use the already-begun SpriteBatch from Game1.Draw
-            spriteBatch.Draw(_pixel, new Rectangle(0, 0, spriteBatch.GraphicsDevice.Viewport.Width, spriteBatch.GraphicsDevice.Viewport.Height), Color.Gray);
+            // Draw background
+            spriteBatch.Draw(_pixel, new Rectangle(0, 0, spriteBatch.GraphicsDevice.Viewport.Width, spriteBatch.GraphicsDevice.Viewport.Height), Color.DarkSlateGray);
 
             if (_font != null)
             {
                 var viewport = spriteBatch.GraphicsDevice.Viewport;
-                var startY = viewport.Height / 2f - _options.Length * 40f / 2f;
+                
+                // Draw title
+                string title = "Select a Level";
+                var titleSize = _font.MeasureString(title);
+                var titlePos = new Vector2(viewport.Width / 2f - titleSize.X / 2f, 100);
+                spriteBatch.DrawString(_font, title, titlePos, Color.White);
 
-                for (var i = 0; i < _options.Length; i++)
+                // Draw level options
+                var startY = viewport.Height / 2f - _levelNames.Length * 40f / 2f;
+
+                for (var i = 0; i < _levelNames.Length; i++)
                 {
-                    var option = _options[i];
+                    var levelName = _levelNames[i];
                     var color = i == _selectedIndex ? Color.Yellow : Color.White;
-                    var textSize = _font.MeasureString(option);
+                    var textSize = _font.MeasureString(levelName);
                     var position = new Vector2(viewport.Width / 2f - textSize.X / 2f, startY + i * 40f);
 
-                    spriteBatch.DrawString(_font, option, position, color);
+                    spriteBatch.DrawString(_font, levelName, position, color);
                 }
             }
         }
@@ -156,7 +158,5 @@ namespace PolyGone
         {
             return keyboardState.IsKeyDown(key) && !previousKeyboardState.IsKeyDown(key);
         }
-
-
     }
 }

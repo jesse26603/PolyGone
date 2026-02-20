@@ -12,7 +12,7 @@ using PolyGone.Items;
 namespace PolyGone.Entities
 {
 
-    internal class Player : Entity
+    public class Player : Entity
     {
         // Constants for gap centering nudge strengths
         private const float VERTICAL_GAP_NUDGE_STRENGTH = 20f; // Strong nudge for vertical movement through gaps
@@ -20,9 +20,8 @@ namespace PolyGone.Entities
         
         private KeyboardState keyboardState;
         private KeyboardState previousKeyboardState;
-        private readonly List<Item> weaponInventory = new List<Item>(); // Weapons (blasters/shotguns)
-        private readonly List<Item> itemInventory = new List<Item>(); // Regular items (double jump, speed boost, etc.)
-        private int currentWeaponIndex = 0; // Index of currently equipped weapon
+        private Item? currentWeapon; // Single selected weapon
+        private readonly List<Item> itemInventory = new List<Item>(); // Pre-selected items (max 2)
         public readonly List<Projectile> bullets = new List<Projectile>(); // Shared projectile list for all weapons
         private float ffCooldown = 0f;
         private float coyoteTime = 0f; // Allows jumping shortly after leaving a platform
@@ -33,22 +32,43 @@ namespace PolyGone.Entities
         // Public property to access current weapon's cooldown for HUD
         public float Cooldown => GetBlaster()?.Cooldown ?? 0f;
         
-        public Player(Texture2D texture, Vector2 position, int[] size, int health, Color color, Rectangle? srcRect, Dictionary<Vector2, int> collisionMap, Texture2D blasterTexture, int[]? visualSize = null)
+        public Player(Texture2D texture, Vector2 position, int[] size, int health, Color color, Rectangle? srcRect, Dictionary<Vector2, int> collisionMap, Texture2D blasterTexture, List<ItemType> selectedItems, WeaponType selectedWeapon, int[]? visualSize = null)
             : base(texture, position, size, health, color, srcRect, collisionMap, visualSize)
         {
-            // Create both weapon types and add to weapon inventory
-            var blasterWeapon = new Blaster(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.White, collisionMap, bullets, srcRect);
-            var shotgun = new Shotgun(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.Red, collisionMap, bullets, srcRect);
-            weaponInventory.Add(blasterWeapon);
-            weaponInventory.Add(shotgun);
+            // Create the selected weapon
+            switch (selectedWeapon)
+            {
+                case WeaponType.Blaster:
+                    currentWeapon = new Blaster(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.White, collisionMap, bullets, srcRect);
+                    break;
+                case WeaponType.Shotgun:
+                    currentWeapon = new Shotgun(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.Red, collisionMap, bullets, srcRect);
+                    break;
+            }
             
-            // Create sample items and add to item inventory
-            var doubleJump = new DoubleJumpItem(texture, Vector2.Zero, new int[] { 32, 32 }, Color.Blue, srcRect);
-            var speedBoost = new SpeedBoostItem(texture, Vector2.Zero, new int[] { 32, 32 }, Color.Yellow, srcRect);
-            var healingGlow = new HealingGlowItem(texture, Vector2.Zero, new int[] { 32, 32 }, Color.Green, srcRect);
-            itemInventory.Add(doubleJump);
-            itemInventory.Add(speedBoost);
-            itemInventory.Add(healingGlow);
+            // Create and activate the selected items
+            foreach (var itemType in selectedItems)
+            {
+                Item? item = null;
+                switch (itemType)
+                {
+                    case ItemType.DoubleJump:
+                        item = new DoubleJumpItem(texture, Vector2.Zero, new int[] { 32, 32 }, Color.Blue, srcRect);
+                        break;
+                    case ItemType.SpeedBoost:
+                        item = new SpeedBoostItem(texture, Vector2.Zero, new int[] { 32, 32 }, Color.Yellow, srcRect);
+                        break;
+                    case ItemType.HealingGlow:
+                        item = new HealingGlowItem(texture, Vector2.Zero, new int[] { 32, 32 }, Color.Green, srcRect);
+                        break;
+                }
+                
+                if (item != null)
+                {
+                    itemInventory.Add(item);
+                    item.Apply(this); // Automatically activate all selected items
+                }
+            }
             
             this.friction = 0.8f; // Player has more friction for tighter control
         }
@@ -100,30 +120,6 @@ namespace PolyGone.Entities
             previousKeyboardState = keyboardState;
             keyboardState = Keyboard.GetState();
             int moveDirection = 0;
-
-            // Weapon switching
-            if (keyboardState.IsKeyDown(Keys.D1) && !previousKeyboardState.IsKeyDown(Keys.D1))
-            {
-                currentWeaponIndex = 0; // Switch to blaster
-            }
-            else if (keyboardState.IsKeyDown(Keys.D2) && !previousKeyboardState.IsKeyDown(Keys.D2))
-            {
-                currentWeaponIndex = 1; // Switch to shotgun
-            }
-
-            // Item management (3, 4, 5 keys for items 0, 1, 2)
-            if (keyboardState.IsKeyDown(Keys.D3) && !previousKeyboardState.IsKeyDown(Keys.D3))
-            {
-                ToggleItem(0);
-            }
-            else if (keyboardState.IsKeyDown(Keys.D4) && !previousKeyboardState.IsKeyDown(Keys.D4))
-            {
-                ToggleItem(1);
-            }
-            else if (keyboardState.IsKeyDown(Keys.D5) && !previousKeyboardState.IsKeyDown(Keys.D5))
-            {
-                ToggleItem(2);
-            }
 
             // Horizontal movement with speed boost consideration
             if (keyboardState.IsKeyDown(Keys.A) && !keyboardState.IsKeyDown(Keys.D)) moveDirection = -1;
@@ -256,65 +252,36 @@ namespace PolyGone.Entities
             }
         }
 
-        // Item management methods
-        private void ToggleItem(int itemIndex)
-        {
-            if (itemIndex >= 0 && itemIndex < itemInventory.Count)
-            {
-                var item = itemInventory[itemIndex];
-                if (item.IsActive)
-                {
-                    item.Remove(this);
-                }
-                else
-                {
-                    item.Apply(this);
-                }
-            }
-        }
-
         private float GetSpeedBoostMultiplier()
         {
             var speedBoostItem = itemInventory.OfType<SpeedBoostItem>().FirstOrDefault();
             return speedBoostItem?.GetSpeedMultiplier() ?? 1.0f;
         }
 
-        private DoubleJumpItem GetActiveDoubleJumpItem()
+        private DoubleJumpItem? GetActiveDoubleJumpItem()
         {
             return itemInventory.OfType<DoubleJumpItem>().FirstOrDefault(item => item.IsActive);
         }
 
-        private HealingGlowItem GetActiveHealingGlowItem()
+        private HealingGlowItem? GetActiveHealingGlowItem()
         {
             return itemInventory.OfType<HealingGlowItem>().FirstOrDefault(item => item.IsActive);
         }
 
-        // Helper method to get the currently equipped blaster from weapon inventory
-        public Blaster GetBlaster()
+        // Helper method to get the currently equipped blaster/weapon
+        public Blaster? GetBlaster()
         {
-            Blaster firstBlaster = null;
-            int blasterIndex = 0;
-
-            foreach (var blasterWeapon in weaponInventory.OfType<Blaster>())
-            {
-                if (firstBlaster == null)
-                {
-                    firstBlaster = blasterWeapon;
-                }
-
-                if (blasterIndex == currentWeaponIndex)
-                {
-                    return blasterWeapon;
-                }
-
-                blasterIndex++;
-            }
-
-            return firstBlaster;
+            return currentWeapon as Blaster;
         }
 
         // Public property to access current blaster for backward compatibility
         public Blaster blaster => GetBlaster();
+
+        // Public method to access item inventory for UI
+        public List<Item> GetAllItems()
+        {
+            return itemInventory;
+        }
 
         public override void Update(GameTime gameTime)
         {
@@ -360,6 +327,12 @@ namespace PolyGone.Entities
             foreach (var item in itemInventory.Where(item => item.IsActive))
             {
                 item.Update(gameTime);
+                
+                // Apply healing over time from HealingGlowItem
+                if (item is HealingGlowItem healingGlow)
+                {
+                    healingGlow.ApplyHealingOverTime(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
+                }
             }
             
             ffCooldown = Math.Max(0f, ffCooldown - 1f);

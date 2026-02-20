@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Linq;
 using System;
 using PolyGone.Entities;
+using PolyGone.Graphics;
 
 namespace PolyGone;
 
@@ -19,6 +20,7 @@ public class GameScene : IScene
     private SceneManager sceneManager;
     private Player player;
     private FollowCamera camera;
+    private GameUI gameUI;
     private readonly GraphicsDeviceManager graphics;
     private Dictionary<Vector2, int> tileMap;
     private Dictionary<Vector2, int> collisionMap;
@@ -29,15 +31,28 @@ public class GameScene : IScene
     private readonly List<Entity> enemies = new(); // Placeholder for enemy list
     private GoalTrigger goalTrigger; // Win condition trigger
     private bool levelComplete = false;
+    private readonly List<ItemType> selectedItems;
+    private readonly WeaponType selectedWeapon;
+    private readonly string levelName;
 
-    public GameScene(ContentManager contentManager, SceneManager sceneManager, GraphicsDeviceManager graphics, string levelName = "TestLevel")
+    public GameScene(ContentManager contentManager, SceneManager sceneManager, GraphicsDeviceManager graphics, string levelName = "TestLevel", List<ItemType>? selectedItems = null, WeaponType selectedWeapon = WeaponType.Blaster)
     {       
         this.contentManager = contentManager;
         this.sceneManager = sceneManager;
         this.graphics = graphics;
+        this.selectedItems = selectedItems ?? new List<ItemType>(); // Default to empty list
+        this.selectedWeapon = selectedWeapon;
+        this.levelName = levelName;
         LoadMapFromJson("../../../Content/Maps/" + levelName + ".json");
         textureStore = GetTextureStore(32, new int[2] { 4, 4 });
     }
+
+    // Public method to get the level name for restart functionality
+    public string GetLevelName() => levelName;
+    
+    // Public methods to get the current loadout for restart functionality
+    public List<ItemType> GetSelectedItems() => new List<ItemType>(selectedItems);
+    public WeaponType GetSelectedWeapon() => selectedWeapon;
 
     // Generates a list of rectangles representing individual textures in a texture atlas
     public List<Rectangle> GetTextureStore(int textureSize, int[] gridSize)
@@ -159,6 +174,9 @@ public class GameScene : IScene
 
     public void Load()
     {
+        // Reset input state to prevent carried over clicks from triggering actions
+        InputManager.ResetClickCooldown();
+        
         // Load texture atlas and initialize camera
         texture = contentManager.Load<Texture2D>("PolyGoneTileMap");
         try
@@ -170,7 +188,7 @@ public class GameScene : IScene
             Console.WriteLine("Warning: Could not load SpriteFont 'Fonts/PauseMenu'. HUD text will not be rendered with this font.");
         }
         camera = new(new Vector2(0, 0));
-        // Initialize player
+        // Initialize player with selected items and weapon
         player = new Player(
             texture: texture,
             position: playerPos,
@@ -180,8 +198,13 @@ public class GameScene : IScene
             srcRect: textureStore[1],
             collisionMap: collisionMap,
             blasterTexture: texture,
+            selectedItems: selectedItems,
+            selectedWeapon: selectedWeapon,
             visualSize: new int[2] { 64, 64 }
         );
+        
+        // Initialize GameUI
+        gameUI = new GameUI(player, texture, textureStore[0], hudFont);
         // Initialize enemies from spawn positions
         enemies.AddRange(enemySpawns.Select(spawnPos => new Enemy(
             texture: texture,
@@ -227,14 +250,6 @@ public class GameScene : IScene
     
     public void Update(GameTime gameTime)
     {
-        // Check for reset input
-        KeyboardState keyboardState = Keyboard.GetState();
-        if (keyboardState.IsKeyDown(Keys.R))
-        {
-            Reset();
-            return;
-        }
-        
         // Check if level is complete
         if (levelComplete)
         {
@@ -309,8 +324,8 @@ public class GameScene : IScene
             if (goalTrigger.IsTriggered)
             {
                 levelComplete = true;
-                // Transition to win scene
-                sceneManager.AddScene(new WinScene(contentManager, sceneManager, graphics));
+                // Transition to win scene with current loadout
+                sceneManager.AddScene(new WinScene(contentManager, sceneManager, graphics, levelName, selectedItems, selectedWeapon));
             }
         }
     }
@@ -332,17 +347,6 @@ public class GameScene : IScene
             enemy.Draw(spriteBatch, camera.position);
         }
         player.Draw(spriteBatch, camera.position);
-
-        if (hudFont != null)
-        {
-            var viewport = spriteBatch.GraphicsDevice.Viewport;
-            string healthText = $"Health: {player.health}";
-            string cooldownText = $"Cooldown: {player.blaster.Cooldown:0.0}";
-            string combinedText = healthText + "  " + cooldownText;
-            Vector2 textSize = hudFont.MeasureString(combinedText);
-            Vector2 position = new Vector2(10f, viewport.Height - textSize.Y - 50f);
-            spriteBatch.DrawString(hudFont, combinedText, position, Color.White);
-        }
         
         // Draw goal trigger (if it exists)
         if (goalTrigger != null)
@@ -359,8 +363,7 @@ public class GameScene : IScene
             spriteBatch.Draw(texture, goalDest, textureStore[0], goalColor * 0.5f);
         }
         
-        // Draw item indicators (UI overlay, not affected by camera)
-        // Using the same texture and source rectangle as the player sprite
-        player.DrawItemIndicators(spriteBatch, texture, textureStore[1]);
+        // Draw new GameUI (health, cooldown, and active items)
+        gameUI.Draw(spriteBatch);
     }
 }
