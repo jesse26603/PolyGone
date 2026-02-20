@@ -62,8 +62,8 @@ public class WinScene : IScene
             previousMouseState.LeftButton == ButtonState.Pressed)
         {
             // Remove WinScene and create new GameScene
-            sceneManager.RemoveScene(this);
-            sceneManager.RemoveScene(sceneManager.GetCurrentScene()); // Remove old GameScene
+            sceneManager.PopScene(this);
+            sceneManager.PopScene(sceneManager.GetCurrentScene()); // Remove old GameScene
             sceneManager.AddScene(new GameScene(contentManager, sceneManager, graphics));
         }
         

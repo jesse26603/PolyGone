@@ -1,11 +1,11 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using PolyGone;
+using PolyGone.Entities;
 
 namespace PolyGone.Items
 {
-    class Item : PolyGone.Sprite
+    class Item : Sprite
     {
         public string Name { get; protected set; }
         public string Description { get; protected set; }

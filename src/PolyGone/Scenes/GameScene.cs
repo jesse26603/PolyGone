@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Linq;
 using System;
 using PolyGone.Weapons;
+using PolyGone.Entities;
 
 namespace PolyGone;
 
@@ -190,7 +191,7 @@ public class GameScene : IScene
             color: Color.White,
             srcRect: textureStore[1],
             collisionMap: collisionMap,
-            blaster: blaster
+            blasterTexture: texture
         );
         // Initialize enemies from spawn positions
         enemies.AddRange(enemySpawns.Select(spawnPos => new Enemy(
@@ -346,7 +347,7 @@ public class GameScene : IScene
         {
             var viewport = spriteBatch.GraphicsDevice.Viewport;
             string healthText = $"Health: {player.health}";
-            string cooldownText = $"Cooldown: {player.Cooldown:0.0}";
+            string cooldownText = $"Cooldown: {player.blaster.cooldown:0.0}";
             string combinedText = healthText + "  " + cooldownText;
             Vector2 textSize = hudFont.MeasureString(combinedText);
             Vector2 position = new Vector2(10f, viewport.Height - textSize.Y - 50f);
