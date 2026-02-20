@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Math = System.Math;
 using System.Collections.Generic;
+using PolyGone.Entities;
 
 namespace PolyGone.Weapons
 {

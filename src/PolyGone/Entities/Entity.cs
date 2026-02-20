@@ -25,8 +25,6 @@ class Entity : Sprite
     protected const int TILE_SIZE = 64;
     protected const int TILE_HALF_SIZE = TILE_SIZE / 2;
 
-    public float ChangeY => changeY;
-
 
     public Entity(Texture2D texture, Vector2 position, int[] size, int health = 100, Color color = default, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null, int[]? visualSize = null)
         : base(texture, position, size, color, srcRect)
