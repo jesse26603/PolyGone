@@ -7,7 +7,7 @@ using System.IO;
 using System.Text.Json;
 using System.Linq;
 using System;
-using PolyGone.Entities;
+using PolyGone.Weapons;
 
 namespace PolyGone;
 
@@ -15,9 +15,11 @@ public class GameScene : IScene
 {
     private ContentManager contentManager;
     private Texture2D texture;
+    private SpriteFont hudFont;
     private SceneManager sceneManager;
     private Player player;
     private FollowCamera camera;
+    private Blaster blaster;
     private readonly GraphicsDeviceManager graphics;
     private Dictionary<Vector2, int> tileMap;
     private Dictionary<Vector2, int> collisionMap;
@@ -29,12 +31,12 @@ public class GameScene : IScene
     private GoalTrigger goalTrigger; // Win condition trigger
     private bool levelComplete = false;
 
-    public GameScene(ContentManager contentManager, SceneManager sceneManager, GraphicsDeviceManager graphics)
-    {
+    public GameScene(ContentManager contentManager, SceneManager sceneManager, GraphicsDeviceManager graphics, string levelName = "TestLevel")
+    {       
         this.contentManager = contentManager;
         this.sceneManager = sceneManager;
         this.graphics = graphics;
-        LoadMapFromJson("../../../Content/Maps/TestLevel.json");
+        LoadMapFromJson("../../../Content/Maps/" + levelName + ".json");
         textureStore = GetTextureStore(32, new int[2] { 4, 4 });
     }
 
@@ -160,7 +162,25 @@ public class GameScene : IScene
     {
         // Load texture atlas and initialize camera
         texture = contentManager.Load<Texture2D>("PolyGoneTileMap");
+        try
+        {
+            hudFont = contentManager.Load<SpriteFont>("Fonts/PauseMenu");
+        }
+        catch (ContentLoadException)
+        {
+            Console.WriteLine("Warning: Could not load SpriteFont 'Fonts/PauseMenu'. HUD text will not be rendered with this font.");
+        }
         camera = new(new Vector2(0, 0));
+        // Initialize blaster
+        blaster = new Blaster(
+            texture: texture,
+            position: new Vector2(0, 0),
+            size: new int[2] { 32, 32 },
+            color: Color.White,
+            collisionMap: collisionMap,
+            sharedBullets: new List<Projectile>(),
+            srcRect: textureStore[1]
+        );
         // Initialize player
         player = new Player(
             texture: texture,
@@ -170,8 +190,7 @@ public class GameScene : IScene
             color: Color.White,
             srcRect: textureStore[1],
             collisionMap: collisionMap,
-            blasterTexture: texture,
-            visualSize: new int[2] { 64, 64 }
+            blaster: blaster
         );
         // Initialize enemies from spawn positions
         enemies.AddRange(enemySpawns.Select(spawnPos => new Enemy(
@@ -182,8 +201,7 @@ public class GameScene : IScene
             color: Color.White,
             srcRect: textureStore[2],
             collisionMap: collisionMap,
-            patrolSpeed: 1f,
-            visualSize: new int[2] { 64, 64 }
+            patrolSpeed: 1f
         )));
     }
     
@@ -204,8 +222,7 @@ public class GameScene : IScene
             color: Color.White,
             srcRect: textureStore[2],
             collisionMap: collisionMap,
-            patrolSpeed: 1f,
-            visualSize: new int[2] { 64, 64 }
+            patrolSpeed: 1f
         )));
         
         // Reset goal trigger and level completion
@@ -226,6 +243,8 @@ public class GameScene : IScene
             return;
         }
         
+        // Gather all entities for collision detection
+        List<Entity> allEntities = [player, .. enemies, .. player.bullets];
         // Check if level is complete
         if (levelComplete)
         {
@@ -235,7 +254,7 @@ public class GameScene : IScene
         }
         
         // Update player and camera
-        player.Update(gameTime, camera.position);
+        player.Update(gameTime);
         camera.Follow(player.Rectangle, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), new Vector2( tileMap.Keys.Max(k => k.X + 1) * 64, tileMap.Keys.Max(k => k.Y + 1) * 64));
         
         // Check all entities for out-of-bounds
@@ -273,14 +292,13 @@ public class GameScene : IScene
             }
         }
         
+        player.blaster.Follow(player.Rectangle, camera.position); // Temporary Fix
+        
         // Update enemies
         foreach (var enemy in enemies)
         {
             enemy.Update(gameTime);
         }
-        
-        // Gather all entities for collision detection after all updates
-        List<Entity> allEntities = [player, .. enemies, .. player.bullets];
         
         // Handle entity-to-entity collisions
         player.EntityCollisionUpdate(allEntities);
@@ -323,6 +341,17 @@ public class GameScene : IScene
             enemy.Draw(spriteBatch, camera.position);
         }
         player.Draw(spriteBatch, camera.position);
+
+        if (hudFont != null)
+        {
+            var viewport = spriteBatch.GraphicsDevice.Viewport;
+            string healthText = $"Health: {player.health}";
+            string cooldownText = $"Cooldown: {player.Cooldown:0.0}";
+            string combinedText = healthText + "  " + cooldownText;
+            Vector2 textSize = hudFont.MeasureString(combinedText);
+            Vector2 position = new Vector2(10f, viewport.Height - textSize.Y - 50f);
+            spriteBatch.DrawString(hudFont, combinedText, position, Color.White);
+        }
         
         // Draw goal trigger (if it exists)
         if (goalTrigger != null)
