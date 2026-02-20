@@ -174,6 +174,9 @@ public class GameScene : IScene
 
     public void Load()
     {
+        // Reset input state to prevent carried over clicks from triggering actions
+        InputManager.ResetClickCooldown();
+        
         // Load texture atlas and initialize camera
         texture = contentManager.Load<Texture2D>("PolyGoneTileMap");
         try
