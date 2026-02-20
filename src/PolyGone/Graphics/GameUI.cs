@@ -87,7 +87,7 @@ public class GameUI
         int itemSize = 40;
         int itemSpacing = 50;
 
-        // Get all items from the player
+        // Get all items from the player (all are active by default now)
         var items = player.GetAllItems();
         
         for (int i = 0; i < items.Count; i++)
@@ -96,8 +96,8 @@ public class GameUI
             int x = startX;
             int y = startY + (i * itemSpacing);
 
-            // Background
-            Color bgColor = item.IsActive ? Color.Green * 0.7f : Color.DarkGray;
+            // Background - always green since items are always active
+            Color bgColor = Color.Green * 0.7f;
             spriteBatch.Draw(itemIndicatorTexture, new Rectangle(x, y, itemSize, itemSize), srcRect, bgColor);
 
             // Item icon
@@ -106,26 +106,19 @@ public class GameUI
                 spriteBatch.Draw(item.texture, new Rectangle(x + 4, y + 4, itemSize - 8, itemSize - 8), item.srcRect, item.color);
             }
 
-            // Border
-            Color borderColor = item.IsActive ? Color.LightGreen : Color.Black;
+            // Border - always light green
+            Color borderColor = Color.LightGreen;
             spriteBatch.Draw(itemIndicatorTexture, new Rectangle(x - 2, y - 2, 2, itemSize + 4), srcRect, borderColor);
             spriteBatch.Draw(itemIndicatorTexture, new Rectangle(x - 2, y - 2, itemSize + 4, 2), srcRect, borderColor);
             spriteBatch.Draw(itemIndicatorTexture, new Rectangle(x + itemSize, y - 2, 2, itemSize + 4), srcRect, borderColor);
             spriteBatch.Draw(itemIndicatorTexture, new Rectangle(x - 2, y + itemSize, itemSize + 4, 2), srcRect, borderColor);
-
-            // Key number indicator (3, 4, 5)
-            string keyText = $"{i + 3}";
-            Vector2 keyTextSize = font?.MeasureString(keyText) ?? Vector2.Zero;
-            Vector2 keyTextPosition = new Vector2(x + itemSize - keyTextSize.X - 2, y + 2);
-            spriteBatch.DrawString(font, keyText, keyTextPosition, Color.White);
 
             // Item name
             if (font != null)
             {
                 string itemName = item.Name;
                 Vector2 namePosition = new Vector2(x + itemSize + 5, y + (itemSize / 2) - (font.LineSpacing / 2));
-                Color textColor = item.IsActive ? Color.White : Color.Gray;
-                spriteBatch.DrawString(font, itemName, namePosition, textColor);
+                spriteBatch.DrawString(font, itemName, namePosition, Color.White);
             }
         }
     }

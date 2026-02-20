@@ -1,0 +1,340 @@
+using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+
+namespace PolyGone
+{
+    public enum ItemType
+    {
+        DoubleJump,
+        SpeedBoost,
+        HealingGlow
+    }
+
+    public enum WeaponType
+    {
+        Blaster,
+        Shotgun
+    }
+
+    internal class InventoryManagement : IScene
+    {
+        private Texture2D? _pixel;
+        private SpriteFont? _font;
+        private KeyboardState keyboardState;
+        private KeyboardState previousKeyboardState;
+        private readonly ContentManager _content;
+        private readonly SceneManager _sceneManager;
+        private readonly GraphicsDeviceManager _graphics;
+        private readonly string _levelFile;
+
+        // Available items and weapons
+        private readonly string[] _itemNames = { "Double Jump", "Speed Boost", "Healing Glow" };
+        private readonly ItemType[] _itemTypes = { ItemType.DoubleJump, ItemType.SpeedBoost, ItemType.HealingGlow };
+        private readonly string[] _weaponNames = { "Blaster", "Shotgun" };
+        private readonly WeaponType[] _weaponTypes = { WeaponType.Blaster, WeaponType.Shotgun };
+
+        // Selection state
+        private enum SelectionMode { Items, Weapon, Confirm }
+        private SelectionMode _currentMode = SelectionMode.Items;
+        private int _itemCursor = 0;
+        private int _weaponCursor = 0;
+        private int _confirmCursor = 0; // 0 = Start Game, 1 = Back
+        
+        private readonly List<ItemType> _selectedItems = new List<ItemType>();
+        private WeaponType _selectedWeapon = WeaponType.Blaster;
+
+        public InventoryManagement(ContentManager content, SceneManager sceneManager, GraphicsDeviceManager graphics, string levelFile)
+        {
+            _pixel = null;
+            _content = content;
+            _sceneManager = sceneManager;
+            _graphics = graphics;
+            _levelFile = levelFile;
+            previousKeyboardState = Keyboard.GetState();
+        }
+
+        public void Load()
+        {
+            if (_font == null)
+            {
+                try
+                {
+                    _font = _content.Load<SpriteFont>("Fonts/PauseMenu");
+                }
+                catch
+                {
+                    // Font not available
+                }
+            }
+        }
+
+        public void Update(GameTime gameTime)
+        {
+            keyboardState = Keyboard.GetState();
+
+            // Check for Control key to skip inventory and start with defaults
+            if (keyboardState.IsKeyDown(Keys.LeftControl) || keyboardState.IsKeyDown(Keys.RightControl))
+            {
+                // Start game with default selections
+                _selectedItems.Clear();
+                _selectedItems.Add(ItemType.DoubleJump);
+                _selectedItems.Add(ItemType.SpeedBoost);
+                _selectedWeapon = WeaponType.Blaster;
+                StartGame();
+                previousKeyboardState = keyboardState;
+                return;
+            }
+
+            switch (_currentMode)
+            {
+                case SelectionMode.Items:
+                    UpdateItemSelection();
+                    break;
+                case SelectionMode.Weapon:
+                    UpdateWeaponSelection();
+                    break;
+                case SelectionMode.Confirm:
+                    UpdateConfirmSelection();
+                    break;
+            }
+
+            previousKeyboardState = keyboardState;
+        }
+
+        private void UpdateItemSelection()
+        {
+            if (IsKeyPressed(Keys.Up))
+            {
+                _itemCursor = (_itemCursor - 1 + _itemNames.Length) % _itemNames.Length;
+            }
+
+            if (IsKeyPressed(Keys.Down))
+            {
+                _itemCursor = (_itemCursor + 1) % _itemNames.Length;
+            }
+
+            if (IsKeyPressed(Keys.Enter) || IsKeyPressed(Keys.Space))
+            {
+                ItemType selectedItem = _itemTypes[_itemCursor];
+                
+                if (_selectedItems.Contains(selectedItem))
+                {
+                    // Deselect item
+                    _selectedItems.Remove(selectedItem);
+                }
+                else if (_selectedItems.Count < 2)
+                {
+                    // Select item (max 2)
+                    _selectedItems.Add(selectedItem);
+                }
+            }
+
+            if (IsKeyPressed(Keys.Right) || (IsKeyPressed(Keys.Tab) && !keyboardState.IsKeyDown(Keys.LeftShift)))
+            {
+                // Move to weapon selection
+                _currentMode = SelectionMode.Weapon;
+            }
+
+            if (IsKeyPressed(Keys.Escape))
+            {
+                // Go back to level select
+                _sceneManager.PopScene(this);
+            }
+        }
+
+        private void UpdateWeaponSelection()
+        {
+            if (IsKeyPressed(Keys.Up))
+            {
+                _weaponCursor = (_weaponCursor - 1 + _weaponNames.Length) % _weaponNames.Length;
+            }
+
+            if (IsKeyPressed(Keys.Down))
+            {
+                _weaponCursor = (_weaponCursor + 1) % _weaponNames.Length;
+            }
+
+            if (IsKeyPressed(Keys.Enter) || IsKeyPressed(Keys.Space))
+            {
+                // Select weapon
+                _selectedWeapon = _weaponTypes[_weaponCursor];
+            }
+
+            if (IsKeyPressed(Keys.Left) || (IsKeyPressed(Keys.Tab) && keyboardState.IsKeyDown(Keys.LeftShift)))
+            {
+                // Move back to item selection
+                _currentMode = SelectionMode.Items;
+            }
+
+            if (IsKeyPressed(Keys.Right) || (IsKeyPressed(Keys.Tab) && !keyboardState.IsKeyDown(Keys.LeftShift)))
+            {
+                // Move to confirm
+                _currentMode = SelectionMode.Confirm;
+            }
+
+            if (IsKeyPressed(Keys.Escape))
+            {
+                // Go back to item selection
+                _currentMode = SelectionMode.Items;
+            }
+        }
+
+        private void UpdateConfirmSelection()
+        {
+            if (IsKeyPressed(Keys.Up) || IsKeyPressed(Keys.Down))
+            {
+                _confirmCursor = (_confirmCursor + 1) % 2;
+            }
+
+            if (IsKeyPressed(Keys.Enter))
+            {
+                if (_confirmCursor == 0)
+                {
+                    // Start Game
+                    StartGame();
+                }
+                else
+                {
+                    // Back
+                    _sceneManager.PopScene(this);
+                }
+            }
+
+            if (IsKeyPressed(Keys.Left) || (IsKeyPressed(Keys.Tab) && keyboardState.IsKeyDown(Keys.LeftShift)))
+            {
+                // Move back to weapon selection
+                _currentMode = SelectionMode.Weapon;
+            }
+
+            if (IsKeyPressed(Keys.Escape))
+            {
+                // Go back to weapon selection
+                _currentMode = SelectionMode.Weapon;
+            }
+        }
+
+        private void StartGame()
+        {
+            // Pop this scene and start the game with selected items
+            _sceneManager.PopScene(this);
+            _sceneManager.PopScene(_sceneManager.GetCurrentScene()); // Pop level select too
+            _sceneManager.AddScene(new GameScene(_content, _sceneManager, _graphics, _levelFile, _selectedItems, _selectedWeapon));
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            if (_pixel == null)
+            {
+                _pixel = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
+                _pixel.SetData(new[] { Color.White });
+            }
+
+            // Draw background
+            spriteBatch.Draw(_pixel, new Rectangle(0, 0, spriteBatch.GraphicsDevice.Viewport.Width, spriteBatch.GraphicsDevice.Viewport.Height), Color.DarkBlue);
+
+            if (_font != null)
+            {
+                var viewport = spriteBatch.GraphicsDevice.Viewport;
+                
+                // Draw title
+                string title = "Select Your Loadout";
+                var titleSize = _font.MeasureString(title);
+                var titlePos = new Vector2(viewport.Width / 2f - titleSize.X / 2f, 50);
+                spriteBatch.DrawString(_font, title, titlePos, Color.White);
+
+                // Draw instructions
+                string instructions = "Select 2 Items | Select 1 Weapon | Press Ctrl to skip";
+                var instructionsSize = _font.MeasureString(instructions);
+                var instructionsPos = new Vector2(viewport.Width / 2f - instructionsSize.X / 2f, 90);
+                spriteBatch.DrawString(_font, instructions, instructionsPos, Color.Gray);
+
+                // Draw items section
+                DrawItemsSection(spriteBatch, viewport);
+
+                // Draw weapons section
+                DrawWeaponsSection(spriteBatch, viewport);
+
+                // Draw confirm section
+                DrawConfirmSection(spriteBatch, viewport);
+            }
+        }
+
+        private void DrawItemsSection(SpriteBatch spriteBatch, Viewport viewport)
+        {
+            int startX = 100;
+            int startY = 200;
+            
+            // Section title
+            Color sectionColor = _currentMode == SelectionMode.Items ? Color.Yellow : Color.White;
+            spriteBatch.DrawString(_font, "Items (choose 2):", new Vector2(startX, startY - 40), sectionColor);
+
+            for (int i = 0; i < _itemNames.Length; i++)
+            {
+                string itemName = _itemNames[i];
+                bool isSelected = _selectedItems.Contains(_itemTypes[i]);
+                bool isCursor = i == _itemCursor && _currentMode == SelectionMode.Items;
+
+                Color color = isCursor ? Color.Yellow : (isSelected ? Color.Green : Color.White);
+                string prefix = isSelected ? "[X] " : "[ ] ";
+                
+                spriteBatch.DrawString(_font, prefix + itemName, new Vector2(startX, startY + i * 40), color);
+            }
+        }
+
+        private void DrawWeaponsSection(SpriteBatch spriteBatch, Viewport viewport)
+        {
+            int startX = viewport.Width / 2;
+            int startY = 200;
+            
+            // Section title
+            Color sectionColor = _currentMode == SelectionMode.Weapon ? Color.Yellow : Color.White;
+            spriteBatch.DrawString(_font, "Weapon:", new Vector2(startX, startY - 40), sectionColor);
+
+            for (int i = 0; i < _weaponNames.Length; i++)
+            {
+                string weaponName = _weaponNames[i];
+                bool isSelected = _weaponTypes[i] == _selectedWeapon;
+                bool isCursor = i == _weaponCursor && _currentMode == SelectionMode.Weapon;
+
+                Color color = isCursor ? Color.Yellow : (isSelected ? Color.Green : Color.White);
+                string prefix = isSelected ? "(O) " : "( ) ";
+                
+                spriteBatch.DrawString(_font, prefix + weaponName, new Vector2(startX, startY + i * 40), color);
+            }
+        }
+
+        private void DrawConfirmSection(SpriteBatch spriteBatch, Viewport viewport)
+        {
+            if (_font == null) return;
+            
+            int startY = viewport.Height - 150;
+            
+            // Section title
+            Color sectionColor = _currentMode == SelectionMode.Confirm ? Color.Yellow : Color.White;
+            string sectionTitle = _currentMode == SelectionMode.Confirm ? "> Ready?" : "  Ready?";
+            var sectionSize = _font.MeasureString(sectionTitle);
+            spriteBatch.DrawString(_font, sectionTitle, new Vector2(viewport.Width / 2f - sectionSize.X / 2f, startY - 40), sectionColor);
+
+            string[] confirmOptions = { "Start Game", "Back" };
+            for (int i = 0; i < confirmOptions.Length; i++)
+            {
+                bool isCursor = i == _confirmCursor && _currentMode == SelectionMode.Confirm;
+                Color color = isCursor ? Color.Yellow : Color.White;
+                string prefix = isCursor ? "> " : "  ";
+                
+                var optionText = prefix + confirmOptions[i];
+                var optionSize = _font.MeasureString(optionText);
+                spriteBatch.DrawString(_font, optionText, new Vector2(viewport.Width / 2f - optionSize.X / 2f, startY + i * 40), color);
+            }
+        }
+
+        private bool IsKeyPressed(Keys key)
+        {
+            return keyboardState.IsKeyDown(key) && !previousKeyboardState.IsKeyDown(key);
+        }
+    }
+}

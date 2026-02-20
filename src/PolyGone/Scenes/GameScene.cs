@@ -31,12 +31,16 @@ public class GameScene : IScene
     private readonly List<Entity> enemies = new(); // Placeholder for enemy list
     private GoalTrigger goalTrigger; // Win condition trigger
     private bool levelComplete = false;
+    private readonly List<ItemType> selectedItems;
+    private readonly WeaponType selectedWeapon;
 
-    public GameScene(ContentManager contentManager, SceneManager sceneManager, GraphicsDeviceManager graphics, string levelName = "TestLevel")
+    public GameScene(ContentManager contentManager, SceneManager sceneManager, GraphicsDeviceManager graphics, string levelName = "TestLevel", List<ItemType>? selectedItems = null, WeaponType selectedWeapon = WeaponType.Blaster)
     {       
         this.contentManager = contentManager;
         this.sceneManager = sceneManager;
         this.graphics = graphics;
+        this.selectedItems = selectedItems ?? new List<ItemType>(); // Default to empty list
+        this.selectedWeapon = selectedWeapon;
         LoadMapFromJson("../../../Content/Maps/" + levelName + ".json");
         textureStore = GetTextureStore(32, new int[2] { 4, 4 });
     }
@@ -172,7 +176,7 @@ public class GameScene : IScene
             Console.WriteLine("Warning: Could not load SpriteFont 'Fonts/PauseMenu'. HUD text will not be rendered with this font.");
         }
         camera = new(new Vector2(0, 0));
-        // Initialize player
+        // Initialize player with selected items and weapon
         player = new Player(
             texture: texture,
             position: playerPos,
@@ -182,6 +186,8 @@ public class GameScene : IScene
             srcRect: textureStore[1],
             collisionMap: collisionMap,
             blasterTexture: texture,
+            selectedItems: selectedItems,
+            selectedWeapon: selectedWeapon,
             visualSize: new int[2] { 64, 64 }
         );
         

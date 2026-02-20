@@ -29,7 +29,7 @@ namespace PolyGone
         private readonly ContentManager _content;
         private readonly SceneManager _sceneManager;
         private readonly GraphicsDeviceManager _graphics;
-        private readonly string[] _options = { "Test Level 1", "Test Level 2", "Test Level 3", "Exit to Desktop" };
+        private readonly string[] _options = { "Level Select", "Options", "Exit to Desktop" };
         private int _selectedIndex;
 
         public MenuScene(ContentManager content, SceneManager sceneManager, GraphicsDeviceManager graphics)
@@ -73,21 +73,17 @@ namespace PolyGone
             {
                 if (_selectedIndex == 0)
                 {
-                    _sceneManager.PopScene(this);
-                    _sceneManager.AddScene(new GameScene(_content, _sceneManager, _graphics)); // Load default level
+                    // Level Select
+                    _sceneManager.AddScene(new LevelSelect(_content, _sceneManager, _graphics));
                 }
                 else if (_selectedIndex == 1)
                 {
-                    _sceneManager.PopScene(this);
-                    _sceneManager.AddScene(new GameScene(_content, _sceneManager, _graphics, "TestLevel2"));
+                    // Options (placeholder for now)
+                    // Could add options scene later
                 }
                 else if (_selectedIndex == 2)
                 {
-                    _sceneManager.PopScene(this);
-                    _sceneManager.AddScene(new GameScene(_content, _sceneManager, _graphics, "TestLevel3"));
-                }
-                else if (_selectedIndex == _options.Length - 1)
-                {
+                    // Exit to Desktop
                     Environment.Exit(0);
                 }
             }
