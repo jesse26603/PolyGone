@@ -337,7 +337,7 @@ public class GameScene : IScene
         {
             var viewport = spriteBatch.GraphicsDevice.Viewport;
             string healthText = $"Health: {player.health}";
-            string cooldownText = $"Cooldown: {player.blaster.cooldown:0.0}";
+            string cooldownText = $"Cooldown: {player.blaster.Cooldown:0.0}";
             string combinedText = healthText + "  " + cooldownText;
             Vector2 textSize = hudFont.MeasureString(combinedText);
             Vector2 position = new Vector2(10f, viewport.Height - textSize.Y - 50f);
