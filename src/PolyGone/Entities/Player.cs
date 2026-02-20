@@ -30,6 +30,9 @@ namespace PolyGone.Entities
         // Public property to access changeY for items
         public float ChangeY => changeY;
         
+        // Public property to access current weapon's cooldown for HUD
+        public float Cooldown => GetBlaster()?.Cooldown ?? 0f;
+        
         public Player(Texture2D texture, Vector2 position, int[] size, int health, Color color, Rectangle? srcRect, Dictionary<Vector2, int> collisionMap, Texture2D blasterTexture, int[]? visualSize = null)
             : base(texture, position, size, health, color, srcRect, collisionMap, visualSize)
         {

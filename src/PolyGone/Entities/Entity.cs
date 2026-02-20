@@ -315,6 +315,7 @@ class Entity : Sprite
         base.Update(gameTime);
     }
 
+
     public override void Draw(SpriteBatch spriteBatch, Vector2 offset)
     {
         // Draw using visual size, offset by hitboxOffset to center the sprite on the hitbox

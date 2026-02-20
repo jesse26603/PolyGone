@@ -4,7 +4,7 @@ using System;
 
 namespace PolyGone.Items
 {
-    class Item : PolyGone.Sprite
+    class Item : Sprite
     {
         public string Name { get; protected set; }
         public string Description { get; protected set; }
