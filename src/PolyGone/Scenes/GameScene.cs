@@ -324,8 +324,8 @@ public class GameScene : IScene
             if (goalTrigger.IsTriggered)
             {
                 levelComplete = true;
-                // Transition to win scene
-                sceneManager.AddScene(new WinScene(contentManager, sceneManager, graphics));
+                // Transition to win scene with current loadout
+                sceneManager.AddScene(new WinScene(contentManager, sceneManager, graphics, levelName, selectedItems, selectedWeapon));
             }
         }
     }
