@@ -37,6 +37,10 @@ namespace PolyGone
         private readonly string[] _weaponNames = { "Blaster", "Shotgun" };
         private readonly WeaponType[] _weaponTypes = { WeaponType.Blaster, WeaponType.Shotgun };
 
+        // Static fields to remember last selection across instances
+        private static List<ItemType> _lastSelectedItems = new List<ItemType> { ItemType.DoubleJump, ItemType.SpeedBoost };
+        private static WeaponType _lastSelectedWeapon = WeaponType.Blaster;
+
         // Selection state
         private enum SelectionMode { Items, Weapon, Confirm }
         private SelectionMode _currentMode = SelectionMode.Items;
@@ -44,8 +48,8 @@ namespace PolyGone
         private int _weaponCursor = 0;
         private int _confirmCursor = 0; // 0 = Start Game, 1 = Back
         
-        private readonly List<ItemType> _selectedItems = new List<ItemType>();
-        private WeaponType _selectedWeapon = WeaponType.Blaster;
+        private readonly List<ItemType> _selectedItems;
+        private WeaponType _selectedWeapon;
 
         public InventoryManagement(ContentManager content, SceneManager sceneManager, GraphicsDeviceManager graphics, string levelFile)
         {
@@ -55,6 +59,10 @@ namespace PolyGone
             _graphics = graphics;
             _levelFile = levelFile;
             previousKeyboardState = Keyboard.GetState();
+            
+            // Initialize with last selected values
+            _selectedItems = new List<ItemType>(_lastSelectedItems);
+            _selectedWeapon = _lastSelectedWeapon;
         }
 
         public void Load()
@@ -76,14 +84,10 @@ namespace PolyGone
         {
             keyboardState = Keyboard.GetState();
 
-            // Check for Control key to skip inventory and start with defaults
+            // Check for Control key to skip inventory and start with current selections
             if (keyboardState.IsKeyDown(Keys.LeftControl) || keyboardState.IsKeyDown(Keys.RightControl))
             {
-                // Start game with default selections
-                _selectedItems.Clear();
-                _selectedItems.Add(ItemType.DoubleJump);
-                _selectedItems.Add(ItemType.SpeedBoost);
-                _selectedWeapon = WeaponType.Blaster;
+                // Start game with current selections (which were loaded from last time)
                 StartGame();
                 previousKeyboardState = keyboardState;
                 return;
@@ -301,6 +305,10 @@ namespace PolyGone
 
         private void StartGame()
         {
+            // Save current selections for next time
+            _lastSelectedItems = new List<ItemType>(_selectedItems);
+            _lastSelectedWeapon = _selectedWeapon;
+            
             // Pop this inventory management scene
             _sceneManager.PopScene(this);
             // Note: LevelSelect (or previous scene) remains on stack for proper back navigation
