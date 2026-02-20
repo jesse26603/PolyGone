@@ -47,6 +47,9 @@ public class Game1 : Game
     protected override void Update(GameTime gameTime)
     {
         var keyboardState = Keyboard.GetState();
+        
+        // Update centralized input manager
+        InputManager.Update(gameTime);
 
         if ((GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) && !(sceneManager.GetCurrentScene() is PauseScene || sceneManager.GetCurrentScene() is GameScene))
             Exit();
@@ -60,6 +63,8 @@ public class Game1 : Game
             else
             {
                 sceneManager.AddScene(new PauseScene(Content, sceneManager, _graphics));
+                // Reset click cooldown when opening pause menu
+                InputManager.ResetClickCooldown();
             }
         }
 

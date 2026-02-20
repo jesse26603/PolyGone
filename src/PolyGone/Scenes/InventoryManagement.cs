@@ -89,6 +89,9 @@ namespace PolyGone
                 return;
             }
 
+            // Mouse navigation for items
+            HandleMouseNavigation();
+
             switch (_currentMode)
             {
                 case SelectionMode.Items:
@@ -103,6 +106,95 @@ namespace PolyGone
             }
 
             previousKeyboardState = keyboardState;
+        }
+
+        private void HandleMouseNavigation()
+        {
+            if (_font == null) return;
+
+            var viewport = _graphics.GraphicsDevice.Viewport;
+
+            // Check items section
+            int itemsStartX = 100;
+            int itemsStartY = 200;
+            for (int i = 0; i < _itemNames.Length; i++)
+            {
+                var itemText = (_selectedItems.Contains(_itemTypes[i]) ? "[X] " : "[ ] ") + _itemNames[i];
+                var textSize = _font.MeasureString(itemText);
+                var bounds = new Rectangle(itemsStartX, itemsStartY + i * 40, (int)textSize.X, (int)textSize.Y);
+
+                if (bounds.Contains(InputManager.GetMousePosition()))
+                {
+                    _currentMode = SelectionMode.Items;
+                    _itemCursor = i;
+
+                    if (InputManager.IsLeftMouseButtonClicked())
+                    {
+                        ItemType selectedItem = _itemTypes[_itemCursor];
+                        if (_selectedItems.Contains(selectedItem))
+                        {
+                            _selectedItems.Remove(selectedItem);
+                        }
+                        else if (_selectedItems.Count < 2)
+                        {
+                            _selectedItems.Add(selectedItem);
+                        }
+                        InputManager.ConsumeClick();
+                    }
+                }
+            }
+
+            // Check weapons section
+            int weaponsStartX = viewport.Width / 2;
+            int weaponsStartY = 200;
+            for (int i = 0; i < _weaponNames.Length; i++)
+            {
+                var weaponText = (_weaponTypes[i] == _selectedWeapon ? "(O) " : "( ) ") + _weaponNames[i];
+                var textSize = _font.MeasureString(weaponText);
+                var bounds = new Rectangle(weaponsStartX, weaponsStartY + i * 40, (int)textSize.X, (int)textSize.Y);
+
+                if (bounds.Contains(InputManager.GetMousePosition()))
+                {
+                    _currentMode = SelectionMode.Weapon;
+                    _weaponCursor = i;
+
+                    if (InputManager.IsLeftMouseButtonClicked())
+                    {
+                        _selectedWeapon = _weaponTypes[_weaponCursor];
+                        InputManager.ConsumeClick();
+                    }
+                }
+            }
+
+            // Check confirm section
+            int confirmStartY = viewport.Height - 150;
+            string[] confirmOptions = { "Start Game", "Back" };
+            for (int i = 0; i < confirmOptions.Length; i++)
+            {
+                var optionText = (i == _confirmCursor && _currentMode == SelectionMode.Confirm ? "> " : "  ") + confirmOptions[i];
+                var textSize = _font.MeasureString(optionText);
+                var position = new Vector2(viewport.Width / 2f - textSize.X / 2f, confirmStartY + i * 40);
+                var bounds = new Rectangle((int)position.X, (int)position.Y, (int)textSize.X, (int)textSize.Y);
+
+                if (bounds.Contains(InputManager.GetMousePosition()))
+                {
+                    _currentMode = SelectionMode.Confirm;
+                    _confirmCursor = i;
+
+                    if (InputManager.IsLeftMouseButtonClicked())
+                    {
+                        if (_confirmCursor == 0)
+                        {
+                            StartGame();
+                        }
+                        else
+                        {
+                            _sceneManager.PopScene(this);
+                        }
+                        InputManager.ConsumeClick();
+                    }
+                }
+            }
         }
 
         private void UpdateItemSelection()
@@ -223,6 +315,8 @@ namespace PolyGone
             _sceneManager.PopScene(this);
             _sceneManager.PopScene(_sceneManager.GetCurrentScene()); // Pop level select too
             _sceneManager.AddScene(new GameScene(_content, _sceneManager, _graphics, _levelFile, _selectedItems, _selectedWeapon));
+            // Reset click cooldown when starting game
+            InputManager.ResetClickCooldown();
         }
 
         public void Draw(SpriteBatch spriteBatch)

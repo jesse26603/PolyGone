@@ -327,6 +327,12 @@ namespace PolyGone.Entities
             foreach (var item in itemInventory.Where(item => item.IsActive))
             {
                 item.Update(gameTime);
+                
+                // Apply healing over time from HealingGlowItem
+                if (item is HealingGlowItem healingGlow)
+                {
+                    healingGlow.ApplyHealingOverTime(this, (float)gameTime.ElapsedGameTime.TotalSeconds);
+                }
             }
             
             ffCooldown = Math.Max(0f, ffCooldown - 1f);

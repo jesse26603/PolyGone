@@ -33,6 +33,7 @@ public class GameScene : IScene
     private bool levelComplete = false;
     private readonly List<ItemType> selectedItems;
     private readonly WeaponType selectedWeapon;
+    private readonly string levelName;
 
     public GameScene(ContentManager contentManager, SceneManager sceneManager, GraphicsDeviceManager graphics, string levelName = "TestLevel", List<ItemType>? selectedItems = null, WeaponType selectedWeapon = WeaponType.Blaster)
     {       
@@ -41,9 +42,13 @@ public class GameScene : IScene
         this.graphics = graphics;
         this.selectedItems = selectedItems ?? new List<ItemType>(); // Default to empty list
         this.selectedWeapon = selectedWeapon;
+        this.levelName = levelName;
         LoadMapFromJson("../../../Content/Maps/" + levelName + ".json");
         textureStore = GetTextureStore(32, new int[2] { 4, 4 });
     }
+
+    // Public method to get the level name for restart functionality
+    public string GetLevelName() => levelName;
 
     // Generates a list of rectangles representing individual textures in a texture atlas
     public List<Rectangle> GetTextureStore(int textureSize, int[] gridSize)
@@ -238,14 +243,6 @@ public class GameScene : IScene
     
     public void Update(GameTime gameTime)
     {
-        // Check for reset input
-        KeyboardState keyboardState = Keyboard.GetState();
-        if (keyboardState.IsKeyDown(Keys.R))
-        {
-            Reset();
-            return;
-        }
-        
         // Check if level is complete
         if (levelComplete)
         {

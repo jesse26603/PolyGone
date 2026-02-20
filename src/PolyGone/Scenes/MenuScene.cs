@@ -59,6 +59,34 @@ namespace PolyGone
         {
             keyboardState = Keyboard.GetState();
 
+            // Mouse navigation
+            if (_font != null)
+            {
+                var viewport = _graphics.GraphicsDevice.Viewport;
+                var startY = viewport.Height / 2f - _options.Length * 40f / 2f;
+
+                for (var i = 0; i < _options.Length; i++)
+                {
+                    var option = _options[i];
+                    var textSize = _font.MeasureString(option);
+                    var position = new Vector2(viewport.Width / 2f - textSize.X / 2f, startY + i * 40f);
+                    var bounds = new Rectangle((int)position.X, (int)position.Y, (int)textSize.X, (int)textSize.Y);
+
+                    if (bounds.Contains(InputManager.GetMousePosition()))
+                    {
+                        _selectedIndex = i;
+                        
+                        // Mouse click with InputManager
+                        if (InputManager.IsLeftMouseButtonClicked())
+                        {
+                            ExecuteSelection();
+                            InputManager.ConsumeClick();
+                        }
+                    }
+                }
+            }
+
+            // Keyboard navigation
             if (IsKeyPressed(Keys.Up))
             {
                 _selectedIndex = (_selectedIndex - 1 + _options.Length) % _options.Length;
@@ -71,24 +99,29 @@ namespace PolyGone
 
             if (IsKeyPressed(Keys.Enter))
             {
-                if (_selectedIndex == 0)
-                {
-                    // Level Select
-                    _sceneManager.AddScene(new LevelSelect(_content, _sceneManager, _graphics));
-                }
-                else if (_selectedIndex == 1)
-                {
-                    // Options (placeholder for now)
-                    // Could add options scene later
-                }
-                else if (_selectedIndex == 2)
-                {
-                    // Exit to Desktop
-                    Environment.Exit(0);
-                }
+                ExecuteSelection();
             }
 
             previousKeyboardState = keyboardState;
+        }
+
+        private void ExecuteSelection()
+        {
+            if (_selectedIndex == 0)
+            {
+                // Level Select
+                _sceneManager.AddScene(new LevelSelect(_content, _sceneManager, _graphics));
+            }
+            else if (_selectedIndex == 1)
+            {
+                // Options (placeholder for now)
+                // Could add options scene later
+            }
+            else if (_selectedIndex == 2)
+            {
+                // Exit to Desktop
+                Environment.Exit(0);
+            }
         }
 
         public void Draw(SpriteBatch spriteBatch)

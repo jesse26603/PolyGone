@@ -48,6 +48,34 @@ namespace PolyGone
         {
             keyboardState = Keyboard.GetState();
 
+            // Mouse navigation
+            if (_font != null)
+            {
+                var viewport = _graphics.GraphicsDevice.Viewport;
+                var startY = viewport.Height / 2f - _levelNames.Length * 40f / 2f;
+
+                for (var i = 0; i < _levelNames.Length; i++)
+                {
+                    var levelName = _levelNames[i];
+                    var textSize = _font.MeasureString(levelName);
+                    var position = new Vector2(viewport.Width / 2f - textSize.X / 2f, startY + i * 40f);
+                    var bounds = new Rectangle((int)position.X, (int)position.Y, (int)textSize.X, (int)textSize.Y);
+
+                    if (bounds.Contains(InputManager.GetMousePosition()))
+                    {
+                        _selectedIndex = i;
+                        
+                        // Mouse click with InputManager
+                        if (InputManager.IsLeftMouseButtonClicked())
+                        {
+                            ExecuteSelection();
+                            InputManager.ConsumeClick();
+                        }
+                    }
+                }
+            }
+
+            // Keyboard navigation
             if (IsKeyPressed(Keys.Up))
             {
                 _selectedIndex = (_selectedIndex - 1 + _levelNames.Length) % _levelNames.Length;
@@ -60,20 +88,7 @@ namespace PolyGone
 
             if (IsKeyPressed(Keys.Enter))
             {
-                if (_selectedIndex == _levelNames.Length - 1)
-                {
-                    // Back to Menu
-                    _sceneManager.PopScene(this);
-                }
-                else
-                {
-                    // Go to inventory management with selected level
-                    string? levelFile = _levelFiles[_selectedIndex];
-                    if (levelFile != null)
-                    {
-                        _sceneManager.AddScene(new InventoryManagement(_content, _sceneManager, _graphics, levelFile));
-                    }
-                }
+                ExecuteSelection();
             }
 
             if (IsKeyPressed(Keys.Escape))
@@ -83,6 +98,24 @@ namespace PolyGone
             }
 
             previousKeyboardState = keyboardState;
+        }
+
+        private void ExecuteSelection()
+        {
+            if (_selectedIndex == _levelNames.Length - 1)
+            {
+                // Back to Menu
+                _sceneManager.PopScene(this);
+            }
+            else
+            {
+                // Go to inventory management with selected level
+                string? levelFile = _levelFiles[_selectedIndex];
+                if (levelFile != null)
+                {
+                    _sceneManager.AddScene(new InventoryManagement(_content, _sceneManager, _graphics, levelFile));
+                }
+            }
         }
 
         public void Draw(SpriteBatch spriteBatch)
