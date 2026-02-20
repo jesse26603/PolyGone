@@ -91,7 +91,7 @@ namespace PolyGone
                 ExecuteSelection();
             }
 
-            if (IsKeyPressed(Keys.Escape))
+            if (InputManager.IsEscapeKeyPressed())
             {
                 // Also allow Escape to go back
                 _sceneManager.PopScene(this);

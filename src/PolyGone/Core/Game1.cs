@@ -51,7 +51,7 @@ public class Game1 : Game
         // Update centralized input manager
         InputManager.Update(gameTime);
 
-        if ((GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) && !(sceneManager.GetCurrentScene() is PauseScene || sceneManager.GetCurrentScene() is GameScene))
+        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
             Exit();
 
         if (IsKeyPressed(Keys.Escape, keyboardState))

@@ -11,8 +11,12 @@ public static class InputManager
 {
     private static MouseState _currentMouseState;
     private static MouseState _previousMouseState;
+    private static KeyboardState _currentKeyboardState;
+    private static KeyboardState _previousKeyboardState;
     private static float _mouseClickCooldown = 0f;
+    private static float _escapeKeyCooldown = 0f;
     private const float CLICK_COOLDOWN = 0.01f; // 10ms between clicks
+    private const float ESCAPE_COOLDOWN = 0.2f; // 200ms between escape presses
     
     public static MouseState CurrentMouseState => _currentMouseState;
     public static MouseState PreviousMouseState => _previousMouseState;
@@ -25,9 +29,16 @@ public static class InputManager
         _previousMouseState = _currentMouseState;
         _currentMouseState = Mouse.GetState();
         
+        _previousKeyboardState = _currentKeyboardState;
+        _currentKeyboardState = Keyboard.GetState();
+        
         // Update click cooldown
         if (_mouseClickCooldown > 0f)
             _mouseClickCooldown -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            
+        // Update escape key cooldown
+        if (_escapeKeyCooldown > 0f)
+            _escapeKeyCooldown -= (float)gameTime.ElapsedGameTime.TotalSeconds;
     }
     
     /// <summary>
@@ -57,6 +68,16 @@ public static class InputManager
     public static void ResetClickCooldown()
     {
         _mouseClickCooldown = CLICK_COOLDOWN;
+    }
+    
+    /// <summary>
+    /// Checks if the Escape key was just pressed (down now, up before).
+    /// This prevents the key press from being processed by multiple scenes by tracking state globally.
+    /// </summary>
+    public static bool IsEscapeKeyPressed()
+    {
+        return _currentKeyboardState.IsKeyDown(Keys.Escape) 
+            && !_previousKeyboardState.IsKeyDown(Keys.Escape);
     }
     
     /// <summary>

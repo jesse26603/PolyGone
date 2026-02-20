@@ -89,6 +89,14 @@ namespace PolyGone
                 return;
             }
 
+            // Check for Escape key to go back to previous screen
+            if (InputManager.IsEscapeKeyPressed())
+            {
+                _sceneManager.PopScene(this);
+                previousKeyboardState = keyboardState;
+                return;
+            }
+
             // Mouse navigation for items
             HandleMouseNavigation();
 
@@ -230,12 +238,6 @@ namespace PolyGone
                 // Move to weapon selection
                 _currentMode = SelectionMode.Weapon;
             }
-
-            if (IsKeyPressed(Keys.Escape))
-            {
-                // Go back to level select
-                _sceneManager.PopScene(this);
-            }
         }
 
         private void UpdateWeaponSelection()
@@ -267,12 +269,6 @@ namespace PolyGone
                 // Move to confirm
                 _currentMode = SelectionMode.Confirm;
             }
-
-            if (IsKeyPressed(Keys.Escape))
-            {
-                // Go back to item selection
-                _currentMode = SelectionMode.Items;
-            }
         }
 
         private void UpdateConfirmSelection()
@@ -299,12 +295,6 @@ namespace PolyGone
             if (IsKeyPressed(Keys.Left) || (IsKeyPressed(Keys.Tab) && keyboardState.IsKeyDown(Keys.LeftShift)))
             {
                 // Move back to weapon selection
-                _currentMode = SelectionMode.Weapon;
-            }
-
-            if (IsKeyPressed(Keys.Escape))
-            {
-                // Go back to weapon selection
                 _currentMode = SelectionMode.Weapon;
             }
         }
