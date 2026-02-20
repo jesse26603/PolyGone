@@ -1,7 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using PolyGone.Entities;
 
 namespace PolyGone.Items
 {
@@ -24,13 +23,13 @@ namespace PolyGone.Items
         }
 
         // Called when item is equipped/activated
-        public virtual void Apply(Player player)
+        public virtual void Apply(PolyGone.Entities.Player player)
         {
             IsActive = true;
         }
 
         // Called when item is unequipped/deactivated
-        public virtual void Remove(Player player)
+        public virtual void Remove(PolyGone.Entities.Player player)
         {
             IsActive = false;
         }
@@ -92,13 +91,13 @@ namespace PolyGone.Items
         {
         }
 
-        public override void Apply(Player player)
+        public override void Apply(PolyGone.Entities.Player player)
         {
             base.Apply(player);
             hasDoubleJumped = false; // Reset double jump state when equipped
         }
 
-        public override void Remove(Player player)
+        public override void Remove(PolyGone.Entities.Player player)
         {
             base.Remove(player);
             hasDoubleJumped = false; // Reset state when removed
@@ -115,7 +114,7 @@ namespace PolyGone.Items
         }
 
         // Call this method from Player's HandleInput when checking for jump
-        public bool TryDoubleJump(Player player, bool spacePressed, bool wasOnGround)
+        public bool TryDoubleJump(PolyGone.Entities.Player player, bool spacePressed, bool wasOnGround)
         {
             if (!IsActive) return false;
 
@@ -146,13 +145,13 @@ namespace PolyGone.Items
         {
         }
 
-        public override void Apply(Player player)
+        public override void Apply(PolyGone.Entities.Player player)
         {
             base.Apply(player);
             // Speed boost is handled in Player's movement calculations
         }
 
-        public override void Remove(Player player)
+        public override void Remove(PolyGone.Entities.Player player)
         {
             base.Remove(player);
             // Speed boost removal is handled in Player's movement calculations
@@ -186,7 +185,7 @@ namespace PolyGone.Items
         {
         }
 
-        public override void Apply(Player player)
+        public override void Apply(PolyGone.Entities.Player player)
         {
             base.Apply(player);
             if (!hasHealed)
@@ -198,7 +197,7 @@ namespace PolyGone.Items
             glowTime = 0f;
         }
 
-        public override void Remove(Player player)
+        public override void Remove(PolyGone.Entities.Player player)
         {
             base.Remove(player);
             hasHealed = false;
