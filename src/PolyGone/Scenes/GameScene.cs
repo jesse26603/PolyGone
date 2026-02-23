@@ -8,16 +8,19 @@ using System.Text.Json;
 using System.Linq;
 using System;
 using PolyGone.Entities;
+using PolyGone.Graphics;
 
 namespace PolyGone;
 
 public class GameScene : IScene
 {
     private ContentManager contentManager;
-    private Texture2D texture = null!;
+    private Texture2D texture;
+    private SpriteFont hudFont;
     private SceneManager sceneManager;
-    private Player player = null!;
-    private FollowCamera camera = null!;
+    private Player player;
+    private FollowCamera camera;
+    private GameUI gameUI;
     private readonly GraphicsDeviceManager graphics;
     private Dictionary<Vector2, int> tileMap = null!;
     private Dictionary<Vector2, int> collisionMap = null!;
@@ -26,15 +29,30 @@ public class GameScene : IScene
     private bool playerSpawnFound = false;
     private readonly List<Vector2> enemySpawns = new(); // Store enemy spawn positions
     private readonly List<Entity> enemies = new(); // Placeholder for enemy list
+    private GoalTrigger goalTrigger; // Win condition trigger
+    private bool levelComplete = false;
+    private readonly List<ItemType> selectedItems;
+    private readonly WeaponType selectedWeapon;
+    private readonly string levelName;
 
-    public GameScene(ContentManager contentManager, SceneManager sceneManager, GraphicsDeviceManager graphics)
-    {
+    public GameScene(ContentManager contentManager, SceneManager sceneManager, GraphicsDeviceManager graphics, string levelName = "TestLevel", List<ItemType>? selectedItems = null, WeaponType selectedWeapon = WeaponType.Blaster)
+    {       
         this.contentManager = contentManager;
         this.sceneManager = sceneManager;
         this.graphics = graphics;
-        LoadMapFromJson("../../../Content/Maps/TestLevel.json");
+        this.selectedItems = selectedItems ?? new List<ItemType>(); // Default to empty list
+        this.selectedWeapon = selectedWeapon;
+        this.levelName = levelName;
+        LoadMapFromJson("../../../Content/Maps/" + levelName + ".json");
         textureStore = GetTextureStore(32, new int[2] { 4, 4 });
     }
+
+    // Public method to get the level name for restart functionality
+    public string GetLevelName() => levelName;
+    
+    // Public methods to get the current loadout for restart functionality
+    public List<ItemType> GetSelectedItems() => new List<ItemType>(selectedItems);
+    public WeaponType GetSelectedWeapon() => selectedWeapon;
 
     // Generates a list of rectangles representing individual textures in a texture atlas
     public List<Rectangle> GetTextureStore(int textureSize, int[] gridSize)
@@ -130,6 +148,15 @@ public class GameScene : IScene
                             );
                             enemySpawns.Add(enemyPos);
                             break;
+                        case "Goal":
+                            Vector2 goalPos = AdjustCoordinates(
+                                obj.GetProperty("x").GetSingle(),
+                                obj.GetProperty("y").GetSingle()
+                            );
+                            int goalWidth = (int)(obj.GetProperty("width").GetSingle() * 2);
+                            int goalHeight = (int)(obj.GetProperty("height").GetSingle() * 2);
+                            goalTrigger = new GoalTrigger(goalPos, goalWidth, goalHeight);
+                            break;
                         default:
                             break;
                     }
@@ -149,10 +176,21 @@ public class GameScene : IScene
 
     public void Load()
     {
+        // Reset input state to prevent carried over clicks from triggering actions
+        InputManager.ResetClickCooldown();
+        
         // Load texture atlas and initialize camera
         texture = contentManager.Load<Texture2D>("PolyGoneTileMap");
+        try
+        {
+            hudFont = contentManager.Load<SpriteFont>("Fonts/PauseMenu");
+        }
+        catch (ContentLoadException)
+        {
+            Console.WriteLine("Warning: Could not load SpriteFont 'Fonts/PauseMenu'. HUD text will not be rendered with this font.");
+        }
         camera = new(new Vector2(0, 0));
-        // Initialize player
+        // Initialize player with selected items and weapon
         player = new Player(
             texture: texture,
             position: playerPos,
@@ -162,8 +200,13 @@ public class GameScene : IScene
             srcRect: textureStore[1],
             collisionMap: collisionMap,
             blasterTexture: texture,
+            selectedItems: selectedItems,
+            selectedWeapon: selectedWeapon,
             visualSize: new int[2] { 64, 64 }
         );
+        
+        // Initialize GameUI
+        gameUI = new GameUI(player, texture, textureStore[0], hudFont);
         // Initialize enemies from spawn positions
         enemies.AddRange(enemySpawns.Select(spawnPos => new Enemy(
             texture: texture,
@@ -198,15 +241,22 @@ public class GameScene : IScene
             patrolSpeed: 1f,
             visualSize: new int[2] { 64, 64 }
         )));
+        
+        // Reset goal trigger and level completion
+        if (goalTrigger != null)
+        {
+            goalTrigger.Reset();
+        }
+        levelComplete = false;
     }
     
     public void Update(GameTime gameTime)
     {
-        // Check for reset input
-        KeyboardState keyboardState = Keyboard.GetState();
-        if (keyboardState.IsKeyDown(Keys.R))
+        // Check if level is complete
+        if (levelComplete)
         {
-            Reset();
+            // Could transition to next level or exit scene here
+            // For now, just prevent further updates
             return;
         }
         
@@ -268,6 +318,18 @@ public class GameScene : IScene
                 enemy.EntityCollisionUpdate(allEntities);
             }
         }
+        
+        // Check for goal trigger
+        if (goalTrigger != null && !levelComplete)
+        {
+            goalTrigger.CheckTrigger(player.Rectangle);
+            if (goalTrigger.IsTriggered)
+            {
+                levelComplete = true;
+                // Transition to win scene with current loadout
+                sceneManager.AddScene(new WinScene(contentManager, sceneManager, graphics, levelName, selectedItems, selectedWeapon));
+            }
+        }
     }
     public void Draw(SpriteBatch spriteBatch)
     {
@@ -279,7 +341,7 @@ public class GameScene : IScene
                 64,
                 64
             );
-            Rectangle src = textureStore[tile.Value];
+            Rectangle src = textureStore[tile.Value % textureStore.Count]; // Ensure we don't go out of bounds
             spriteBatch.Draw(texture, dest, src, Color.White);
         }
         foreach (var enemy in enemies)
@@ -288,8 +350,22 @@ public class GameScene : IScene
         }
         player.Draw(spriteBatch, camera.position);
         
-        // Draw item indicators (UI overlay, not affected by camera)
-        // Using the same texture and source rectangle as the player sprite
-        player.DrawItemIndicators(spriteBatch, texture, textureStore[1]);
+        // Draw goal trigger (if it exists)
+        if (goalTrigger != null)
+        {
+            Rectangle goalRect = goalTrigger.GetBounds();
+            Rectangle goalDest = new Rectangle(
+                (int)(goalRect.X - camera.position.X),
+                (int)(goalRect.Y - camera.position.Y),
+                goalRect.Width,
+                goalRect.Height
+            );
+            // Draw goal with a green tint (using tile 0 or any appropriate texture)
+            Color goalColor = goalTrigger.IsTriggered ? Color.Gold : Color.LimeGreen;
+            spriteBatch.Draw(texture, goalDest, textureStore[0], goalColor * 0.5f);
+        }
+        
+        // Draw new GameUI (health, cooldown, and active items)
+        gameUI.Draw(spriteBatch);
     }
 }

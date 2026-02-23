@@ -9,11 +9,13 @@ using PolyGone.Entities;
 
 namespace PolyGone.Weapons
 {
-    class Blaster : Item
+    public class Blaster : Item
     {
         public float rotation = 0f;
         protected readonly List<Projectile> bullets; // Reference to shared bullets list
         protected float cooldown;
+        public float Cooldown => cooldown;
+        public virtual float MaxCooldown => 12f; // Default blaster cooldown
         protected readonly Dictionary<Vector2, int> collisionMap;
         public Blaster(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, List<Projectile> sharedBullets, Rectangle? srcRect = null)
             : base(texture, position, size, color, "Blaster", "Basic energy weapon", srcRect)
@@ -25,9 +27,8 @@ namespace PolyGone.Weapons
 
         public void Follow(Rectangle target, Vector2 cameraOffset)
         {
-            // Get mouse position
-            MouseState mouseState = Mouse.GetState();
-            Vector2 mousePosition = mouseState.Position.ToVector2();
+            // Get mouse position from InputManager
+            Vector2 mousePosition = InputManager.GetMousePosition().ToVector2();
 
             // Convert mouse position from screen space to world space
             Vector2 worldMousePosition = mousePosition + cameraOffset;
@@ -52,9 +53,8 @@ namespace PolyGone.Weapons
 
         public override void Use()
         {
-            // Handle shooting
-            MouseState mouseState = Mouse.GetState();
-            if (mouseState.LeftButton == ButtonState.Pressed && cooldown <= 0f)
+            // Handle shooting with InputManager to prevent click carryover
+            if (InputManager.IsLeftMouseButtonClicked() && cooldown <= 0f)
             {
                 bullets.Add(new Projectile(
                     texture: texture,
@@ -70,6 +70,7 @@ namespace PolyGone.Weapons
                     collisionMap: collisionMap
                 ));
                 cooldown = 12f; // Cooldown of 0.2 seconds at 60fps
+                InputManager.ConsumeClick(); // Prevent multiple shots from same click
             }
         }
 

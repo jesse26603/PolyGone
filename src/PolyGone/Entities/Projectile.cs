@@ -12,7 +12,7 @@ namespace PolyGone
         Enemy
     }
 
-    class Projectile : Entity
+    public class Projectile : Entity
     {
         public readonly float xSpeed;
         public readonly float ySpeed;
