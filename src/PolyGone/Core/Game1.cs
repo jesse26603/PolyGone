@@ -80,7 +80,7 @@ public class Game1 : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.CornflowerBlue);
+        GraphicsDevice.Clear(Color.White);
 
         // TODO: Add your drawing code here
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
