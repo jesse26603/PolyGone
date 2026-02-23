@@ -7,7 +7,7 @@ using PolyGone.Items;
 
 namespace PolyGone;
 
-class Entity : Sprite
+public class Entity : Sprite
 {
 
     protected readonly Dictionary<Vector2, int>? collisionMap;
@@ -314,6 +314,7 @@ class Entity : Sprite
         }
         base.Update(gameTime);
     }
+
 
     public override void Draw(SpriteBatch spriteBatch, Vector2 offset)
     {

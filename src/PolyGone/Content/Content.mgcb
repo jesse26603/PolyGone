@@ -13,6 +13,13 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Fonts/PauseMenu.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/PauseMenu.spritefont
+
 #begin PolyGoneTileMap.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -24,4 +31,11 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:PolyGoneTileMap.png
+
+#begin DefaultFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:DefaultFont.spritefont
 
