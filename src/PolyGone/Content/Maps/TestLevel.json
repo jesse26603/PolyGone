@@ -53,9 +53,9 @@
                 {
                  "height":32,
                  "id":12,
-                 "name":"Finish",
+                 "name":"Goal",
                  "rotation":0,
-                 "type":"End",
+                 "type":"Goal",
                  "visible":true,
                  "width":32,
                  "x":2784,
@@ -600,19 +600,7 @@
                  "width":32,
                  "x":1248,
                  "y":832
-                },
-                {
-                   "gid":5,
-                   "height":32,
-                   "id":7,
-                   "name":"",
-                   "rotation":0,
-                   "type":"Goal",
-                   "visible":true,
-                   "width":32,
-                   "x":2816,
-                   "y":768
-                  }],
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,

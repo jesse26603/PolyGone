@@ -44,7 +44,7 @@
                  "id":1,
                  "name":"",
                  "rotation":0,
-                 "type":"PlayerSpawn",
+                 "type":"Player",
                  "visible":true,
                  "width":32,
                  "x":416,

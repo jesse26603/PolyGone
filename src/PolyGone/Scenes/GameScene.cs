@@ -109,16 +109,15 @@ public class GameScene : IScene
                     
                     if (tileValue > 0)
                     {
-                        // Subtract the firstgid to get texture atlas index
-                        // BasicTiles tileset has firstgid=17, so we subtract 17
+                        // Tiled's firstgid is 1, so we subtract 1 to convert to 0-based index.
+                        // Wrap tileValue to fit within our texture store (assuming 16 tiles per layer in Tiled)
                         if (layerName == "Tiles")
                         {
-                            tileMap[new Vector2(x, y)] = tileValue - 17;
+                            tileMap[new Vector2(x, y)] = tileValue % 16 - 1; 
                         }
                         else if (layerName == "Collisions")
                         {
-                            // CollisionTiles tileset has firstgid=1, so we subtract 1
-                            collisionMap[new Vector2(x, y)] = tileValue - 1;
+                            collisionMap[new Vector2(x, y)] = tileValue % 16 - 1;
                         }
                     }
                     
