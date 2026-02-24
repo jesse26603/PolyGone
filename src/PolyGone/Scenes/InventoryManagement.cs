@@ -17,7 +17,8 @@ namespace PolyGone
     public enum WeaponType
     {
         Blaster,
-        Shotgun
+        Shotgun,
+        Rifle
     }
 
     internal class InventoryManagement : IScene
@@ -34,8 +35,8 @@ namespace PolyGone
         // Available items and weapons
         private readonly string[] _itemNames = { "Double Jump", "Speed Boost", "Healing Glow" };
         private readonly ItemType[] _itemTypes = { ItemType.DoubleJump, ItemType.SpeedBoost, ItemType.HealingGlow };
-        private readonly string[] _weaponNames = { "Blaster", "Shotgun" };
-        private readonly WeaponType[] _weaponTypes = { WeaponType.Blaster, WeaponType.Shotgun };
+        private readonly string[] _weaponNames = { "Blaster", "Shotgun", "Rifle" };
+        private readonly WeaponType[] _weaponTypes = { WeaponType.Blaster, WeaponType.Shotgun, WeaponType.Rifle };
 
         // Static fields to remember last selection across instances
         private static List<ItemType> _lastSelectedItems = new List<ItemType> { ItemType.DoubleJump, ItemType.SpeedBoost };
