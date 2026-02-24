@@ -39,6 +39,7 @@ namespace PolyGone.Weapons
                         size: new int[2] { 8, 8 }, // Slightly smaller pellets
                         lifetime: 120f, // Shorter range than regular blaster
                         health: 1,
+                        damage: 15, // Weaker than blaster but multiple pellets
                         color: Color.Orange, // Different color to distinguish
                         xSpeed: (float)(Math.Cos(currentAngle) * 600f), // Slightly slower
                         ySpeed: (float)(Math.Sin(currentAngle) * 600f),

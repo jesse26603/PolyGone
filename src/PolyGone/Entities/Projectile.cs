@@ -18,14 +18,15 @@ namespace PolyGone
         public readonly float ySpeed;
         public float lifetime; // Separate from Entity health for projectiles
         public readonly Owner owner; // Who fired this projectile
-        public int damage => 40; // Fixed damage for now
-        public Projectile(Texture2D texture, Vector2 position, int[] size, float lifetime, int health, Color color, float xSpeed, float ySpeed, Owner owner, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null)
+        public readonly int damage; // Fixed damage for now
+        public Projectile(Texture2D texture, Vector2 position, int[] size, float lifetime, int health, Color color, float xSpeed, float ySpeed, Owner owner, int damage, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null)
             : base(texture, position, size, health, color, srcRect, collisionMap)
         {
             this.xSpeed = xSpeed;
             this.ySpeed = ySpeed;
             this.lifetime = lifetime;
             this.owner = owner;
+            this.damage = damage;
         }
 
         // Fire projectiles from blaster to global mouse position

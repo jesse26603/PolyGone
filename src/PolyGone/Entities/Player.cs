@@ -44,6 +44,9 @@ namespace PolyGone.Entities
                 case WeaponType.Shotgun:
                     currentWeapon = new Shotgun(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.Red, collisionMap, bullets, srcRect);
                     break;
+                case WeaponType.Rifle:
+                    currentWeapon = new Rifle(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.Black, collisionMap, bullets, srcRect);
+                    break;
             }
             
             // Create and activate the selected items
