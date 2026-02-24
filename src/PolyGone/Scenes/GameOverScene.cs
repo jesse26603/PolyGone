@@ -160,7 +160,7 @@ internal class GameOverScene : IScene
             var titleSize = font.MeasureString(title);
             var titlePos = new Vector2(viewport.Width / 2f - titleSize.X / 2f, viewport.Height / 2f - 120f);
             spriteBatch.DrawString(font, title, titlePos + new Vector2(2, 2), Color.Black * 0.6f); // drop shadow
-            spriteBatch.DrawString(font, title, titlePos, Color.OrangeRed);
+            spriteBatch.DrawString(font, title, titlePos, Color.White);
 
             // Menu options
             var startY = viewport.Height / 2f + 30f;
