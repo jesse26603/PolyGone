@@ -109,11 +109,28 @@ namespace PolyGone
             }
             else
             {
-                // Go to inventory management with selected level
                 string? levelFile = _levelFiles[_selectedIndex];
-                if (levelFile != null)
+                if (levelFile == null) return;
+
+                // Require Formbar login before accessing any level
+                if (!FormbarSession.IsLoggedIn)
+                {
+                    _sceneManager.AddScene(new FormbarLoginScene(_content, _sceneManager, _graphics));
+                    return;
+                }
+
+                // If the player has already paid for this level, go straight to loadout selection
+                if (PurchaseTracker.HasPurchased(FormbarSession.UserId, levelFile))
                 {
                     _sceneManager.AddScene(new InventoryManagement(_content, _sceneManager, _graphics, levelFile));
+                }
+                else
+                {
+                    // Player must pay before playing
+                    _sceneManager.AddScene(new PaymentScene(
+                        _content, _sceneManager, _graphics,
+                        levelFile,
+                        _levelNames[_selectedIndex]));
                 }
             }
         }

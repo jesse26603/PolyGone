@@ -29,7 +29,8 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
-        // TODO: Add your initialization logic here
+        // Hook up text input so scenes can accept keyboard text entry
+        Window.TextInput += InputManager.OnTextInput;
 
         base.Initialize();
     }
@@ -42,6 +43,8 @@ public class Game1 : Game
         // TODO: use this.Content to load your game content here
         sceneManager.AddScene(new GameScene(Content, sceneManager, _graphics));
         sceneManager.AddScene(new MenuScene(Content, sceneManager, _graphics));
+        // Login scene sits on top of the menu; it pops itself after a successful login
+        sceneManager.AddScene(new FormbarLoginScene(Content, sceneManager, _graphics));
     }
 
     protected override void Update(GameTime gameTime)
