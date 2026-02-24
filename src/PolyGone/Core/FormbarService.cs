@@ -61,7 +61,9 @@ public static class FormbarService
     private static int ReadInt(JsonElement el, string key)
     {
         if (!el.TryGetProperty(key, out var prop)) return 0;
-        return prop.ValueKind == JsonValueKind.Number ? prop.GetInt32() : 0;
+        if (prop.ValueKind != JsonValueKind.Number) return 0;
+        // Use GetDouble() then cast so fractional values like 10.0 are handled correctly
+        return (int)prop.GetDouble();
     }
 
     /// <summary>
@@ -115,7 +117,7 @@ public static class FormbarService
     {
         try
         {
-            var payload = new { from = fromId, to = toId, amount, reason, pin };
+            var payload = new { from = fromId, to = toId, amount, reason, pin, pool = true };
 
             var content = new StringContent(
                 JsonSerializer.Serialize(payload),

@@ -27,10 +27,9 @@ public static class FormbarSession
     public static bool IsLoggedIn { get; set; } = false;
 
     /// <summary>
-    /// The Formbar user ID of the game's account that receives Digipog payments.
-    /// Change this to the actual game/teacher account ID before deployment.
+    /// The Formbar pool ID that receives Digipog payments for level unlocks.
     /// </summary>
-    public const int GameAccountId = 0;
+    public const int GameAccountId = 47;
 
     /// <summary>Cost in Digipogs to unlock each level.</summary>
     public const int LevelCost = 5;
