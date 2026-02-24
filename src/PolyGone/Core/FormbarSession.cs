@@ -8,7 +8,10 @@ public static class FormbarSession
     /// <summary>Base URL of the Formbar server (e.g. "https://formbeta.yorktechapps.com").</summary>
     public static string ServerUrl { get; set; } = "https://formbeta.yorktechapps.com";
 
-    /// <summary>The player's Formbar API key (found at /profile on the Formbar server).</summary>
+    /// <summary>
+    /// The OAuth JWT token received from the Formbar Passport login.
+    /// Stored here so it can be passed as auth for Digipog transfer API calls.
+    /// </summary>
     public static string ApiKey { get; set; } = "";
 
     /// <summary>The player's Formbar user ID, populated after a successful login.</summary>

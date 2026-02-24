@@ -21,6 +21,50 @@ public static class FormbarService
     public record TransferResult(bool Success, string Message);
 
     /// <summary>
+    /// Decodes a Formbar Passport JWT token and returns the user's info.
+    /// The JWT payload is base64url-encoded JSON – no API call is required.
+    /// Returns null if the token is malformed.
+    /// </summary>
+    public static UserInfo? DecodeJwt(string jwt)
+    {
+        try
+        {
+            var parts = jwt.Split('.');
+            if (parts.Length != 3) return null;
+
+            // Base64url → Base64 → bytes → JSON string
+            string base64 = parts[1]
+                .Replace('-', '+')
+                .Replace('_', '/');
+            int pad = (4 - base64.Length % 4) % 4;
+            if (pad < 4) base64 += new string('=', pad);
+
+            byte[] bytes = Convert.FromBase64String(base64);
+            string json = Encoding.UTF8.GetString(bytes);
+
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            int id = ReadInt(root, "id");
+            string displayName = root.TryGetProperty("displayName", out var dn)
+                ? dn.GetString() ?? "" : "";
+            int digipogs = ReadInt(root, "digipogs");
+
+            return new UserInfo(id, displayName, digipogs);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static int ReadInt(JsonElement el, string key)
+    {
+        if (!el.TryGetProperty(key, out var prop)) return 0;
+        return prop.ValueKind == JsonValueKind.Number ? prop.GetInt32() : 0;
+    }
+
+    /// <summary>
     /// Calls GET /api/me to verify an API key and retrieve the user's profile.
     /// Returns (UserInfo, null) on success or (null, errorMessage) on failure.
     /// </summary>
@@ -80,7 +124,8 @@ public static class FormbarService
 
             var request = new HttpRequestMessage(HttpMethod.Post,
                 $"{serverUrl.TrimEnd('/')}/api/digipogs/transfer");
-            request.Headers.TryAddWithoutValidation("API", apiKey);
+            if (!string.IsNullOrEmpty(apiKey))
+                request.Headers.TryAddWithoutValidation("API", apiKey);
             request.Content = content;
 
             var response = await _client.SendAsync(request);
