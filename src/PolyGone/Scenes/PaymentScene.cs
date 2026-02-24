@@ -8,10 +8,11 @@ using Microsoft.Xna.Framework.Input;
 namespace PolyGone;
 
 /// <summary>
-/// Shown when a player tries to access a level they have not yet purchased.
-/// Charges <see cref="FormbarSession.LevelCost"/> Digipogs via the Formbar API
-/// before granting access.  The player must supply their Digipog PIN (from
-/// their /profile page on the Formbar website) to authorise the transfer.
+/// Shown when a player tries to access a level they have not yet unlocked.
+/// A one-time payment of <see cref="FormbarSession.LevelCost"/> Digipogs grants
+/// access to all levels.  The player supplies their Digipog PIN to authorise
+/// the transfer; the server is the authoritative source on whether the payment
+/// succeeds.
 /// </summary>
 internal class PaymentScene : IScene
 {
@@ -20,8 +21,7 @@ internal class PaymentScene : IScene
     private readonly ContentManager _content;
     private readonly SceneManager _sceneManager;
     private readonly GraphicsDeviceManager _graphics;
-    private readonly string _levelFile;
-    private readonly string _levelDisplayName;
+    private readonly string _levelFile; // destination after successful purchase
 
     // PIN input
     private string _pin = "";
@@ -39,13 +39,12 @@ internal class PaymentScene : IScene
         SceneManager sceneManager,
         GraphicsDeviceManager graphics,
         string levelFile,
-        string levelDisplayName)
+        string levelDisplayName)   // kept for API compatibility; not used in the UI
     {
         _content = content;
         _sceneManager = sceneManager;
         _graphics = graphics;
         _levelFile = levelFile;
-        _levelDisplayName = levelDisplayName;
         _previousKeyboardState = Keyboard.GetState();
     }
 
@@ -71,12 +70,10 @@ internal class PaymentScene : IScene
 
             if (result.Success)
             {
-                // Record the purchase so the player is not charged again
-                PurchaseTracker.RecordPurchase(FormbarSession.UserId, _levelFile);
-                // Reflect the deduction locally (actual source of truth is the Formbar server)
-                FormbarSession.Digipogs -= FormbarSession.LevelCost;
+                // Record once so all levels are unlocked from now on
+                PurchaseTracker.RecordPurchase(FormbarSession.UserId, FormbarSession.AllLevelsKey);
 
-                // Move directly to inventory / loadout selection
+                // Go straight to loadout selection for the chosen level
                 _sceneManager.PopScene(this);
                 _sceneManager.AddScene(new InventoryManagement(
                     _content, _sceneManager, _graphics, _levelFile));
@@ -127,23 +124,23 @@ internal class PaymentScene : IScene
             var mousePos = InputManager.GetMousePosition();
 
             // PIN field click area
-            float pinFieldY = viewport.Height / 2f;
+            float pinFieldY = viewport.Height / 2f - 10f;
             var pinBounds = new Rectangle(
-                viewport.Width / 2 - 200, (int)pinFieldY - 3, 400, 28);
+                viewport.Width / 2 - 150, (int)pinFieldY - 3, 300, 28);
             if (pinBounds.Contains(mousePos))
             {
                 InputManager.ConsumeClick();
             }
 
             // Pay button
-            float payBtnY = viewport.Height / 2f + 80f;
-            string payLabel = "Pay " + FormbarSession.LevelCost + " Digipogs";
+            float payBtnY = viewport.Height / 2f + 35f;
+            string payLabel = $"Pay {FormbarSession.LevelCost} Digipogs";
             var paySize = _font.MeasureString(payLabel);
             var payBounds = new Rectangle(
-                (int)(viewport.Width / 2f - paySize.X / 2f) - 10,
-                (int)payBtnY - 5,
-                (int)paySize.X + 20,
-                (int)paySize.Y + 10);
+                (int)(viewport.Width / 2f - paySize.X / 2f) - 8,
+                (int)payBtnY - 4,
+                (int)paySize.X + 16,
+                (int)paySize.Y + 8);
             if (payBounds.Contains(mousePos) && _pin.Length > 0)
             {
                 StartPayment();
@@ -151,14 +148,14 @@ internal class PaymentScene : IScene
             }
 
             // Cancel button
-            float cancelBtnY = payBtnY + 50f;
+            float cancelBtnY = payBtnY + 40f;
             string cancelLabel = "Cancel";
             var cancelSize = _font.MeasureString(cancelLabel);
             var cancelBounds = new Rectangle(
-                (int)(viewport.Width / 2f - cancelSize.X / 2f) - 10,
-                (int)cancelBtnY - 5,
-                (int)cancelSize.X + 20,
-                (int)cancelSize.Y + 10);
+                (int)(viewport.Width / 2f - cancelSize.X / 2f) - 8,
+                (int)cancelBtnY - 4,
+                (int)cancelSize.X + 16,
+                (int)cancelSize.Y + 8);
             if (cancelBounds.Contains(mousePos))
             {
                 _sceneManager.PopScene(this);
@@ -177,12 +174,6 @@ internal class PaymentScene : IScene
             return;
         }
 
-        if (FormbarSession.Digipogs < FormbarSession.LevelCost)
-        {
-            _statusMessage = $"Insufficient Digipogs. You need {FormbarSession.LevelCost} but have {FormbarSession.Digipogs}.";
-            return;
-        }
-
         _isProcessing = true;
         _statusMessage = "Processing payment...";
         _paymentTask = FormbarService.TransferDigipogs(
@@ -191,7 +182,7 @@ internal class PaymentScene : IScene
             FormbarSession.UserId,
             FormbarSession.GameAccountId,
             FormbarSession.LevelCost,
-            $"PolyGone level unlock: {_levelDisplayName}",
+            "PolyGone: unlock all levels",
             pinInt);
     }
 
@@ -204,6 +195,8 @@ internal class PaymentScene : IScene
         }
 
         var viewport = spriteBatch.GraphicsDevice.Viewport;
+        float cx = viewport.Width / 2f;
+        float cy = viewport.Height / 2f;
 
         // Background
         spriteBatch.Draw(_pixel,
@@ -213,56 +206,52 @@ internal class PaymentScene : IScene
         if (_font == null) return;
 
         // ---- Title ----
-        DrawCentered(spriteBatch, viewport, "Unlock Level", viewport.Height / 4f, Color.Gold);
-        DrawCentered(spriteBatch, viewport,
-            $"Access to \"{_levelDisplayName}\" costs {FormbarSession.LevelCost} Digipogs.",
-            viewport.Height / 4f + 45f, Color.White);
+        DrawCentered(spriteBatch, viewport, "Unlock All Levels", cy - 110f, Color.Gold);
 
-        // ---- Player info ----
+        // ---- Description ----
         DrawCentered(spriteBatch, viewport,
-            $"Logged in as: {FormbarSession.DisplayName}  |  Balance: {FormbarSession.Digipogs} Digipogs",
-            viewport.Height / 4f + 85f,
-            FormbarSession.Digipogs >= FormbarSession.LevelCost ? Color.LightGreen : Color.OrangeRed);
+            $"One-time payment of {FormbarSession.LevelCost} Digipogs unlocks every level.",
+            cy - 75f, Color.White);
+
+        // ---- Logged-in name ----
+        DrawCentered(spriteBatch, viewport,
+            $"Logged in as: {FormbarSession.DisplayName}",
+            cy - 45f, Color.LightGray);
+
+        // ---- PIN label ----
+        spriteBatch.DrawString(_font, "Digipog PIN:",
+            new Vector2(cx - 150f, cy - 30f), Color.White);
 
         // ---- PIN field ----
-        float pinLabelY = viewport.Height / 2f - 40f;
-        spriteBatch.DrawString(_font, "Digipog PIN (from your /profile page):",
-            new Vector2(viewport.Width / 2f - 200f, pinLabelY), Color.White);
-
-        float pinFieldY = viewport.Height / 2f;
-        // Border
+        float pinFieldY = cy - 10f;
         spriteBatch.Draw(_pixel,
-            new Rectangle(viewport.Width / 2 - 200, (int)pinFieldY - 3, 400, 28),
+            new Rectangle((int)cx - 150, (int)pinFieldY - 3, 300, 28),
             Color.Yellow);
-        // Background
         spriteBatch.Draw(_pixel,
-            new Rectangle(viewport.Width / 2 - 198, (int)pinFieldY - 1, 396, 24),
+            new Rectangle((int)cx - 148, (int)pinFieldY - 1, 296, 24),
             Color.Black);
-        // Masked PIN
         string maskedPin = new string('*', _pin.Length) + "|";
         spriteBatch.DrawString(_font, maskedPin,
-            new Vector2(viewport.Width / 2f - 195f, pinFieldY), Color.White);
+            new Vector2(cx - 143f, pinFieldY), Color.White);
 
         // ---- Pay button ----
-        float payBtnY = viewport.Height / 2f + 80f;
-        string payLabel = _isProcessing
-            ? "Processing..."
-            : $"Pay {FormbarSession.LevelCost} Digipogs";
+        float payBtnY = cy + 35f;
+        string payLabel = _isProcessing ? "Processing..." : $"Pay {FormbarSession.LevelCost} Digipogs";
         Color payBg = _isProcessing ? Color.Gray : Color.DarkGreen;
         var paySize = _font.MeasureString(payLabel);
-        float payX = viewport.Width / 2f - paySize.X / 2f;
+        float payX = cx - paySize.X / 2f;
         spriteBatch.Draw(_pixel,
-            new Rectangle((int)payX - 10, (int)payBtnY - 5, (int)paySize.X + 20, (int)paySize.Y + 10),
+            new Rectangle((int)payX - 8, (int)payBtnY - 4, (int)paySize.X + 16, (int)paySize.Y + 8),
             payBg);
         spriteBatch.DrawString(_font, payLabel, new Vector2(payX, payBtnY), Color.White);
 
         // ---- Cancel button ----
-        float cancelBtnY = payBtnY + 50f;
+        float cancelBtnY = payBtnY + 40f;
         string cancelLabel = "Cancel";
         var cancelSize = _font.MeasureString(cancelLabel);
-        float cancelX = viewport.Width / 2f - cancelSize.X / 2f;
+        float cancelX = cx - cancelSize.X / 2f;
         spriteBatch.Draw(_pixel,
-            new Rectangle((int)cancelX - 10, (int)cancelBtnY - 5, (int)cancelSize.X + 20, (int)cancelSize.Y + 10),
+            new Rectangle((int)cancelX - 8, (int)cancelBtnY - 4, (int)cancelSize.X + 16, (int)cancelSize.Y + 8),
             Color.DarkRed);
         spriteBatch.DrawString(_font, cancelLabel, new Vector2(cancelX, cancelBtnY), Color.White);
 
@@ -272,8 +261,7 @@ internal class PaymentScene : IScene
             Color statusColor = _statusMessage.StartsWith("Payment failed", StringComparison.OrdinalIgnoreCase)
                 ? Color.OrangeRed
                 : Color.LightGray;
-            DrawCentered(spriteBatch, viewport, _statusMessage,
-                cancelBtnY + 60f, statusColor);
+            DrawCentered(spriteBatch, viewport, _statusMessage, cancelBtnY + 40f, statusColor);
         }
     }
 
@@ -288,3 +276,4 @@ internal class PaymentScene : IScene
     private bool IsKeyPressed(Keys key) =>
         _keyboardState.IsKeyDown(key) && !_previousKeyboardState.IsKeyDown(key);
 }
+

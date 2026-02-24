@@ -20,9 +20,6 @@ public static class FormbarSession
     /// <summary>The player's Formbar display name, populated after a successful login.</summary>
     public static string DisplayName { get; set; } = "";
 
-    /// <summary>The player's current Digipog balance, populated after a successful login.</summary>
-    public static int Digipogs { get; set; } = 0;
-
     /// <summary>Whether the player is currently logged in.</summary>
     public static bool IsLoggedIn { get; set; } = false;
 
@@ -31,8 +28,15 @@ public static class FormbarSession
     /// </summary>
     public const int GameAccountId = 47;
 
-    /// <summary>Cost in Digipogs to unlock each level.</summary>
-    public const int LevelCost = 5;
+    /// <summary>
+    /// Cost in Digipogs to unlock all levels at once.
+    /// </summary>
+    public const int LevelCost = 50;
+
+    /// <summary>
+    /// Purchase record key used to track whether the player has unlocked all levels.
+    /// </summary>
+    public const string AllLevelsKey = "all_levels";
 
     /// <summary>Maximum number of digits accepted for a Digipog PIN.</summary>
     public const int PinMaxLength = 8;
@@ -43,7 +47,6 @@ public static class FormbarSession
         ApiKey = "";
         UserId = 0;
         DisplayName = "";
-        Digipogs = 0;
         IsLoggedIn = false;
     }
 }

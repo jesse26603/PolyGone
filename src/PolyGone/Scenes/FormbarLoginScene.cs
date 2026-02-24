@@ -177,7 +177,6 @@ internal class FormbarLoginScene : IScene
                     FormbarSession.ServerUrl = _serverUrl;
                     FormbarSession.UserId = userInfo.Id;
                     FormbarSession.DisplayName = userInfo.DisplayName;
-                    FormbarSession.Digipogs = userInfo.Digipogs;
                     FormbarSession.IsLoggedIn = true;
                     _sceneManager.PopScene(this);
                     return;

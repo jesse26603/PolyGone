@@ -119,8 +119,8 @@ namespace PolyGone
                     return;
                 }
 
-                // If the player has already paid for this level, go straight to loadout selection
-                if (PurchaseTracker.HasPurchased(FormbarSession.UserId, levelFile))
+                // If the player has already paid for all levels, go straight to loadout selection
+                if (PurchaseTracker.HasPurchased(FormbarSession.UserId, FormbarSession.AllLevelsKey))
                 {
                     _sceneManager.AddScene(new InventoryManagement(_content, _sceneManager, _graphics, levelFile));
                 }
