@@ -54,8 +54,9 @@ class Enemy : Entity
         accumulatedDamage += projectile.damage;
         hitProjectiles.Add(projectile);
 
-        // Expire the projectile so it doesn't hit other enemies
-        projectile.lifetime = 0f;
+        // Expire the projectile unless it's piercing (piercing goes through enemies)
+        if (!projectile.IsPiercing)
+            projectile.lifetime = 0f;
 
         // Apply knockback from the first projectile only (to prevent excessive knockback)
         if (hitProjectiles.Count == 1)

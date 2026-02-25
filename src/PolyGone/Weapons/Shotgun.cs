@@ -10,6 +10,8 @@ namespace PolyGone.Weapons
     class Shotgun : Blaster
     {
         public override float MaxCooldown => 30f; // Shotgun has longer cooldown
+        /// <summary>Extra pellets fired per shot. Set by MultiShotItem.</summary>
+        public int ExtraPelletsPerShot { get; set; } = 0;
         
         public Shotgun(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, List<Projectile> sharedBullets, Rectangle? srcRect = null)
             : base(texture, position, size, color, collisionMap, sharedBullets, srcRect)
@@ -23,8 +25,8 @@ namespace PolyGone.Weapons
             // Handle shooting with spread using InputManager
             if (InputManager.IsLeftMouseButtonClicked() && cooldown <= 0f)
             {
-                // Shotgun fires 5 projectiles with spread
-                int pelletCount = 5;
+                // Shotgun fires base pellets + any extras from MultiShotItem
+                int pelletCount = 5 + ExtraPelletsPerShot;
                 float spreadAngle = 0.6f; // Total spread in radians (about 34 degrees)
                 float angleStep = spreadAngle / (pelletCount - 1);
                 float startAngle = rotation - spreadAngle / 2;

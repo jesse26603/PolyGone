@@ -53,6 +53,12 @@ namespace PolyGone.Entities
                 case WeaponType.Rifle:
                     currentWeapon = new Rifle(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.Black, collisionMap, bullets, srcRect);
                     break;
+                case WeaponType.Automatic:
+                    currentWeapon = new Automatic(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, Color.Cyan, collisionMap, bullets, srcRect);
+                    break;
+                case WeaponType.VoidLance:
+                    currentWeapon = new VoidLance(blasterTexture, Vector2.Zero, new int[] { 32, 32 }, new Color(180, 0, 220), collisionMap, bullets, srcRect);
+                    break;
             }
             
             // Create and activate the selected items

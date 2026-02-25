@@ -91,6 +91,7 @@ namespace PolyGone.Weapons
                             size: new int[2] { 10, 10 },
                             lifetime: 200f,
                             health: 1,
+                            damage: 40,
                             color: Color.White,
                             xSpeed: (float)(Math.Cos(angle) * 750f),
                             ySpeed: (float)(Math.Sin(angle) * 750f),

@@ -19,7 +19,9 @@ namespace PolyGone
         public float lifetime; // Separate from Entity health for projectiles
         public readonly Owner owner; // Who fired this projectile
         public readonly int damage; // Fixed damage for now
-        public Projectile(Texture2D texture, Vector2 position, int[] size, float lifetime, int health, Color color, float xSpeed, float ySpeed, Owner owner, int damage, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null)
+        /// <summary>When true, the projectile passes through enemies instead of being destroyed on hit.</summary>
+        public bool IsPiercing { get; }
+        public Projectile(Texture2D texture, Vector2 position, int[] size, float lifetime, int health, Color color, float xSpeed, float ySpeed, Owner owner, int damage, Rectangle? srcRect = null, Dictionary<Vector2, int>? collisionMap = null, bool isPiercing = false)
             : base(texture, position, size, health, color, srcRect, collisionMap)
         {
             this.xSpeed = xSpeed;
@@ -27,6 +29,7 @@ namespace PolyGone
             this.lifetime = lifetime;
             this.owner = owner;
             this.damage = damage;
+            this.IsPiercing = isPiercing;
         }
 
         // Fire projectiles from blaster to global mouse position
