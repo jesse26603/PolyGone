@@ -29,7 +29,7 @@ namespace PolyGone
         private readonly ContentManager _content;
         private readonly SceneManager _sceneManager;
         private readonly GraphicsDeviceManager _graphics;
-        private readonly string[] _options = { "Level Select", "Options", "Exit to Desktop" };
+        private readonly string[] _options = { "Level Select", "Options", "Log Out", "Exit to Desktop" };
         private int _selectedIndex;
 
         public MenuScene(ContentManager content, SceneManager sceneManager, GraphicsDeviceManager graphics)
@@ -115,9 +115,14 @@ namespace PolyGone
             else if (_selectedIndex == 1)
             {
                 // Options (placeholder for now)
-                // Could add options scene later
             }
             else if (_selectedIndex == 2)
+            {
+                // Log Out
+                FormbarSession.Clear();
+                _sceneManager.AddScene(new FormbarLoginScene(_content, _sceneManager, _graphics));
+            }
+            else if (_selectedIndex == 3)
             {
                 // Exit to Desktop
                 Environment.Exit(0);
