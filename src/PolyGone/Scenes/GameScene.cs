@@ -31,6 +31,7 @@ public class GameScene : IScene
     private readonly List<Entity> enemies = new(); // Placeholder for enemy list
     private GoalTrigger goalTrigger; // Win condition trigger
     private bool levelComplete = false;
+    private bool gameOver = false;
     private readonly List<ItemType> selectedItems;
     private readonly WeaponType selectedWeapon;
     private readonly string levelName;
@@ -247,15 +248,14 @@ public class GameScene : IScene
             goalTrigger.Reset();
         }
         levelComplete = false;
+        gameOver = false;
     }
     
     public void Update(GameTime gameTime)
     {
-        // Check if level is complete
-        if (levelComplete)
+        // Check if level is complete or game over
+        if (levelComplete || gameOver)
         {
-            // Could transition to next level or exit scene here
-            // For now, just prevent further updates
             return;
         }
         
@@ -280,42 +280,44 @@ public class GameScene : IScene
         {
             player.position.X = worldMaxX - player.size[0];
         }
+
+        // Trigger game over if player died
+        if (!player.IsAlive && !gameOver)
+        {
+            gameOver = true;
+            sceneManager.AddScene(new GameOverScene(contentManager, sceneManager, graphics, this));
+            return;
+        }
         
         // Check enemies for falling out of bounds
-        foreach (var enemy in enemies.ToList())
-        {
-            if (enemy.position.Y > worldMaxY)
-            {
-                enemy.HandleDeath();
-            }
-            else if (enemy.position.X < 0)
-            {
-                enemy.position.X = 0;
-            }
-            else if (enemy.position.X + enemy.size[0] > worldMaxX)
-            {
-                enemy.position.X = worldMaxX - enemy.size[0];
-            }
-        }
-        
-        // Update enemies
         foreach (var enemy in enemies)
         {
-            enemy.Update(gameTime);
+            if (enemy.position.Y > worldMaxY)
+                enemy.HandleDeath();
+            else if (enemy.position.X < 0)
+                enemy.position.X = 0;
+            else if (enemy.position.X + enemy.size[0] > worldMaxX)
+                enemy.position.X = worldMaxX - enemy.size[0];
         }
-        
+
+        // Update alive enemies
+        foreach (var enemy in enemies)
+        {
+            if (enemy.IsAlive)
+                enemy.Update(gameTime);
+        }
+
+        // Remove enemies that died this frame
+        enemies.RemoveAll(e => !e.IsAlive);
+
         // Gather all entities for collision detection after all updates
         List<Entity> allEntities = [player, .. enemies, .. player.bullets];
-        
+
         // Handle entity-to-entity collisions
         player.EntityCollisionUpdate(allEntities);
         foreach (var enemy in enemies)
         {
-            // Only process collisions for enemies that are still alive
-            if (enemy.health > 0)
-            {
-                enemy.EntityCollisionUpdate(allEntities);
-            }
+            enemy.EntityCollisionUpdate(allEntities);
         }
         
         // Check for goal trigger

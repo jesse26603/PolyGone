@@ -20,6 +20,8 @@ public class Entity : Sprite
     protected float friction; // Horizontal friction multiplier in range [0, 1]; 1 keeps full velocity (no friction), 0 stops movement immediately (maximum friction)
     protected readonly int[] visualSize; // Visual size for drawing (can be larger than hitbox)
     protected Vector2 hitboxOffset; // Offset to center the hitbox within the visual sprite
+    protected bool isAlive = true;
+    public bool IsAlive => isAlive;
     
     // Constants for tile-based calculations
     protected const int TILE_SIZE = 64;
@@ -144,9 +146,8 @@ public class Entity : Sprite
 
     public virtual void HandleDeath()
     {
-        // Default implementation resets position and health
-        position = new Vector2(100, -100);
-        health = 100;
+        // Default implementation marks entity as not alive
+        isAlive = false;
     }
 
     // Physics and collision update for non-player entities (no input)
