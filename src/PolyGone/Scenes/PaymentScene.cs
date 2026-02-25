@@ -93,6 +93,17 @@ internal class PaymentScene : IScene
         if (IsKeyPressed(Keys.Enter) && _pin.Length > 0)
             StartPayment();
 
+#if DEBUG
+        // Developer bypass: Ctrl + Shift + D skips payment entirely
+        if (_keyboardState.IsKeyDown(Keys.LeftControl) &&
+            _keyboardState.IsKeyDown(Keys.LeftShift) &&
+            IsKeyPressed(Keys.D))
+        {
+            DevBypass();
+            return;
+        }
+#endif
+
         if (_font == null || !InputManager.IsLeftMouseButtonClicked())
         {
             _previousKeyboardState = _keyboardState;
@@ -139,6 +150,14 @@ internal class PaymentScene : IScene
             FormbarSession.UserId, FormbarSession.GameAccountId,
             FormbarSession.LevelCost, "PolyGone: unlock all levels", pinInt);
     }
+
+#if DEBUG
+    private void DevBypass()
+    {
+        PurchaseTracker.RecordPurchase(FormbarSession.UserId, FormbarSession.AllLevelsKey);
+        _sceneManager.PopScene(this);
+    }
+#endif
 
     private void DoLogout()
     {
@@ -217,6 +236,12 @@ internal class PaymentScene : IScene
                 ? Color.OrangeRed : Color.LightGray;
             DrawCentered(spriteBatch, viewport, _statusMessage, cy + RowGap * 3f, statusColor);
         }
+
+#if DEBUG
+        // Dev hint in bottom-left corner
+        spriteBatch.DrawString(_font, "[DEV] Ctrl+Shift+D to bypass payment",
+            new Vector2(8f, viewport.Height - _font.LineSpacing - 6f), Color.Gray * 0.7f);
+#endif
     }
 
     private void DrawCentered(SpriteBatch spriteBatch, Viewport viewport,
