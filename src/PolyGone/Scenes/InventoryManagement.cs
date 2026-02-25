@@ -21,7 +21,10 @@ namespace PolyGone
     public enum WeaponType
     {
         Blaster,
-        Shotgun
+        Shotgun,
+        Rifle,
+        Automatic,
+        VoidLance
     }
 
     internal class InventoryManagement : IScene
@@ -61,13 +64,13 @@ namespace PolyGone
             "Second jump in mid-air",
             "Move 50% faster",
             "Regen 10 HP every 2s",
-            "Fire 3 bullets per shot",
+            "Adds 3 extra pellets to the Shotgun",
             "Cooldown reduced to 1/3",
             "Gravity reduced to 40%",
             "Survive 1 kill every 20s"
         };
-        private readonly string[] _weaponNames = { "Blaster", "Shotgun" };
-        private readonly WeaponType[] _weaponTypes = { WeaponType.Blaster, WeaponType.Shotgun };
+        private readonly string[] _weaponNames = { "Blaster", "Shotgun", "Rifle", "Automatic", "Void Lance" };
+        private readonly WeaponType[] _weaponTypes = { WeaponType.Blaster, WeaponType.Shotgun, WeaponType.Rifle, WeaponType.Automatic, WeaponType.VoidLance };
 
         // Static fields to remember last selection across instances
         private static List<ItemType> _lastSelectedItems = new List<ItemType> { ItemType.DoubleJump, ItemType.SpeedBoost };
