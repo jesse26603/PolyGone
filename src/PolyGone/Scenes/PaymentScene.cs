@@ -152,7 +152,7 @@ internal class PaymentScene : IScene
     // -----------------------------------------------------------------------
 
     // Vertical spacing between UI rows (pixels)
-    private const float RowGap = 32f;
+    private const float RowGap = 50f;
 
     public void Draw(SpriteBatch spriteBatch)
     {

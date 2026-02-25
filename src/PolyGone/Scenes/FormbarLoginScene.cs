@@ -40,7 +40,7 @@ internal class FormbarLoginScene : IScene
     private const int CallbackPort = 59200;
 
     // Vertical spacing between UI rows (pixels)
-    private const float RowGap = 32f;
+    private const float RowGap = 50f;
 
     public FormbarLoginScene(ContentManager content, SceneManager sceneManager, GraphicsDeviceManager graphics)
     {
@@ -198,7 +198,7 @@ internal class FormbarLoginScene : IScene
         float cy = viewport.Height / 2f;
 
         // Login button  (same Y as drawn below)
-        float btnY = cy + RowGap;
+        float btnY = cy;
         string btnLabel = "Login with Formbar";
         var btnSize = _font.MeasureString(btnLabel);
         var btnBounds = new Rectangle(
@@ -222,7 +222,7 @@ internal class FormbarLoginScene : IScene
         float cy = viewport.Height / 2f;
 
         // Cancel button  (same Y as drawn below)
-        float cancelY = cy + RowGap * 2f;
+        float cancelY = cy + RowGap;
         string cancelLabel = "Cancel";
         var cancelSize = _font.MeasureString(cancelLabel);
         var cancelBounds = new Rectangle(
