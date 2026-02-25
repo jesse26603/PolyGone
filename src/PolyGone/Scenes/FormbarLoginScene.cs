@@ -11,22 +11,15 @@ using Microsoft.Xna.Framework.Input;
 namespace PolyGone;
 
 /// <summary>
-/// Shown when the player needs to log in.  The player picks a Formbar server from
-/// a preset list, then clicks "Login with Formbar".  A browser window opens to the
-/// Formbar OAuth page; after successful login Formbar redirects back to a local
-/// HTTP listener.  The JWT is decoded locally – no API key is required.
+/// Shown when the player needs to log in.  Clicking "Login with Formbar" opens the
+/// system browser to the Formbar OAuth page; after login Formbar redirects back to a
+/// local HTTP listener and the JWT is decoded locally – no API key required.
+///
+/// The Formbar server is controlled by <see cref="FormbarSession.DefaultServerUrl"/>.
 /// </summary>
 internal class FormbarLoginScene : IScene
 {
     private enum LoginState { Idle, WaitingForCallback }
-
-    // Known Formbar server presets
-    private static readonly string[] ServerPresets =
-    {
-        "https://formbeta.yorktechapps.com",
-        "https://formbar.yorktechapps.com",
-        "http://localhost:420",
-    };
 
     private SpriteFont? _font;
     private Texture2D? _pixel;
@@ -34,7 +27,6 @@ internal class FormbarLoginScene : IScene
     private readonly SceneManager _sceneManager;
     private readonly GraphicsDeviceManager _graphics;
 
-    private int _presetIndex = 0;
     private LoginState _state = LoginState.Idle;
     private string _statusMessage = "";
     private string _oauthUrl = "";
@@ -47,25 +39,16 @@ internal class FormbarLoginScene : IScene
 
     private const int CallbackPort = 59200;
 
+    // Vertical spacing between UI rows (pixels)
+    private const float RowGap = 32f;
+
     public FormbarLoginScene(ContentManager content, SceneManager sceneManager, GraphicsDeviceManager graphics)
     {
         _content = content;
         _sceneManager = sceneManager;
         _graphics = graphics;
         _previousKeyboardState = Keyboard.GetState();
-
-        // Start preset index at the saved server URL if it matches a preset
-        for (int i = 0; i < ServerPresets.Length; i++)
-        {
-            if (ServerPresets[i].Equals(FormbarSession.ServerUrl, StringComparison.OrdinalIgnoreCase))
-            {
-                _presetIndex = i;
-                break;
-            }
-        }
     }
-
-    private string CurrentServer => ServerPresets[_presetIndex];
 
     public void Load()
     {
@@ -110,7 +93,7 @@ internal class FormbarLoginScene : IScene
         {
             string prefix = $"http://localhost:{CallbackPort}/";
             string redirectUrl = $"http://localhost:{CallbackPort}/login";
-            _oauthUrl = $"{CurrentServer.TrimEnd('/')}/oauth?redirectURL={Uri.EscapeDataString(redirectUrl)}";
+            _oauthUrl = $"{FormbarSession.ServerUrl.TrimEnd('/')}/oauth?redirectURL={Uri.EscapeDataString(redirectUrl)}";
 
             _listener = new HttpListener();
             _listener.Prefixes.Add(prefix);
@@ -160,7 +143,6 @@ internal class FormbarLoginScene : IScene
                 if (userInfo != null)
                 {
                     FormbarSession.ApiKey = jwt;
-                    FormbarSession.ServerUrl = CurrentServer;
                     FormbarSession.UserId = userInfo.Id;
                     FormbarSession.DisplayName = userInfo.DisplayName;
                     FormbarSession.IsLoggedIn = true;
@@ -168,7 +150,6 @@ internal class FormbarLoginScene : IScene
 
                     _sceneManager.PopScene(this);
 
-                    // If the player hasn't paid yet, require payment before the menu
                     if (!PurchaseTracker.HasPurchased(FormbarSession.UserId, FormbarSession.AllLevelsKey))
                         _sceneManager.AddScene(new PaymentScene(_content, _sceneManager, _graphics));
 
@@ -207,11 +188,6 @@ internal class FormbarLoginScene : IScene
 
     private void HandleIdleInput()
     {
-        // Left/Right arrows cycle through server presets
-        if (IsKeyPressed(Keys.Left))
-            _presetIndex = (_presetIndex - 1 + ServerPresets.Length) % ServerPresets.Length;
-        if (IsKeyPressed(Keys.Right))
-            _presetIndex = (_presetIndex + 1) % ServerPresets.Length;
         if (IsKeyPressed(Keys.Enter))
             StartOAuth();
 
@@ -221,28 +197,10 @@ internal class FormbarLoginScene : IScene
         var mousePos = InputManager.GetMousePosition();
         float cy = viewport.Height / 2f;
 
-        // < arrow
-        var leftBounds = GetArrowBounds(viewport, cy, left: true);
-        if (leftBounds.Contains(mousePos))
-        {
-            _presetIndex = (_presetIndex - 1 + ServerPresets.Length) % ServerPresets.Length;
-            InputManager.ConsumeClick();
-            return;
-        }
-
-        // > arrow
-        var rightBounds = GetArrowBounds(viewport, cy, left: false);
-        if (rightBounds.Contains(mousePos))
-        {
-            _presetIndex = (_presetIndex + 1) % ServerPresets.Length;
-            InputManager.ConsumeClick();
-            return;
-        }
-
-        // Login button
+        // Login button  (same Y as drawn below)
+        float btnY = cy + RowGap;
         string btnLabel = "Login with Formbar";
         var btnSize = _font.MeasureString(btnLabel);
-        float btnY = cy + 30f;
         var btnBounds = new Rectangle(
             (int)(viewport.Width / 2f - btnSize.X / 2f) - 10,
             (int)btnY - 5,
@@ -263,9 +221,10 @@ internal class FormbarLoginScene : IScene
         var mousePos = InputManager.GetMousePosition();
         float cy = viewport.Height / 2f;
 
+        // Cancel button  (same Y as drawn below)
+        float cancelY = cy + RowGap * 2f;
         string cancelLabel = "Cancel";
         var cancelSize = _font.MeasureString(cancelLabel);
-        float cancelY = cy + 40f;
         var cancelBounds = new Rectangle(
             (int)(viewport.Width / 2f - cancelSize.X / 2f) - 10,
             (int)cancelY - 5,
@@ -278,17 +237,6 @@ internal class FormbarLoginScene : IScene
             return true;
         }
         return false;
-    }
-
-    // Returns the hit-box for the < or > arrow button
-    private Rectangle GetArrowBounds(Viewport viewport, float cy, bool left)
-    {
-        int arrowW = 28, arrowH = 28;
-        float serverBoxHalfW = 200f;
-        int x = left
-            ? (int)(viewport.Width / 2f - serverBoxHalfW) - arrowW - 6
-            : (int)(viewport.Width / 2f + serverBoxHalfW) + 6;
-        return new Rectangle(x, (int)cy - arrowH / 2, arrowW, arrowH);
     }
 
     // -----------------------------------------------------------------------
@@ -319,72 +267,49 @@ internal class FormbarLoginScene : IScene
         float cx = viewport.Width / 2f;
         float cy = viewport.Height / 2f;
 
-        // Title
-        DrawCentered(spriteBatch, viewport, "Sign in with Formbar", cy - 80f, Color.White);
+        // Row 0  (cy - 2*gap): title
+        DrawCentered(spriteBatch, viewport, "Sign in with Formbar", cy - RowGap * 2f, Color.White);
 
-        // Server label
-        spriteBatch.DrawString(_font, "Formbar server:", new Vector2(cx - 200f, cy - 45f), Color.LightGray);
+        // Row 1  (cy - gap): server URL (read-only; edit FormbarSession.DefaultServerUrl in code)
+        DrawCentered(spriteBatch, viewport, FormbarSession.ServerUrl, cy - RowGap, new Color(120, 180, 255));
 
-        // Server selector  < [URL] >
-        var leftRect = GetArrowBounds(viewport, cy, left: true);
-        var rightRect = GetArrowBounds(viewport, cy, left: false);
-
-        // Box behind URL
-        spriteBatch.Draw(_pixel, new Rectangle((int)cx - 200, (int)cy - 14, 400, 28), new Color(30, 30, 60));
-        spriteBatch.Draw(_pixel, new Rectangle((int)cx - 200, (int)cy - 14, 400, 1), Color.SlateGray);
-        spriteBatch.Draw(_pixel, new Rectangle((int)cx - 200, (int)cy + 14, 400, 1), Color.SlateGray);
-
-        // Left arrow
-        spriteBatch.Draw(_pixel, leftRect, new Color(50, 50, 80));
-        DrawCentered(spriteBatch,
-            new Rectangle(leftRect.X, leftRect.Y, leftRect.Width, leftRect.Height),
-            "<", Color.White);
-
-        // Right arrow
-        spriteBatch.Draw(_pixel, rightRect, new Color(50, 50, 80));
-        DrawCentered(spriteBatch,
-            new Rectangle(rightRect.X, rightRect.Y, rightRect.Width, rightRect.Height),
-            ">", Color.White);
-
-        // Current URL text (truncate if needed)
-        string url = TruncateToFit(CurrentServer, 390f);
-        DrawCentered(spriteBatch, viewport, url, cy - 10f, Color.Cyan);
-
-        // Preset counter  e.g. "1 / 3"
-        string counter = $"{_presetIndex + 1} / {ServerPresets.Length}";
-        DrawCentered(spriteBatch, viewport, counter, cy + 18f, new Color(120, 120, 140));
-
-        // Login button
+        // Row 2  (cy): "Login with Formbar" button — centred on cy
         string btnLabel = "Login with Formbar";
         var btnSize = _font.MeasureString(btnLabel);
-        float btnY = cy + 30f;
+        float btnY = cy;
         float btnX = cx - btnSize.X / 2f;
-        spriteBatch.Draw(_pixel,
-            new Rectangle((int)btnX - 12, (int)btnY - 6, (int)btnSize.X + 24, (int)btnSize.Y + 12),
+        spriteBatch.Draw(_pixel!,
+            new Rectangle((int)btnX - 10, (int)btnY - 5, (int)btnSize.X + 20, (int)btnSize.Y + 10),
             Color.DarkGreen);
         spriteBatch.DrawString(_font, btnLabel, new Vector2(btnX, btnY), Color.White);
 
-        // Status / error
+        // Row 3  (cy + gap): status / error
         if (!string.IsNullOrEmpty(_statusMessage))
-            DrawCentered(spriteBatch, viewport, _statusMessage, cy + 80f, Color.OrangeRed);
+            DrawCentered(spriteBatch, viewport, _statusMessage, cy + RowGap, Color.OrangeRed);
     }
 
     private void DrawWaiting(SpriteBatch spriteBatch, Viewport viewport)
     {
+        float cx = viewport.Width / 2f;
         float cy = viewport.Height / 2f;
 
-        DrawCentered(spriteBatch, viewport, "Waiting for browser login...", cy - 80f, Color.White);
-        DrawCentered(spriteBatch, viewport, "Complete login in your browser, then return here.", cy - 48f, Color.LightGray);
+        // Row 0: heading
+        DrawCentered(spriteBatch, viewport, "Waiting for browser login...", cy - RowGap * 2f, Color.White);
 
-        DrawCentered(spriteBatch, viewport, "If your browser didn't open, visit:", cy - 10f, Color.LightGray);
-        string shortUrl = TruncateToFit(_oauthUrl, (float)viewport.Width - 40f);
-        DrawCentered(spriteBatch, viewport, shortUrl, cy + 20f, Color.Cyan);
+        // Row 1: instruction
+        DrawCentered(spriteBatch, viewport,
+            "Complete login in your browser, then return here.",
+            cy - RowGap, Color.LightGray);
 
-        // Cancel button
+        // Row 2: OAuth URL (truncated to viewport width minus margins)
+        string shortUrl = TruncateToFit(_oauthUrl, viewport.Width - 80f);
+        DrawCentered(spriteBatch, viewport, shortUrl, cy, new Color(120, 180, 255));
+
+        // Row 3: Cancel button
+        float cancelY = cy + RowGap;
         string cancelLabel = "Cancel";
         var cancelSize = _font!.MeasureString(cancelLabel);
-        float cancelY = cy + 40f;
-        float cancelX = viewport.Width / 2f - cancelSize.X / 2f;
+        float cancelX = cx - cancelSize.X / 2f;
         spriteBatch.Draw(_pixel!,
             new Rectangle((int)cancelX - 10, (int)cancelY - 5, (int)cancelSize.X + 20, (int)cancelSize.Y + 10),
             Color.DarkRed);
@@ -392,38 +317,22 @@ internal class FormbarLoginScene : IScene
     }
 
     // -----------------------------------------------------------------------
-    // Drawing utilities
+    // Utilities
     // -----------------------------------------------------------------------
 
-    /// <summary>Draw text centred inside a viewport-width row at the given Y.</summary>
     private void DrawCentered(SpriteBatch spriteBatch, Viewport viewport, string text, float y, Color color)
     {
         var size = _font!.MeasureString(text);
         spriteBatch.DrawString(_font, text, new Vector2(viewport.Width / 2f - size.X / 2f, y), color);
     }
 
-    /// <summary>Draw text centred inside an arbitrary Rectangle.</summary>
-    private void DrawCentered(SpriteBatch spriteBatch, Rectangle rect, string text, Color color)
-    {
-        var size = _font!.MeasureString(text);
-        spriteBatch.DrawString(_font, text,
-            new Vector2(rect.X + (rect.Width - size.X) / 2f, rect.Y + (rect.Height - size.Y) / 2f),
-            color);
-    }
-
-    /// <summary>Truncates a string so its rendered width fits within <paramref name="maxPixels"/>.</summary>
     private string TruncateToFit(string text, float maxPixels)
     {
-        if (_font == null) return text;
-        if (_font.MeasureString(text).X <= maxPixels) return text;
-        while (text.Length > 3 && _font.MeasureString(text + "...").X > maxPixels)
+        if (_font == null || _font.MeasureString(text).X <= maxPixels) return text;
+        while (text.Length > 4 && _font.MeasureString(text + "...").X > maxPixels)
             text = text[..^1];
         return text + "...";
     }
-
-    // -----------------------------------------------------------------------
-    // HTTP utilities
-    // -----------------------------------------------------------------------
 
     private static void SendBrowserResponse(HttpListenerContext context, string message)
     {

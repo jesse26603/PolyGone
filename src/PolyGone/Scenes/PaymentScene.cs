@@ -104,8 +104,8 @@ internal class PaymentScene : IScene
         float cx = viewport.Width / 2f;
         float cy = viewport.Height / 2f;
 
-        // Pay button
-        float payBtnY = cy + 20f;
+        // Pay button  (same Y as drawn: cy + RowGap)
+        float payBtnY = cy + RowGap;
         string payLabel = $"Pay {FormbarSession.LevelCost} Digipogs";
         var paySize = _font.MeasureString(payLabel);
         var payBounds = Btn((int)(cx - paySize.X / 2f), (int)payBtnY, paySize);
@@ -115,8 +115,8 @@ internal class PaymentScene : IScene
             InputManager.ConsumeClick();
         }
 
-        // Log Out button
-        float logoutBtnY = payBtnY + 38f;
+        // Log Out button  (same Y as drawn: cy + 2*RowGap)
+        float logoutBtnY = cy + RowGap * 2f;
         string logoutLabel = "Log Out";
         var logoutSize = _font.MeasureString(logoutLabel);
         var logoutBounds = Btn((int)(cx - logoutSize.X / 2f), (int)logoutBtnY, logoutSize);
@@ -151,6 +151,9 @@ internal class PaymentScene : IScene
     // Draw
     // -----------------------------------------------------------------------
 
+    // Vertical spacing between UI rows (pixels)
+    private const float RowGap = 32f;
+
     public void Draw(SpriteBatch spriteBatch)
     {
         if (_pixel == null)
@@ -167,29 +170,31 @@ internal class PaymentScene : IScene
 
         if (_font == null) return;
 
-        // Title
-        DrawCentered(spriteBatch, viewport, "Unlock PolyGone", cy - 90f, Color.Gold);
+        // Row 0  (cy - 4*gap): title
+        DrawCentered(spriteBatch, viewport, "Unlock PolyGone", cy - RowGap * 4f, Color.Gold);
+
+        // Row 1  (cy - 3*gap): cost description
         DrawCentered(spriteBatch, viewport,
             $"Pay {FormbarSession.LevelCost} Digipogs to unlock all levels.",
-            cy - 58f, Color.White);
+            cy - RowGap * 3f, Color.White);
+
+        // Row 2  (cy - 2*gap): logged-in name
         DrawCentered(spriteBatch, viewport,
             $"Logged in as: {FormbarSession.DisplayName}",
-            cy - 30f, new Color(160, 160, 180));
+            cy - RowGap * 2f, new Color(160, 160, 180));
 
-        // PIN label (short, left-aligned to the field)
+        // Row 3  (cy - gap): PIN label
         spriteBatch.DrawString(_font, "Digipog PIN:",
-            new Vector2(cx - 120f, cy - 12f), Color.LightGray);
+            new Vector2(cx - 120f, cy - RowGap), Color.LightGray);
 
-        // PIN field  (240px wide – comfortably holds 8 asterisks)
-        float pinY = cy + 8f;
-        spriteBatch.Draw(_pixel, new Rectangle((int)cx - 120, (int)pinY - 3, 240, 26), Color.DimGray);
-        spriteBatch.Draw(_pixel, new Rectangle((int)cx - 119, (int)pinY - 2, 238, 24), Color.Black);
-        // Show at most PinDisplayMax masked chars + cursor so nothing overflows
+        // Row 4  (cy): PIN field  (240 px wide; at most 8 asterisks + cursor)
+        spriteBatch.Draw(_pixel, new Rectangle((int)cx - 120, (int)cy - 3, 240, 26), Color.DimGray);
+        spriteBatch.Draw(_pixel, new Rectangle((int)cx - 119, (int)cy - 2, 238, 24), Color.Black);
         string displayed = new string('*', Math.Min(_pin.Length, PinDisplayMax)) + "|";
-        spriteBatch.DrawString(_font, displayed, new Vector2(cx - 113f, pinY), Color.White);
+        spriteBatch.DrawString(_font, displayed, new Vector2(cx - 113f, cy), Color.White);
 
-        // Pay button
-        float payBtnY = cy + 20f;
+        // Row 5  (cy + gap): Pay button
+        float payBtnY = cy + RowGap;
         string payLabel = _isProcessing ? "Processing..." : $"Pay {FormbarSession.LevelCost} Digipogs";
         Color payBg = _isProcessing ? Color.Gray : Color.DarkGreen;
         var paySize = _font.MeasureString(payLabel);
@@ -197,20 +202,20 @@ internal class PaymentScene : IScene
         spriteBatch.Draw(_pixel, Btn((int)payX, (int)payBtnY, paySize), payBg);
         spriteBatch.DrawString(_font, payLabel, new Vector2(payX, payBtnY), Color.White);
 
-        // Log Out button
-        float logoutBtnY = payBtnY + 38f;
+        // Row 6  (cy + 2*gap): Log Out button
+        float logoutBtnY = cy + RowGap * 2f;
         string logoutLabel = "Log Out";
         var logoutSize = _font.MeasureString(logoutLabel);
         float logoutX = cx - logoutSize.X / 2f;
         spriteBatch.Draw(_pixel, Btn((int)logoutX, (int)logoutBtnY, logoutSize), new Color(80, 30, 30));
         spriteBatch.DrawString(_font, logoutLabel, new Vector2(logoutX, logoutBtnY), Color.White);
 
-        // Status message
+        // Row 7  (cy + 3*gap): status message
         if (!string.IsNullOrEmpty(_statusMessage))
         {
             Color statusColor = _statusMessage.StartsWith("Payment failed", StringComparison.OrdinalIgnoreCase)
                 ? Color.OrangeRed : Color.LightGray;
-            DrawCentered(spriteBatch, viewport, _statusMessage, logoutBtnY + 38f, statusColor);
+            DrawCentered(spriteBatch, viewport, _statusMessage, cy + RowGap * 3f, statusColor);
         }
     }
 

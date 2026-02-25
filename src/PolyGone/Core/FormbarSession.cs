@@ -14,8 +14,14 @@ public static class FormbarSession
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "PolyGone", "session.json");
 
-    /// <summary>Base URL of the Formbar server (e.g. "https://formbeta.yorktechapps.com").</summary>
-    public static string ServerUrl { get; set; } = "https://formbeta.yorktechapps.com";
+    /// <summary>
+    /// The Formbar server used for login and Digipog transfers.
+    /// Change this constant to point at a different Formbar instance.
+    /// </summary>
+    public const string DefaultServerUrl = "https://formbeta.yorktechapps.com";
+
+    /// <summary>Base URL of the Formbar server, set from the saved session or DefaultServerUrl.</summary>
+    public static string ServerUrl { get; set; } = DefaultServerUrl;
 
     /// <summary>
     /// The OAuth JWT token received from the Formbar Passport login.
@@ -89,8 +95,8 @@ public static class FormbarSession
             if (IsJwtExpired(apiKey)) return false;
 
             ServerUrl = root.TryGetProperty("ServerUrl", out var su)
-                ? su.GetString() ?? "https://formbeta.yorktechapps.com"
-                : "https://formbeta.yorktechapps.com";
+                ? su.GetString() ?? DefaultServerUrl
+                : DefaultServerUrl;
             ApiKey = apiKey;
             UserId = root.TryGetProperty("UserId", out var uid) ? uid.GetInt32() : 0;
             DisplayName = root.TryGetProperty("DisplayName", out var dn) ? dn.GetString() ?? "" : "";
