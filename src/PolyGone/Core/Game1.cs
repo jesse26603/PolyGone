@@ -40,11 +40,26 @@ public class Game1 : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-        // TODO: use this.Content to load your game content here
+        // Load purchase tracker before any scene that might need it
+        PurchaseTracker.Load();
+
         sceneManager.AddScene(new GameScene(Content, sceneManager, _graphics));
         sceneManager.AddScene(new MenuScene(Content, sceneManager, _graphics));
-        // Login scene sits on top of the menu; it pops itself after a successful login
-        sceneManager.AddScene(new FormbarLoginScene(Content, sceneManager, _graphics));
+
+        // Try to restore a saved session (skips the login screen on subsequent launches)
+        bool sessionRestored = FormbarSession.TryLoadSession();
+
+        if (!sessionRestored)
+        {
+            // First launch or session expired: require login
+            sceneManager.AddScene(new FormbarLoginScene(Content, sceneManager, _graphics));
+        }
+        else if (!PurchaseTracker.HasPurchased(FormbarSession.UserId, FormbarSession.AllLevelsKey))
+        {
+            // Logged in but hasn't paid yet: require payment before accessing the menu
+            sceneManager.AddScene(new PaymentScene(Content, sceneManager, _graphics));
+        }
+        // else: logged in and paid – menu is immediately accessible
     }
 
     protected override void Update(GameTime gameTime)

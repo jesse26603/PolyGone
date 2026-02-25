@@ -126,11 +126,8 @@ namespace PolyGone
                 }
                 else
                 {
-                    // Player must pay before playing
-                    _sceneManager.AddScene(new PaymentScene(
-                        _content, _sceneManager, _graphics,
-                        levelFile,
-                        _levelNames[_selectedIndex]));
+                    // Safety net: payment should have happened upfront, but if not, require it now
+                    _sceneManager.AddScene(new PaymentScene(_content, _sceneManager, _graphics));
                 }
             }
         }
