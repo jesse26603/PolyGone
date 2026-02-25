@@ -40,7 +40,7 @@ internal class FormbarLoginScene : IScene
     private const int CallbackPort = 59200;
 
     // Vertical spacing between UI rows (pixels)
-    private const float RowGap = 32f;
+    private const float RowGap = 70f;
 
     public FormbarLoginScene(ContentManager content, SceneManager sceneManager, GraphicsDeviceManager graphics)
     {
