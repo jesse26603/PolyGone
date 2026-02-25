@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -9,6 +11,31 @@ namespace PolyGone;
 /// </summary>
 public static class InputManager
 {
+    // Text-input buffer for scenes that need keyboard text entry (login, PIN, etc.)
+    private static readonly Queue<char> _typedChars = new();
+
+    /// <summary>
+    /// Subscribe this to <c>Game.Window.TextInput</c> in <see cref="Game1"/>.
+    /// Enqueues every character (including backspace '\b') for consumption by scenes.
+    /// </summary>
+    public static void OnTextInput(object? sender, TextInputEventArgs e)
+    {
+        _typedChars.Enqueue(e.Character);
+    }
+
+    /// <summary>
+    /// Returns all characters typed since the last call and clears the internal buffer.
+    /// Scenes should call this once per <c>Update</c> and process each character.
+    /// A '\b' (backspace) character signals a delete-last action.
+    /// </summary>
+    public static string ConsumeTypedCharacters()
+    {
+        var sb = new StringBuilder();
+        while (_typedChars.Count > 0)
+            sb.Append(_typedChars.Dequeue());
+        return sb.ToString();
+    }
+
     private static MouseState _currentMouseState;
     private static MouseState _previousMouseState;
     private static KeyboardState _currentKeyboardState;
