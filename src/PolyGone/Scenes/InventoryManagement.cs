@@ -11,7 +11,11 @@ namespace PolyGone
     {
         DoubleJump,
         SpeedBoost,
-        HealingGlow
+        HealingGlow,
+        MultiShot,
+        RapidFire,
+        LowGravity,
+        IronWill
     }
 
     public enum WeaponType
@@ -32,8 +36,36 @@ namespace PolyGone
         private readonly string _levelFile;
 
         // Available items and weapons
-        private readonly string[] _itemNames = { "Double Jump", "Speed Boost", "Healing Glow" };
-        private readonly ItemType[] _itemTypes = { ItemType.DoubleJump, ItemType.SpeedBoost, ItemType.HealingGlow };
+        private readonly string[] _itemNames = 
+        {
+            "Double Jump",
+            "Speed Boost",
+            "Healing Glow",
+            "Multi-Shot",
+            "Rapid Fire",
+            "Low Gravity",
+            "Iron Will"
+        };
+        private readonly ItemType[] _itemTypes = 
+        {
+            ItemType.DoubleJump,
+            ItemType.SpeedBoost,
+            ItemType.HealingGlow,
+            ItemType.MultiShot,
+            ItemType.RapidFire,
+            ItemType.LowGravity,
+            ItemType.IronWill
+        };
+        private readonly string[] _itemDescriptions =
+        {
+            "Second jump in mid-air",
+            "Move 50% faster",
+            "Regen 10 HP every 2s",
+            "Fire 3 bullets per shot",
+            "Cooldown reduced to 1/3",
+            "Gravity reduced to 40%",
+            "Survive 1 kill every 20s"
+        };
         private readonly string[] _weaponNames = { "Blaster", "Shotgun" };
         private readonly WeaponType[] _weaponTypes = { WeaponType.Blaster, WeaponType.Shotgun };
 
@@ -340,7 +372,7 @@ namespace PolyGone
                 spriteBatch.DrawString(_font, title, titlePos, Color.White);
 
                 // Draw instructions
-                string instructions = "Select 2 Items | Select 1 Weapon | Press Ctrl to skip";
+                string instructions = "Select up to 2 Items | Select 1 Weapon | Press Ctrl to skip";
                 var instructionsSize = _font.MeasureString(instructions);
                 var instructionsPos = new Vector2(viewport.Width / 2f - instructionsSize.X / 2f, 90);
                 spriteBatch.DrawString(_font, instructions, instructionsPos, Color.Gray);
@@ -373,8 +405,9 @@ namespace PolyGone
 
                 Color color = isCursor ? Color.Yellow : (isSelected ? Color.Green : Color.White);
                 string prefix = isSelected ? "[X] " : "[ ] ";
+                string description = isCursor ? $"  <- {_itemDescriptions[i]}" : "";
                 
-                spriteBatch.DrawString(_font, prefix + itemName, new Vector2(startX, startY + i * 40), color);
+                spriteBatch.DrawString(_font, prefix + itemName + description, new Vector2(startX, startY + i * 40), color);
             }
         }
 

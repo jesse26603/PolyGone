@@ -31,6 +31,12 @@ namespace PolyGone.Entities
         
         // Public property to access current weapon's cooldown for HUD
         public float Cooldown => GetBlaster()?.Cooldown ?? 0f;
+
+        // Public property to control gravity (used by LowGravityItem)
+        public float GravityScale { get => gravityScale; set => gravityScale = value; }
+
+        // Jump velocity — scaled by LowGravityItem to keep peak height constant
+        public float JumpStrength { get; set; } = -16f;
         
         public Player(Texture2D texture, Vector2 position, int[] size, int health, Color color, Rectangle? srcRect, Dictionary<Vector2, int> collisionMap, Texture2D blasterTexture, List<ItemType> selectedItems, WeaponType selectedWeapon, int[]? visualSize = null)
             : base(texture, position, size, health, color, srcRect, collisionMap, visualSize)
@@ -60,6 +66,18 @@ namespace PolyGone.Entities
                         break;
                     case ItemType.HealingGlow:
                         item = new HealingGlowItem(texture, Vector2.Zero, new int[] { 32, 32 }, Color.Green, srcRect);
+                        break;
+                    case ItemType.MultiShot:
+                        item = new MultiShotItem(texture, Vector2.Zero, new int[] { 32, 32 }, Color.Red, srcRect);
+                        break;
+                    case ItemType.RapidFire:
+                        item = new RapidFireItem(texture, Vector2.Zero, new int[] { 32, 32 }, Color.Orange, srcRect);
+                        break;
+                    case ItemType.LowGravity:
+                        item = new LowGravityItem(texture, Vector2.Zero, new int[] { 32, 32 }, Color.Purple, srcRect);
+                        break;
+                    case ItemType.IronWill:
+                        item = new IronWillItem(texture, Vector2.Zero, new int[] { 32, 32 }, Color.Gold, srcRect);
                         break;
                 }
                 
@@ -136,7 +154,7 @@ namespace PolyGone.Entities
             
             if ((isOnGround || coyoteTime > 0f) && spacePressed)
             {
-                changeY = -16f;
+                changeY = JumpStrength;
                 coyoteTime = 0f; // Reset coyote time after jumping
             }
             else
@@ -145,7 +163,7 @@ namespace PolyGone.Entities
                 var doubleJumpItem = GetActiveDoubleJumpItem();
                 if (doubleJumpItem != null && doubleJumpItem.TryDoubleJump(this, spacePressed, wasOnGroundLastFrame))
                 {
-                    changeY = -16f; // Same jump strength for double jump
+                    changeY = JumpStrength; // Same jump strength for double jump
                 }
             }
         }
@@ -161,6 +179,7 @@ namespace PolyGone.Entities
                     if (projectile.owner == Owner.Enemy && invincibilityFrames <= 0f)
                     {
                         health -= projectile.damage;
+                        if (health <= 0) TryAbsorbLethalHit();
                         invincibilityFrames = 60f;
                     }
                     break;
@@ -170,6 +189,7 @@ namespace PolyGone.Entities
                     {
                         // Take 40 damage
                         health -= 40;
+                        if (health <= 0) TryAbsorbLethalHit();
                         
                         // Calculate knockback direction (away from enemy)
                         float knockbackX = position.X < other.position.X ? -10f : 10f;
@@ -266,6 +286,19 @@ namespace PolyGone.Entities
         private HealingGlowItem? GetActiveHealingGlowItem()
         {
             return itemInventory.OfType<HealingGlowItem>().FirstOrDefault(item => item.IsActive);
+        }
+
+        private IronWillItem? GetReadyIronWillItem()
+        {
+            return itemInventory.OfType<IronWillItem>().FirstOrDefault(item => item.IsReady);
+        }
+
+        /// <summary>If Iron Will is ready, survive the killing blow at 1 HP.</summary>
+        private void TryAbsorbLethalHit()
+        {
+            var ironWill = GetReadyIronWillItem();
+            if (ironWill != null && ironWill.TryAbsorbLethalHit())
+                health = 1;
         }
 
         // Helper method to get the currently equipped blaster/weapon

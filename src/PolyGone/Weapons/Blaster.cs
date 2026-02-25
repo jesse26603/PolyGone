@@ -16,6 +16,10 @@ namespace PolyGone.Weapons
         protected float cooldown;
         public float Cooldown => cooldown;
         public virtual float MaxCooldown => 12f; // Default blaster cooldown
+        /// <summary>Extra bullets fired per shot (in addition to the base bullet). Set by MultiShotItem.</summary>
+        public int ExtraBulletsPerShot { get; set; } = 0;
+        /// <summary>Multiplier applied to the reset cooldown after firing. Set by RapidFireItem.</summary>
+        public float CooldownMultiplier { get; set; } = 1f;
         protected readonly Dictionary<Vector2, int> collisionMap;
         public Blaster(Texture2D texture, Vector2 position, int[] size, Color color, Dictionary<Vector2, int> collisionMap, List<Projectile> sharedBullets, Rectangle? srcRect = null)
             : base(texture, position, size, color, "Blaster", "Basic energy weapon", srcRect)
@@ -56,6 +60,7 @@ namespace PolyGone.Weapons
             // Handle shooting with InputManager to prevent click carryover
             if (InputManager.IsLeftMouseButtonClicked() && cooldown <= 0f)
             {
+                // Central / base bullet
                 bullets.Add(new Projectile(
                     texture: texture,
                     position: new Vector2(position.X + size[0] / 2f - 5f, position.Y + size[1] / 2f - 5f),
@@ -69,7 +74,33 @@ namespace PolyGone.Weapons
                     srcRect: srcRect,
                     collisionMap: collisionMap
                 ));
-                cooldown = 12f; // Cooldown of 0.2 seconds at 60fps
+
+                // Extra spread bullets added by MultiShotItem
+                if (ExtraBulletsPerShot > 0)
+                {
+                    const float SpreadStep = 0.18f; // radians between each extra bullet
+                    int half = ExtraBulletsPerShot / 2;
+                    for (int i = 0; i < ExtraBulletsPerShot; i++)
+                    {
+                        float spreadOffset = (i - half + (ExtraBulletsPerShot % 2 == 0 ? 0.5f : 0f)) * SpreadStep;
+                        float angle = rotation + spreadOffset;
+                        bullets.Add(new Projectile(
+                            texture: texture,
+                            position: new Vector2(position.X + size[0] / 2f - 5f, position.Y + size[1] / 2f - 5f),
+                            size: new int[2] { 10, 10 },
+                            lifetime: 200f,
+                            health: 1,
+                            color: Color.White,
+                            xSpeed: (float)(Math.Cos(angle) * 750f),
+                            ySpeed: (float)(Math.Sin(angle) * 750f),
+                            owner: Owner.Player,
+                            srcRect: srcRect,
+                            collisionMap: collisionMap
+                        ));
+                    }
+                }
+
+                cooldown = MaxCooldown * CooldownMultiplier;
                 InputManager.ConsumeClick(); // Prevent multiple shots from same click
             }
         }
