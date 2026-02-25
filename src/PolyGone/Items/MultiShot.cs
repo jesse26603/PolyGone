@@ -5,28 +5,32 @@ using PolyGone.Weapons;
 namespace PolyGone.Items
 {
     /// <summary>
-    /// Adds 3 extra pellets to the Shotgun per blast, bringing the total from 5 to 8.
-    /// Has no effect when equipped with a non-Shotgun weapon.
+    /// Adds 2 extra bullets per shot to every weapon.
+    /// The extra bullets fan out in a small spread around the main shot.
     /// </summary>
     public class MultiShotItem : Item
     {
-        private const int ExtraPellets = 3;
+        private const int ExtraBullets = 2;
 
         public MultiShotItem(Texture2D texture, Vector2 position, int[] size, Color color, Rectangle? srcRect = null)
-            : base(texture, position, size, color, "Multi-Shot", "Adds 3 extra pellets to the Shotgun", srcRect) { }
+            : base(texture, position, size, color, "Multi-Shot", "Adds 2 extra bullets per shot to every weapon", srcRect) { }
 
         public override void Apply(PolyGone.Entities.Player player)
         {
             base.Apply(player);
-            if (player.GetBlaster() is Shotgun sg)
-                sg.ExtraPelletsPerShot += ExtraPellets;
+            if (player.GetBlaster() is Blaster b)
+            {
+                b.ExtraBulletsPerShot += ExtraBullets;
+            }
         }
 
         public override void Remove(PolyGone.Entities.Player player)
         {
             base.Remove(player);
-            if (player.GetBlaster() is Shotgun sg)
-                sg.ExtraPelletsPerShot -= ExtraPellets;
+            if (player.GetBlaster() is Blaster b)
+            {
+                b.ExtraBulletsPerShot -= ExtraBullets;
+            }
         }
 
         protected override Color GetActiveColor()   => new Color(255, 80, 80, 200);

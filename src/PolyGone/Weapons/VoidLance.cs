@@ -42,6 +42,33 @@ namespace PolyGone.Weapons
                     isPiercing: true             // Passes through enemies
                 ));
 
+                // Extra bullets from MultiShotItem
+                if (ExtraBulletsPerShot > 0)
+                {
+                    const float SpreadStep = 0.18f;
+                    int half = ExtraBulletsPerShot / 2;
+                    for (int i = 0; i < ExtraBulletsPerShot; i++)
+                    {
+                        float spreadOffset = (i - half + (ExtraBulletsPerShot % 2 == 0 ? 0.5f : 0f)) * SpreadStep;
+                        float angle = rotation + spreadOffset;
+                        bullets.Add(new Projectile(
+                            texture: texture,
+                            position: new Vector2(position.X + size[0] / 2f - 7f, position.Y + size[1] / 2f - 7f),
+                            size: new int[2] { 14, 14 },
+                            lifetime: 240f,
+                            health: 99,
+                            damage: 40,
+                            color: new Color(180, 0, 220),
+                            xSpeed: (float)(Math.Cos(angle) * 700f),
+                            ySpeed: (float)(Math.Sin(angle) * 700f),
+                            owner: Owner.Player,
+                            srcRect: srcRect,
+                            collisionMap: collisionMap,
+                            isPiercing: true
+                        ));
+                    }
+                }
+
                 cooldown = MaxCooldown * CooldownMultiplier;
                 InputManager.ConsumeClick();
             }
