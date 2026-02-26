@@ -206,7 +206,7 @@ public class GameScene : IScene
         );
         
         // Initialize GameUI
-        gameUI = new GameUI(player, texture, textureStore[1], hudFont);
+        gameUI = new GameUI(player, texture, textureStore[4], hudFont);
         // Initialize enemies from spawn positions
         enemies.AddRange(enemySpawns.Select(spawnPos => new Enemy(
             texture: texture,

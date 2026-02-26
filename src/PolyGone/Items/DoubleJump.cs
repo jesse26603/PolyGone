@@ -23,6 +23,9 @@ namespace PolyGone.Items
             hasDoubleJumped = false;
         }
 
+        /// <summary>Resets the double-jump charge, e.g. after a ground or coyote jump.</summary>
+        public void Reset() => hasDoubleJumped = false;
+
         protected override Color GetActiveColor()   => new Color(0, 150, 255, 200);
         protected override Color GetInactiveColor() => new Color(0, 75, 127, 150);
 
