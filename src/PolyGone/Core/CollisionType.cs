@@ -12,17 +12,17 @@ public enum CollisionType
 
 public static class CollisionTypeMapper
 {
-    // Map Tiled tile IDs to collision types
-    // Adjust these based on your Tiled collision tileset
+    // Map tileset tile IDs to collision types (after subtracting firstgid)
+    // CollisionTiles.tsx defines: tile 0=Solid, tile 1=SemiSolid
     public static CollisionType GetCollisionType(int tileId)
     {
         return tileId switch
         {
-            16 => CollisionType.Solid,
-            17 => CollisionType.SemiSolid,
-            18 => CollisionType.Slippery,
-            19 => CollisionType.Rough,
-            20 => CollisionType.OneWay,
+            0 => CollisionType.Solid,
+            1 => CollisionType.SemiSolid,
+            2 => CollisionType.Slippery,
+            3 => CollisionType.Rough,
+            4 => CollisionType.OneWay,
             _ => CollisionType.None,
         };
     }

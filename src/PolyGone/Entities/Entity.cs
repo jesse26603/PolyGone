@@ -22,6 +22,8 @@ public class Entity : Sprite
     protected Vector2 hitboxOffset; // Offset to center the hitbox within the visual sprite
     protected bool isAlive = true;
     public bool IsAlive => isAlive;
+    /// <summary>Multiplier applied to gravity each physics tick. 1 = normal, lower = floatier.</summary>
+    protected float gravityScale = 1f;
     
     // Constants for tile-based calculations
     protected const int TILE_SIZE = 64;
@@ -154,7 +156,7 @@ public class Entity : Sprite
     protected virtual void PhysicsUpdate(float deltaTime)
     {
         // Apply gravity
-        changeY += 0.7f;
+        changeY += 0.7f * gravityScale;
         changeY = Math.Min(changeY, 14f);
 
         // Handle vertical movement and collisions

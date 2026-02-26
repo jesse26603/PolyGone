@@ -113,11 +113,23 @@ public class GameUI
             spriteBatch.Draw(itemIndicatorTexture, new Rectangle(x + itemSize, y - 2, 2, itemSize + 4), srcRect, borderColor);
             spriteBatch.Draw(itemIndicatorTexture, new Rectangle(x - 2, y + itemSize, itemSize + 4, 2), srcRect, borderColor);
 
-            // Item name
+            // Item name with border
             if (font != null)
             {
                 string itemName = item.Name;
                 Vector2 namePosition = new Vector2(x + itemSize + 5, y + (itemSize / 2) - (font.LineSpacing / 2));
+                
+                // Draw black border (8 directions)
+                spriteBatch.DrawString(font, itemName, namePosition + new Vector2(-1, -1), Color.Black);
+                spriteBatch.DrawString(font, itemName, namePosition + new Vector2(0, -1), Color.Black);
+                spriteBatch.DrawString(font, itemName, namePosition + new Vector2(1, -1), Color.Black);
+                spriteBatch.DrawString(font, itemName, namePosition + new Vector2(-1, 0), Color.Black);
+                spriteBatch.DrawString(font, itemName, namePosition + new Vector2(1, 0), Color.Black);
+                spriteBatch.DrawString(font, itemName, namePosition + new Vector2(-1, 1), Color.Black);
+                spriteBatch.DrawString(font, itemName, namePosition + new Vector2(0, 1), Color.Black);
+                spriteBatch.DrawString(font, itemName, namePosition + new Vector2(1, 1), Color.Black);
+                
+                // Draw white text on top
                 spriteBatch.DrawString(font, itemName, namePosition, Color.White);
             }
         }

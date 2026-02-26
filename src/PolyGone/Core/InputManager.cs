@@ -78,6 +78,15 @@ public static class InputManager
             && _previousMouseState.LeftButton == ButtonState.Released 
             && _mouseClickCooldown <= 0f;
     }
+
+    /// <summary>
+    /// Checks if the left mouse button is currently held down (any frame, no cooldown check).
+    /// Use this for automatic weapons that fire while the button is held.
+    /// </summary>
+    public static bool IsLeftMouseButtonHeld()
+    {
+        return _currentMouseState.LeftButton == ButtonState.Pressed;
+    }
     
     /// <summary>
     /// Consumes the click by starting the cooldown timer.

@@ -23,8 +23,8 @@ namespace PolyGone.Weapons
             // Handle shooting with spread using InputManager
             if (InputManager.IsLeftMouseButtonClicked() && cooldown <= 0f)
             {
-                // Shotgun fires 5 projectiles with spread
-                int pelletCount = 5;
+                // Shotgun fires base pellets + any extras from MultiShotItem
+                int pelletCount = 5 + ExtraBulletsPerShot;
                 float spreadAngle = 0.6f; // Total spread in radians (about 34 degrees)
                 float angleStep = spreadAngle / (pelletCount - 1);
                 float startAngle = rotation - spreadAngle / 2;

@@ -22,8 +22,8 @@ public class GameScene : IScene
     private FollowCamera camera;
     private GameUI gameUI;
     private readonly GraphicsDeviceManager graphics;
-    private Dictionary<Vector2, int> tileMap;
-    private Dictionary<Vector2, int> collisionMap;
+    private Dictionary<Vector2, int> tileMap = null!;
+    private Dictionary<Vector2, int> collisionMap = null!;
     private List<Rectangle> textureStore;
     private Vector2 playerPos;
     private bool playerSpawnFound = false;
@@ -95,7 +95,7 @@ public class GameScene : IScene
         
         foreach (JsonElement layer in layers.EnumerateArray())
         {
-            string layerName = layer.GetProperty("name").GetString();
+            string? layerName = layer.GetProperty("name").GetString();
             // Process tile and collision layers
             if (layerName != "Objects")
             {
@@ -110,14 +110,15 @@ public class GameScene : IScene
                     
                     if (tileValue > 0)
                     {
-                        // Tiled uses 1-based indexing, convert to 0-based
+                        // Tiled's firstgid is 1, so we subtract 1 to convert to 0-based index.
+                        // Wrap tileValue to fit within our texture store (assuming 16 tiles per layer in Tiled)
                         if (layerName == "Tiles")
                         {
-                            tileMap[new Vector2(x, y)] = tileValue - 1;
+                            tileMap[new Vector2(x, y)] = tileValue % 16 - 1; 
                         }
                         else if (layerName == "Collisions")
                         {
-                            collisionMap[new Vector2(x, y)] = tileValue - 1;
+                            collisionMap[new Vector2(x, y)] = tileValue % 16 - 1;
                         }
                     }
                     
@@ -130,17 +131,17 @@ public class GameScene : IScene
                 List<JsonElement> objects = layer.GetProperty("objects").EnumerateArray().ToList();
                 foreach (JsonElement obj in objects)
                 {
-                    string objType = obj.GetProperty("type").GetString();
+                    string? objType = obj.GetProperty("type").GetString();
                     switch (objType)
                     {
-                        case "PlayerSpawn":
+                        case "Player":
                             playerPos = AdjustCoordinates(
                                 obj.GetProperty("x").GetSingle(),
                                 obj.GetProperty("y").GetSingle()
                             );
                             playerSpawnFound = true;
                             break;
-                        case "EnemySpawn":
+                        case "Enemy":
                             Vector2 enemyPos = AdjustCoordinates(
                                 obj.GetProperty("x").GetSingle(),
                                 obj.GetProperty("y").GetSingle()
@@ -205,7 +206,7 @@ public class GameScene : IScene
         );
         
         // Initialize GameUI
-        gameUI = new GameUI(player, texture, textureStore[0], hudFont);
+        gameUI = new GameUI(player, texture, textureStore[4], hudFont);
         // Initialize enemies from spawn positions
         enemies.AddRange(enemySpawns.Select(spawnPos => new Enemy(
             texture: texture,

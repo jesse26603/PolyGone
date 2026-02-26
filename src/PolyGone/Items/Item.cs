@@ -1,6 +1,5 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 
 namespace PolyGone.Items
 {
@@ -17,44 +16,34 @@ namespace PolyGone.Items
             Description = description;
         }
 
-        public virtual void Use()
-        {
-            // Default use behavior (can be overridden by subclasses)
-        }
+        public virtual void Use() { }
 
-        // Called when item is equipped/activated
+        /// <summary>Called when the item is equipped / activated.</summary>
         public virtual void Apply(PolyGone.Entities.Player player)
         {
             IsActive = true;
         }
 
-        // Called when item is unequipped/deactivated
+        /// <summary>Called when the item is unequipped / deactivated.</summary>
         public virtual void Remove(PolyGone.Entities.Player player)
         {
             IsActive = false;
         }
 
-        // Draw the item indicator at a fixed screen position
+        /// <summary>Draws a small indicator icon at a fixed HUD position.</summary>
         public virtual void DrawIndicator(SpriteBatch spriteBatch, Vector2 indicatorPosition, Texture2D itemTexture, Rectangle sourceRect, int itemIndex)
         {
-            int indicatorWidth = 20;
-            int indicatorHeight = 20;
-            
-            // Create a rectangle for the indicator
+            const int indicatorSize = 20;
             Rectangle indicatorRect = new Rectangle(
-                (int)indicatorPosition.X, 
-                (int)indicatorPosition.Y, 
-                indicatorWidth, 
-                indicatorHeight
+                (int)indicatorPosition.X,
+                (int)indicatorPosition.Y,
+                indicatorSize,
+                indicatorSize
             );
 
-            // Determine colors based on item type and status
             Color backgroundColor = IsActive ? GetActiveColor() : GetInactiveColor();
-
-            // Draw the textured background with color tint
             spriteBatch.Draw(itemTexture, indicatorRect, sourceRect, backgroundColor);
 
-            // Draw key number indicator (small rectangle in corner)
             Rectangle keyIndicator = new Rectangle(
                 indicatorRect.X + indicatorRect.Width - 8,
                 indicatorRect.Y + indicatorRect.Height - 8,
@@ -64,188 +53,9 @@ namespace PolyGone.Items
             spriteBatch.Draw(itemTexture, keyIndicator, sourceRect, keyColor);
         }
 
-        // Virtual methods for item-specific colors
-        protected virtual Color GetActiveColor()
-        {
-            return new Color(255, 255, 255, 200); // Default white
-        }
+        protected virtual Color GetActiveColor()   => new Color(255, 255, 255, 200);
+        protected virtual Color GetInactiveColor() => new Color(127, 127, 127, 150);
 
-        protected virtual Color GetInactiveColor()
-        {
-            return new Color(127, 127, 127, 150); // Default gray
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-        }
-    }
-
-    // Double Jump Item - allows player to jump again while falling or at peak of jump
-    class DoubleJumpItem : Item
-    {
-        private bool hasDoubleJumped = false;
-
-        public DoubleJumpItem(Texture2D texture, Vector2 position, int[] size, Color color, Rectangle? srcRect = null)
-            : base(texture, position, size, color, "Double Jump", "Allows a second jump in mid-air", srcRect)
-        {
-        }
-
-        public override void Apply(PolyGone.Entities.Player player)
-        {
-            base.Apply(player);
-            hasDoubleJumped = false; // Reset double jump state when equipped
-        }
-
-        public override void Remove(PolyGone.Entities.Player player)
-        {
-            base.Remove(player);
-            hasDoubleJumped = false; // Reset state when removed
-        }
-
-        protected override Color GetActiveColor()
-        {
-            return new Color(0, 150, 255, 200); // Bright blue
-        }
-
-        protected override Color GetInactiveColor()
-        {
-            return new Color(0, 75, 127, 150); // Dim blue
-        }
-
-        // Call this method from Player's HandleInput when checking for jump
-        public bool TryDoubleJump(PolyGone.Entities.Player player, bool spacePressed, bool wasOnGround)
-        {
-            if (!IsActive) { return false; }
-
-            // Reset double jump when landing
-            if (wasOnGround)
-            {
-                hasDoubleJumped = false;
-            }
-
-            // Allow double jump if: space is pressed, player is falling/stationary, and hasn't double jumped yet
-            if (spacePressed && player.ChangeY >= 0 && !hasDoubleJumped && !wasOnGround)
-            {
-                hasDoubleJumped = true;
-                return true;
-            }
-
-            return false;
-        }
-    }
-
-    // Speed Boost Item - increases player movement speed by 1.5x
-    class SpeedBoostItem : Item
-    {
-        private const float SPEED_MULTIPLIER = 1.5f;
-
-        public SpeedBoostItem(Texture2D texture, Vector2 position, int[] size, Color color, Rectangle? srcRect = null)
-            : base(texture, position, size, color, "Speed Boost", "Increases movement speed by 50%", srcRect)
-        {
-        }
-
-        public override void Apply(PolyGone.Entities.Player player)
-        {
-            base.Apply(player);
-            // Speed boost is handled in Player's movement calculations
-        }
-
-        public override void Remove(PolyGone.Entities.Player player)
-        {
-            base.Remove(player);
-            // Speed boost removal is handled in Player's movement calculations
-        }
-
-        protected override Color GetActiveColor()
-        {
-            return new Color(255, 215, 0, 200); // Bright yellow
-        }
-
-        protected override Color GetInactiveColor()
-        {
-            return new Color(127, 107, 0, 150); // Dim yellow
-        }
-
-        public float GetSpeedMultiplier()
-        {
-            return IsActive ? SPEED_MULTIPLIER : 1.0f;
-        }
-    }
-
-    // Healing Glow Item - heals player 10 HP every 2 seconds and gives green glowing outline
-    public class HealingGlowItem : Item
-    {
-        private const int HEAL_AMOUNT = 10;
-        private const float HEAL_INTERVAL = 2.0f; // Heal every 2 seconds
-        private float glowTime = 0f;
-        private float healTimer = 0f;
-
-        public HealingGlowItem(Texture2D texture, Vector2 position, int[] size, Color color, Rectangle? srcRect = null)
-            : base(texture, position, size, color, "Healing Glow", "Heals 10 HP every 2 seconds", srcRect)
-        {
-        }
-
-        public override void Apply(PolyGone.Entities.Player player)
-        {
-            base.Apply(player);
-            glowTime = 0f;
-            healTimer = 0f;
-        }
-
-        public override void Remove(PolyGone.Entities.Player player)
-        {
-            base.Remove(player);
-            glowTime = 0f;
-            healTimer = 0f;
-        }
-
-        protected override Color GetActiveColor()
-        {
-            return new Color(0, 255, 100, 200); // Bright green
-        }
-
-        protected override Color GetInactiveColor()
-        {
-            return new Color(0, 127, 50, 150); // Dim green
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-            if (IsActive)
-            {
-                glowTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
-            }
-        }
-
-        // Call this from Player's Update to apply healing over time
-        public void ApplyHealingOverTime(PolyGone.Entities.Player player, float deltaTime)
-        {
-            if (!IsActive) return;
-            
-            healTimer += deltaTime;
-            if (healTimer >= HEAL_INTERVAL)
-            {
-                healTimer -= HEAL_INTERVAL;
-                player.health = Math.Min(player.health + HEAL_AMOUNT, player.maxHealth);
-            }
-        }
-
-        // Get the glow color for drawing the player outline
-        public Color GetGlowColor()
-        {
-            if (!IsActive) { return Color.Transparent; }
-            
-            // Pulsing green glow
-            float intensity = (float)(Math.Sin(glowTime * 6) * 0.3f + 0.7f); // Pulse between 0.4 and 1.0
-            return new Color(0, (int)(255 * intensity), 0, (int)(200 * intensity));
-        }
-
-        // Check if player should have glow outline
-        public bool ShouldGlow()
-        {
-            return IsActive;
-        }
+        public override void Update(GameTime gameTime) => base.Update(gameTime);
     }
 }
