@@ -165,6 +165,7 @@ namespace PolyGone.Entities
             {
                 changeY = JumpStrength;
                 coyoteTime = 0f; // Reset coyote time after jumping
+                GetActiveDoubleJumpItem()?.Reset(); // Allow double jump in the new air phase
             }
             else
             {
