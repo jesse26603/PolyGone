@@ -28,7 +28,10 @@ public class GameScene : IScene
     private Vector2 playerPos;
     private bool playerSpawnFound = false;
     private readonly List<Vector2> enemySpawns = new(); // Store enemy spawn positions
+    private readonly List<Vector2> turretEnemySpawns = new(); // Store turret spawn positions
     private readonly List<Entity> enemies = new(); // Placeholder for enemy list
+    private readonly List<TurretEnemy> turretEnemies = new(); // Stationary blaster enemies
+    private readonly List<Projectile> orphanedTurretBullets = new(); // Bullets that outlive their turret
     private GoalTrigger goalTrigger; // Win condition trigger
     private bool levelComplete = false;
     private bool gameOver = false;
@@ -44,7 +47,7 @@ public class GameScene : IScene
         this.selectedItems = selectedItems ?? new List<ItemType>(); // Default to empty list
         this.selectedWeapon = selectedWeapon;
         this.levelName = levelName;
-        LoadMapFromJson("../../../Content/Maps/" + levelName + ".json");
+        LoadMapFromJson("Maps/" + levelName + ".json");
         textureStore = GetTextureStore(32, new int[2] { 4, 4 });
     }
 
@@ -148,6 +151,13 @@ public class GameScene : IScene
                             );
                             enemySpawns.Add(enemyPos);
                             break;
+                        case "TurretEnemy":
+                            Vector2 turretPos = AdjustCoordinates(
+                                obj.GetProperty("x").GetSingle(),
+                                obj.GetProperty("y").GetSingle()
+                            );
+                            turretEnemySpawns.Add(turretPos);
+                            break;
                         case "Goal":
                             Vector2 goalPos = AdjustCoordinates(
                                 obj.GetProperty("x").GetSingle(),
@@ -207,7 +217,19 @@ public class GameScene : IScene
         
         // Initialize GameUI
         gameUI = new GameUI(player, texture, textureStore[4], hudFont);
-        // Initialize enemies from spawn positions
+        // Initialize turret enemies
+        turretEnemies.AddRange(turretEnemySpawns.Select(spawnPos => new TurretEnemy(
+            texture: texture,
+            position: spawnPos,
+            size: new int[2] { 60, 60 },
+            player: player,
+            health: 80,
+            color: Color.White,
+            srcRect: textureStore[6],
+            collisionMap: collisionMap,
+            visualSize: new int[2] { 64, 64 }
+        )));
+        // Initialize patrol enemies from spawn positions
         enemies.AddRange(enemySpawns.Select(spawnPos => new Enemy(
             texture: texture,
             position: spawnPos,
@@ -228,7 +250,21 @@ public class GameScene : IScene
         player.health = 100;
         player.bullets.Clear();
         
-        // Reset enemies
+        // Reset turret enemies
+        orphanedTurretBullets.Clear();
+        turretEnemies.Clear();
+        turretEnemies.AddRange(turretEnemySpawns.Select(spawnPos => new TurretEnemy(
+            texture: texture,
+            position: spawnPos,
+            size: new int[2] { 60, 60 },
+            player: player,
+            health: 80,
+            color: Color.White,
+            srcRect: textureStore[6],
+            collisionMap: collisionMap,
+            visualSize: new int[2] { 64, 64 }
+        )));
+        // Reset patrol enemies
         enemies.Clear();
         enemies.AddRange(enemySpawns.Select(spawnPos => new Enemy(
             texture: texture,
@@ -300,24 +336,64 @@ public class GameScene : IScene
                 enemy.position.X = worldMaxX - enemy.size[0];
         }
 
-        // Update alive enemies
+        // Update alive patrol enemies
         foreach (var enemy in enemies)
         {
             if (enemy.IsAlive)
                 enemy.Update(gameTime);
         }
 
-        // Remove enemies that died this frame
+        // Remove patrol enemies that died this frame
         enemies.RemoveAll(e => !e.IsAlive);
 
+        // Check turret enemies for falling out of bounds
+        foreach (var turret in turretEnemies)
+        {
+            if (turret.position.Y > worldMaxY)
+                turret.HandleDeath();
+        }
+
+        // Update alive turret enemies
+        foreach (var turret in turretEnemies)
+        {
+            if (turret.IsAlive)
+                turret.Update(gameTime);
+        }
+
+        // Before removing dead turrets, rescue any live bullets they still own
+        foreach (var turret in turretEnemies)
+        {
+            if (!turret.IsAlive)
+            {
+                orphanedTurretBullets.AddRange(turret.Bullets);
+            }
+        }
+
+        // Remove turret enemies that died this frame
+        turretEnemies.RemoveAll(t => !t.IsAlive);
+
+        // Advance and prune orphaned bullets
+        for (int i = orphanedTurretBullets.Count - 1; i >= 0; i--)
+        {
+            orphanedTurretBullets[i].Update(gameTime);
+            if (orphanedTurretBullets[i].lifetime <= 0)
+            {
+                orphanedTurretBullets.RemoveAt(i);
+            }
+        }
+
         // Gather all entities for collision detection after all updates
-        List<Entity> allEntities = [player, .. enemies, .. player.bullets];
+        List<Entity> allEntities = [player, .. enemies, .. turretEnemies, .. player.bullets, .. turretEnemies.SelectMany(t => t.Bullets), .. orphanedTurretBullets];
 
         // Handle entity-to-entity collisions
         player.EntityCollisionUpdate(allEntities);
         foreach (var enemy in enemies)
         {
             enemy.EntityCollisionUpdate(allEntities);
+        }
+        foreach (var turret in turretEnemies)
+        {
+            turret.EntityCollisionUpdate(allEntities);
         }
         
         // Check for goal trigger
@@ -348,6 +424,14 @@ public class GameScene : IScene
         foreach (var enemy in enemies)
         {
             enemy.Draw(spriteBatch, camera.position);
+        }
+        foreach (var turret in turretEnemies)
+        {
+            turret.Draw(spriteBatch, camera.position);
+        }
+        foreach (var bullet in orphanedTurretBullets)
+        {
+            bullet.Draw(spriteBatch, camera.position);
         }
         player.Draw(spriteBatch, camera.position);
         

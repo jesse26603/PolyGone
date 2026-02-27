@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="90" height="30" tilewidth="32" tileheight="32" infinite="0" backgroundcolor="#ffffff" nextlayerid="5" nextobjectid="66">
  <editorsettings>
-  <export target="../../src/PolyGone/Content/Maps/TestLevel.json" format="json"/>
+  <export target="../../src/PolyGone/Maps/TestLevel.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="../TiledSets/CollisionTiles.tsx"/>
  <tileset firstgid="17" source="../TiledSets/BasicTiles.tsx"/>
@@ -40,7 +40,7 @@
 </data>
  </layer>
  <objectgroup id="4" name="Objects" class="EnemySpawn">
-  <object id="12" name="Goal" type="Goal" x="2784" y="768" width="32" height="32"/>
+  <object id="12" name="Goal" type="Goal" x="2784" y="800" width="32" height="32"/>
   <object id="16" gid="18" x="64" y="864" width="32" height="32"/>
   <object id="17" gid="19" x="320" y="544" width="32" height="32"/>
   <object id="19" gid="19" x="576" y="608" width="32" height="32"/>

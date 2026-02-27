@@ -13,7 +13,7 @@ namespace PolyGone.Items
         private const float GravityScale = 0.4f;
         // sqrt(0.4) ≈ 0.6325 — keeps peak height (v²/2g) constant when g is scaled
         private static readonly float JumpScale = (float)Math.Sqrt(GravityScale);
-        private const float BaseJumpStrength = -16f;
+        private const float BaseJumpStrength = -16.75f;
 
         public LowGravityItem(Texture2D texture, Vector2 position, int[] size, Color color, Rectangle? srcRect = null)
             : base(texture, position, size, color, "Low Gravity", "Floatier movement, same jump height", srcRect) { }

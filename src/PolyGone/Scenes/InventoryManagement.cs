@@ -61,16 +61,24 @@ namespace PolyGone
         };
         private readonly string[] _itemDescriptions =
         {
-            "Second jump in mid-air",
+            "One additional jump while airborne",
             "Move 50% faster",
-            "Regen 10 HP every 2s",
-            "Adds 3 extra pellets to the Shotgun",
-            "Cooldown reduced to 1/3",
-            "Gravity reduced to 40%",
-            "Survive 1 kill every 20s"
+            "Regenerate 10 HP every 2 seconds",
+            "Adds 2 extra spread bullets per shot to all weapons",
+            "Reduces weapon cooldown to 1/3",
+            "40% gravity - rises and falls slowly, same jump height",
+            "Once per 20s, survive a killing blow and stay at 1 HP"
         };
         private readonly string[] _weaponNames = { "Blaster", "Shotgun", "Rifle", "Automatic", "Void Lance" };
         private readonly WeaponType[] _weaponTypes = { WeaponType.Blaster, WeaponType.Shotgun, WeaponType.Rifle, WeaponType.Automatic, WeaponType.VoidLance };
+        private readonly string[] _weaponDescriptions =
+        {
+            "40 dmg per shot - click to fire, 0.2s cooldown",
+            "5x15 dmg spread - short range, 0.5s cooldown",
+            "120 dmg - very fast projectile, 1s cooldown",
+            "15 dmg - hold to spray, 4-frame cooldown",
+            "40 dmg - piercing shots pass through all enemies, ~0.8s cooldown"
+        };
 
         // Static fields to remember last selection across instances
         private static List<ItemType> _lastSelectedItems = new List<ItemType> { ItemType.DoubleJump, ItemType.SpeedBoost };
@@ -408,9 +416,16 @@ namespace PolyGone
 
                 Color color = isCursor ? Color.Yellow : (isSelected ? Color.Green : Color.White);
                 string prefix = isSelected ? "[X] " : "[ ] ";
-                string description = isCursor ? $"  <- {_itemDescriptions[i]}" : "";
-                
-                spriteBatch.DrawString(_font, prefix + itemName + description, new Vector2(startX, startY + i * 40), color);
+
+                spriteBatch.DrawString(_font, prefix + itemName, new Vector2(startX, startY + i * 40), color);
+            }
+
+            // Draw description for the currently highlighted item below the list
+            int descY = startY + _itemNames.Length * 40 + 10;
+            string activeItemDesc = _currentMode == SelectionMode.Items ? _itemDescriptions[_itemCursor] : "";
+            if (activeItemDesc.Length > 0)
+            {
+                spriteBatch.DrawString(_font, activeItemDesc, new Vector2(startX, descY), Color.LightGray);
             }
         }
 
@@ -431,8 +446,16 @@ namespace PolyGone
 
                 Color color = isCursor ? Color.Yellow : (isSelected ? Color.Green : Color.White);
                 string prefix = isSelected ? "(O) " : "( ) ";
-                
+
                 spriteBatch.DrawString(_font, prefix + weaponName, new Vector2(startX, startY + i * 40), color);
+            }
+
+            // Draw description for the currently highlighted weapon below the list
+            int descY = startY + _weaponNames.Length * 40 + 10;
+            string activeDesc = _currentMode == SelectionMode.Weapon ? _weaponDescriptions[_weaponCursor] : "";
+            if (activeDesc.Length > 0)
+            {
+                spriteBatch.DrawString(_font, activeDesc, new Vector2(startX, descY), Color.LightGray);
             }
         }
 

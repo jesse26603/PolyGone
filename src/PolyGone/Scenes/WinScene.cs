@@ -165,7 +165,7 @@ public class WinScene : IScene
         
         try
         {
-            string jsonPath = Path.Combine("../../../Content/Maps/LevelOrder.json");
+            string jsonPath = Path.Combine("Maps/LevelOrder.json");
             string jsonContent = File.ReadAllText(jsonPath);
             using JsonDocument doc = JsonDocument.Parse(jsonContent);
             JsonElement root = doc.RootElement;

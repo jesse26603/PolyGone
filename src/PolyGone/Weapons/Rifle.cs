@@ -65,7 +65,7 @@ namespace PolyGone.Weapons
                     }
                 }
 
-                cooldown = 60f; // Slower fire rate (1 seconds at 60fps)
+                cooldown = MaxCooldown * CooldownMultiplier;
                 InputManager.ConsumeClick(); // Prevent multiple shots from same click
             }
         }
