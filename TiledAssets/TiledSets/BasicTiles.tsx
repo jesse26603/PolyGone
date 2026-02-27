@@ -7,6 +7,6 @@
  <tile id="3" type="SemiSolid"/>
  <tile id="4" type="Solid"/>
  <tile id="5" type="Friendly"/>
- <tile id="6" type="Neutral"/>
+ <tile id="6" type="TurretEnemy"/>
  <tile id="7" type="SemiSolid"/>
 </tileset>

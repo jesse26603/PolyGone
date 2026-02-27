@@ -36,9 +36,21 @@ namespace PolyGone.Entities
         public float GravityScale { get => gravityScale; set => gravityScale = value; }
 
         // Jump velocity — scaled by LowGravityItem to keep peak height constant
-        public float JumpStrength { get; set; } = -16f;
+        public float JumpStrength { get; set; } = -16.75f;
         
-        public Player(Texture2D texture, Vector2 position, int[] size, int health, Color color, Rectangle? srcRect, Dictionary<Vector2, int> collisionMap, Texture2D blasterTexture, List<ItemType> selectedItems, WeaponType selectedWeapon, int[]? visualSize = null)
+        public Player(
+            Texture2D texture, 
+            Vector2 position, 
+            int[] size, 
+            int health, 
+            Color color, 
+            Rectangle? srcRect, 
+            Dictionary<Vector2, int> collisionMap, 
+            Texture2D blasterTexture, 
+            List<ItemType> selectedItems, 
+            WeaponType selectedWeapon, 
+            int[]? visualSize = null
+        )
             : base(texture, position, size, health, color, srcRect, collisionMap, visualSize)
         {
             // Create the selected weapon
@@ -189,8 +201,24 @@ namespace PolyGone.Entities
                     if (projectile.owner == Owner.Enemy && invincibilityFrames <= 0f)
                     {
                         health -= projectile.damage;
-                        if (health <= 0) TryAbsorbLethalHit();
+                        if (health <= 0)
+                        {
+                            TryAbsorbLethalHit();
+                        }
+
+                        // Apply knockback in the direction the projectile was travelling
+                        Vector2 projectileVelocity = new Vector2(projectile.xSpeed, projectile.ySpeed);
+                        if (projectileVelocity != Vector2.Zero)
+                        {
+                            projectileVelocity.Normalize();
+                            changeX = projectileVelocity.X * 10f;
+                            changeY = projectileVelocity.Y * 10f - 5f; // extra upward bias
+                        }
+
                         invincibilityFrames = 60f;
+
+                        // Despawn the projectile on contact
+                        projectile.lifetime = 0f;
                     }
                     break;
                 case Enemy:
