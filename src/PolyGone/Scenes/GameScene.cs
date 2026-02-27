@@ -346,6 +346,13 @@ public class GameScene : IScene
         // Remove patrol enemies that died this frame
         enemies.RemoveAll(e => !e.IsAlive);
 
+        // Check turret enemies for falling out of bounds
+        foreach (var turret in turretEnemies)
+        {
+            if (turret.position.Y > worldMaxY)
+                turret.HandleDeath();
+        }
+
         // Update alive turret enemies
         foreach (var turret in turretEnemies)
         {
