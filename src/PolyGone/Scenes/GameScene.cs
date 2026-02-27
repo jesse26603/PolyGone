@@ -47,7 +47,7 @@ public class GameScene : IScene
         this.selectedItems = selectedItems ?? new List<ItemType>(); // Default to empty list
         this.selectedWeapon = selectedWeapon;
         this.levelName = levelName;
-        LoadMapFromJson("../../../Content/Maps/" + levelName + ".json");
+        LoadMapFromJson("Maps/" + levelName + ".json");
         textureStore = GetTextureStore(32, new int[2] { 4, 4 });
     }
 

@@ -23,6 +23,12 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <!-- Copy Maps JSON files (plain data, not content-pipeline processed) to output -->
+    <Content Include="Maps\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*" />
   </ItemGroup>

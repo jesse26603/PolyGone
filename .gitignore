@@ -69,3 +69,9 @@ Desktop.ini
 *.tmp
 *.temp
 *.log
+
+# Publish output
+publish/
+
+# Ignore the publish profile (which may contain user-specific settings and paths)
+src/PolyGone/Properties/PublishProfiles/*
