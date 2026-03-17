@@ -76,6 +76,41 @@ public class Entity : Sprite
         return colType == CollisionType.Solid || colType == CollisionType.Rough || colType == CollisionType.Slippery;
     }
 
+    // Edge nudging
+    protected virtual void HandleEdgeNudging(ref float deltaX, ref float deltaY, List<(Rectangle, CollisionType)> collisions)
+    {
+        var (tileRect, colType) = collisions[0];
+        if (colType == CollisionType.Solid || colType == CollisionType.Rough || colType == CollisionType.Slippery)
+        {
+            // Check for tile collisions 
+            if (Math.Abs((position.X + size[0]) - tileRect.Left) < 5f && deltaX > 0)
+            {
+                // Nudge left when hitting right edge
+                position.X = tileRect.Left - size[0] - 1f;
+                deltaX = 0;
+            }
+            else if (Math.Abs(position.X - tileRect.Right) < 5f && deltaX < 0)
+            {
+                // Nudge right when hitting left edge
+                position.X = tileRect.Right + 1f;
+                deltaX = 0;
+            }
+
+            if (Math.Abs((position.Y + size[1]) - tileRect.Top) < 5f && deltaY > 0)
+            {
+                // Nudge up when hitting bottom edge
+                position.Y = tileRect.Top - size[1] - 1f;
+                deltaY = 0;
+                isOnGround = true;
+            }
+            else if (Math.Abs(position.Y - tileRect.Bottom) < 5f && deltaY < 0)
+            {
+                // Nudge down when hitting top edge
+                position.Y = tileRect.Bottom + 1f;
+                deltaY = 0;
+            }
+        }
+    }
     protected virtual void HandleVerticalCollision(ref bool onGround, ref float deltaY, List<(Rectangle, CollisionType)> collisions)
     {
         var (tileRect, colType) = collisions[0];
