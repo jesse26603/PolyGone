@@ -8,7 +8,7 @@ namespace PolyGone;
 public class Game1 : Game
 {
     private GraphicsDeviceManager _graphics;
-    private SpriteBatch _spriteBatch;
+    private SpriteBatch _spriteBatch = null!;
     private SceneManager sceneManager;
     private KeyboardState _previousKeyboardState;
 

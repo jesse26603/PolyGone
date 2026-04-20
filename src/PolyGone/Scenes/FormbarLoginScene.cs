@@ -264,6 +264,7 @@ internal class FormbarLoginScene : IScene
 
     private void DrawIdle(SpriteBatch spriteBatch, Viewport viewport)
     {
+        var font = _font!;
         float cx = viewport.Width / 2f;
         float cy = viewport.Height / 2f;
 
@@ -275,13 +276,13 @@ internal class FormbarLoginScene : IScene
 
         // Row 2  (cy): "Login with Formbar" button — centred on cy
         string btnLabel = "Login with Formbar";
-        var btnSize = _font.MeasureString(btnLabel);
+        var btnSize = font.MeasureString(btnLabel);
         float btnY = cy;
         float btnX = cx - btnSize.X / 2f;
         spriteBatch.Draw(_pixel!,
             new Rectangle((int)btnX - 10, (int)btnY - 5, (int)btnSize.X + 20, (int)btnSize.Y + 10),
             Color.DarkGreen);
-        spriteBatch.DrawString(_font, btnLabel, new Vector2(btnX, btnY), Color.White);
+        spriteBatch.DrawString(font, btnLabel, new Vector2(btnX, btnY), Color.White);
 
         // Row 3  (cy + gap): status / error
         if (!string.IsNullOrEmpty(_statusMessage))

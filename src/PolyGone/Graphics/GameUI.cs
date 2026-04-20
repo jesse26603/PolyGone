@@ -11,9 +11,9 @@ public class GameUI
     private readonly Player player;
     private readonly Texture2D itemIndicatorTexture;
     private readonly Rectangle srcRect;
-    private readonly SpriteFont font;
+    private readonly SpriteFont? font;
 
-    public GameUI(Player player, Texture2D itemIndicatorTexture, Rectangle srcRect, SpriteFont font)
+    public GameUI(Player player, Texture2D itemIndicatorTexture, Rectangle srcRect, SpriteFont? font)
     {
         this.player = player;
         this.itemIndicatorTexture = itemIndicatorTexture;
@@ -65,15 +65,16 @@ public class GameUI
         spriteBatch.Draw(itemIndicatorTexture, new Rectangle(x - 2, y - 2, size + 4, size + 4), srcRect, Color.Black);
         
         // Icon
-        if (player.GetBlaster() != null)
+        var blaster = player.GetBlaster();
+        if (blaster != null)
         {
-            spriteBatch.Draw(player.GetBlaster().texture, new Rectangle(x + 4, y + 4, size - 8, size - 8), player.GetBlaster().srcRect, Color.White);
+            spriteBatch.Draw(blaster.texture, new Rectangle(x + 4, y + 4, size - 8, size - 8), blaster.srcRect, Color.White);
         }
         
         // Cooldown fill overlay (fits icon dimensions)
-        if (player.GetBlaster() != null)
+        if (blaster != null)
         {
-            float maxCooldown = player.GetBlaster().MaxCooldown;
+            float maxCooldown = blaster.MaxCooldown;
             int iconSize = size - 8;
             int cooldownHeight = (int)((player.Cooldown / maxCooldown) * iconSize);
             spriteBatch.Draw(itemIndicatorTexture, new Rectangle(x + 4, y + 4 + (iconSize - cooldownHeight), iconSize, cooldownHeight), srcRect, Color.Blue * 0.6f);

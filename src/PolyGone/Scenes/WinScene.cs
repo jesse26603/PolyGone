@@ -16,15 +16,15 @@ public class WinScene : IScene
     private readonly string currentLevel;
     private readonly List<ItemType> selectedItems;
     private readonly WeaponType selectedWeapon;
-    private SpriteFont font;
-    private Texture2D pixel;
+    private SpriteFont? font;
+    private Texture2D? pixel;
     private KeyboardState keyboardState;
     private KeyboardState previousKeyboardState;
     private readonly string[] options;
     private int selectedIndex;
     private static List<string>? levelOrder;
 
-    public WinScene(ContentManager contentManager, SceneManager sceneManager, GraphicsDeviceManager graphics, string currentLevel = "TestLevel", List<ItemType> selectedItems = null, WeaponType selectedWeapon = WeaponType.Blaster)
+    public WinScene(ContentManager contentManager, SceneManager sceneManager, GraphicsDeviceManager graphics, string currentLevel = "TestLevel", List<ItemType>? selectedItems = null, WeaponType selectedWeapon = WeaponType.Blaster)
     {
         this.contentManager = contentManager;
         this.sceneManager = sceneManager;

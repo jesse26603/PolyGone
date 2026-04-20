@@ -7,11 +7,9 @@ namespace PolyGone;
 
 public class ExitScene : IScene
 {
-    private ContentManager contentManager;
-    private Texture2D texture;
     public ExitScene(ContentManager contentManager)
     {
-        this.contentManager = contentManager;
+        _ = contentManager;
     }
 
     public void Load() {}

@@ -22,8 +22,8 @@ namespace PolyGone
 {
     internal class MenuScene : IScene
     {
-        private Texture2D _pixel;
-        private SpriteFont _font;
+        private Texture2D? _pixel;
+        private SpriteFont? _font;
         private KeyboardState keyboardState;
         private KeyboardState previousKeyboardState;
         private readonly ContentManager _content;
@@ -34,7 +34,6 @@ namespace PolyGone
 
         public MenuScene(ContentManager content, SceneManager sceneManager, GraphicsDeviceManager graphics)
         {
-            _pixel = null;
             _content = content;
             _sceneManager = sceneManager;
             _graphics = graphics;

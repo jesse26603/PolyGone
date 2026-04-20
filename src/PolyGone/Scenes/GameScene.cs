@@ -15,12 +15,12 @@ namespace PolyGone;
 public class GameScene : IScene
 {
     private ContentManager contentManager;
-    private Texture2D texture;
-    private SpriteFont hudFont;
+    private Texture2D texture = null!;
+    private SpriteFont? hudFont;
     private SceneManager sceneManager;
-    private Player player;
-    private FollowCamera camera;
-    private GameUI gameUI;
+    private Player player = null!;
+    private FollowCamera camera = null!;
+    private GameUI gameUI = null!;
     private readonly GraphicsDeviceManager graphics;
     private Dictionary<Vector2, int> tileMap = null!;
     private Dictionary<Vector2, int> collisionMap = null!;
@@ -32,7 +32,7 @@ public class GameScene : IScene
     private readonly List<Entity> enemies = new(); // Placeholder for enemy list
     private readonly List<TurretEnemy> turretEnemies = new(); // Stationary blaster enemies
     private readonly List<Projectile> orphanedTurretBullets = new(); // Bullets that outlive their turret
-    private GoalTrigger goalTrigger; // Win condition trigger
+    private GoalTrigger? goalTrigger; // Win condition trigger
     private bool levelComplete = false;
     private bool gameOver = false;
     private readonly List<ItemType> selectedItems;
