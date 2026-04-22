@@ -33,8 +33,8 @@ class Frog : Enemy
         : base(texture, position, audioManager, size, health, color, srcRect, collisionMap, patrolSpeed: 0.8f, visualSize: visualSize, player: player)
     {
         this.player = player;
-        this.friction = 0.93f;   
-        this.gravityScale = 1.1f; 
+        this.Friction = 0.93f;   
+        this.GravityScale = 1.1f; 
     }
 
     private void Jump()
@@ -53,8 +53,8 @@ class Frog : Enemy
 
         direction.Normalize();
 
-        changeY = -17f; // Jump strength
-        changeX = direction.X * 20f; // Horizontal leap velocity
+        ChangeY = -17f; // Jump strength
+        ChangeX = direction.X * 20f; // Horizontal leap velocity
 
     }
 
@@ -77,12 +77,12 @@ class Frog : Enemy
 
         // Use regular chase movement while grounded.
         // In air, keep leap momentum instead of snapping to patrol speed.
-        if (isOnGround)
+        if (IsOnGround)
         {
-            changeX = Math.Abs(deltaX) > 2f ? Math.Sign(deltaX) * chaseSpeed : 0f;
+            ChangeX = Math.Abs(deltaX) > 2f ? Math.Sign(deltaX) * chaseSpeed : 0f;
         }
 
-        if (isOnGround && jumpCooldown <= 0f)
+        if (IsOnGround && jumpCooldown <= 0f)
         {
             Jump();
             jumpCooldown = JUMP_COOLDOWN_FRAMES;

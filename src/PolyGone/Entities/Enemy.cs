@@ -151,7 +151,7 @@ class Enemy : Entity
         }
 
         // Set horizontal velocity (not position directly)
-        changeX = patrolDirection * patrolSpeed * GetPatrolSpeedMultiplier();
+        ChangeX = patrolDirection * patrolSpeed * GetPatrolSpeedMultiplier();
     }
 
     private bool IsPlayerInViewRange()
@@ -168,7 +168,7 @@ class Enemy : Entity
 
     private bool IsStandingOnSemiSolid()
     {
-        if (!isOnGround || collisionMap is null)
+        if (!IsOnGround || CollisionMap is null)
         {
             return false;
         }
@@ -177,7 +177,7 @@ class Enemy : Entity
         int feetTileY = (int)((position.Y + size[1]) / TILE_SIZE);
         var keyBelow = new Vector2(centerTileX, feetTileY);
 
-        return collisionMap.TryGetValue(keyBelow, out int tileId)
+        return CollisionMap.TryGetValue(keyBelow, out int tileId)
                && tileId != -1
                && CollisionTypeMapper.GetCollisionType(tileId) == CollisionType.SemiSolid;
     }
@@ -186,10 +186,10 @@ class Enemy : Entity
     {
         // Push down far enough to bypass the semi-solid landing tolerance.
         position.Y += 12f;
-        isOnGround = false;
-        if (changeY < 2f)
+        IsOnGround = false;
+        if (ChangeY < 2f)
         {
-            changeY = 2f;
+            ChangeY = 2f;
         }
     }
 
@@ -204,13 +204,13 @@ class Enemy : Entity
         float playerCenterX = player.position.X + player.size[0] / 2f;
         float deltaX = playerCenterX - myCenterX;
 
-        changeX = Math.Abs(deltaX) > 2f ? Math.Sign(deltaX) * patrolSpeed * GetPatrolSpeedMultiplier() : 0f;
+        ChangeX = Math.Abs(deltaX) > 2f ? Math.Sign(deltaX) * patrolSpeed * GetPatrolSpeedMultiplier() : 0f;
 
         bool playerIsAbove = player.position.Y + player.size[1] < position.Y + 5f;
         bool playerIsNext = player.position.X + player.size[1] < position.X + 10f;
         bool playerIsBelow = player.position.Y > position.Y + size[1] - 5f;
 
-        if (playerIsAbove && isOnGround)
+        if (playerIsAbove && IsOnGround)
         {
             float checkDistance = 10f;
             float nextX = position.X + (Math.Sign(deltaX) * checkDistance);
@@ -222,7 +222,7 @@ class Enemy : Entity
             {
                 if (jumpDelay <= 0f)
                 {
-                    changeY = -16.75f; // Jump strength
+                    ChangeY = -16.75f; // Jump strength
                     jumpDelay = 30f; // 0.5s delay at 60 FPS
                 }
             }
@@ -255,7 +255,7 @@ class Enemy : Entity
         {
             hitFlashFrames -= 1f;
         }
-        if (jumpDelay > 0f && isOnGround)
+        if (jumpDelay > 0f && IsOnGround)
         {
             jumpDelay -= 1f;
         }
