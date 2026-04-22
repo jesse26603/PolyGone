@@ -67,6 +67,7 @@ internal class OptionsScene : IScene
         ResolutionLabel(),
         "",   // placeholder — button row is drawn separately
         "",   // volume row is drawn as a slider
+        "Controls",
 #if DEBUG
         "Reset Purchases",
 #endif
@@ -268,24 +269,39 @@ internal class OptionsScene : IScene
 
         // Keyboard navigation
         int rowCount = GetRowLabels().Length;
-        if (InputManager.MenuUp())   { _selectedIndex = (_selectedIndex - 1 + rowCount) % rowCount; }
-        if (InputManager.MenuDown()) { _selectedIndex = (_selectedIndex + 1) % rowCount; }
+        if (InputManager.MenuUp())   { _selectedIndex = (_selectedIndex - 1 + rowCount) % rowCount; _mouseInputBlockTimer = MouseInputBlockDuration; }
+        if (InputManager.MenuDown()) { _selectedIndex = (_selectedIndex + 1) % rowCount; _mouseInputBlockTimer = MouseInputBlockDuration; }
 
         if (_selectedIndex == 1 && !_pendingIsFullScreen)
         {
-            if (InputManager.MenuLeft())  { CycleResolution(-1); }
-            if (InputManager.MenuRight()) { CycleResolution(1); }
+            if (InputManager.MenuLeft())  { CycleResolution(-1); _mouseInputBlockTimer = MouseInputBlockDuration; }
+            if (InputManager.MenuRight()) { CycleResolution(1); _mouseInputBlockTimer = MouseInputBlockDuration; }
+        }
+
+        if (_selectedIndex == 3)
+        {
+            if (InputManager.MenuLeft() && _volumeKeyRepeatTimer <= 0f)
+            {
+                AdjustVolume(-5);
+                _mouseInputBlockTimer = MouseInputBlockDuration;
+            }
+            if (InputManager.MenuRight() && _volumeKeyRepeatTimer <= 0f)
+            {
+                AdjustVolume(5);
+                _mouseInputBlockTimer = MouseInputBlockDuration;
+            }
         }
 
         if (_selectedIndex == 2)
         {
-            if (InputManager.MenuLeft())  { _buttonIndex = 0; }
-            if (InputManager.MenuRight()) { _buttonIndex = 1; }
+            if (InputManager.MenuLeft())  { _buttonIndex = 0; _mouseInputBlockTimer = MouseInputBlockDuration; }
+            if (InputManager.MenuRight()) { _buttonIndex = 1; _mouseInputBlockTimer = MouseInputBlockDuration; }
         }
 
-        if (InputManager.MenuConfirm()) { ExecuteSelection(); }
+        if (InputManager.MenuConfirm()) { ExecuteSelection(); _mouseInputBlockTimer = MouseInputBlockDuration; }
         if (InputManager.MenuBack())
         {
+            _mouseInputBlockTimer = MouseInputBlockDuration;
             if (HasPendingChanges)
             { _confirmingDiscard = true; _confirmSelectedIndex = 1; }
             else
@@ -365,20 +381,23 @@ internal class OptionsScene : IScene
             case 3:
                 // Volume is adjusted with left/right input and mouse drag.
                 break;
-#if DEBUG
             case 4:
+                _sceneManager.AddScene(new ControlsScene(_content, _sceneManager, _graphics));
+                break;
+#if DEBUG
+            case 5:
                 _resetConfirmStep = 1;
                 _resetConfirmSelectedIndex = 1; // default cursor on Cancel
                 break;
-            case 5:
+            case 6:
                 _resetProgressConfirmStep = 1;
                 _resetProgressConfirmSelectedIndex = 1; // default cursor on Cancel
                 break;
-            case 6:
+            case 7:
                 _sceneManager.AddScene(new DevMenuScene(_content, _sceneManager, _graphics));
                 break;
 #else
-            case 4:
+            case 5:
                 _resetProgressConfirmStep = 1;
                 _resetProgressConfirmSelectedIndex = 1; // default cursor on Cancel
                 break;
@@ -450,6 +469,35 @@ internal class OptionsScene : IScene
         }
     }
 
+    private bool CanProcessMouseInput()
+    {
+        return _mouseInputBlockTimer <= 0f && !InputManager.UsingController;
+    }
+
+    private Rectangle GetVolumeSliderRect(Viewport viewport, float startY)
+    {
+        float rowY = startY + 3 * RowSpacing;
+        return new Rectangle(
+            (int)(viewport.Width / 2f - VolumeSliderWidth / 2f),
+            (int)(rowY + 14f),
+            (int)VolumeSliderWidth,
+            (int)VolumeSliderHeight);
+    }
+
+    private void SetVolumeFromMouseX(int mouseX, Rectangle sliderRect)
+    {
+        float t = Math.Clamp((mouseX - sliderRect.X) / (float)sliderRect.Width, 0f, 1f);
+        _volume = (int)MathF.Round(t * 100f);
+        _audioManager.SetMasterVolume(_volume / 100f);
+    }
+
+    private void AdjustVolume(int amount)
+    {
+        _volume = Math.Clamp(_volume + amount, 0, 100);
+        _audioManager.SetMasterVolume(_volume / 100f);
+        _volumeKeyRepeatTimer = _volumeKeyRepeatTimer <= 0f ? VolumeKeyInitialDelay : VolumeKeyRepeatDelay;
+    }
+
     public void Draw(SpriteBatch spriteBatch)
     {
         if (_pixel == null)
@@ -484,12 +532,12 @@ internal class OptionsScene : IScene
                 else if (i == 1 && _pendingIsFullScreen)
                 { color = Color.DarkGray; }
 #if DEBUG
-                else if (i == 4 || i == 5)
+                else if (i == 5 || i == 6)
                 { color = i == _selectedIndex ? Color.OrangeRed : new Color(180, 80, 60); }
-                else if (i == 6)
+                else if (i == 7)
                 { color = i == _selectedIndex ? Color.Cyan : Color.DarkCyan; }
 #else
-                else if (i == 4)                                     { color = i == _selectedIndex ? Color.OrangeRed : new Color(180, 80, 60); }
+                else if (i == 5)                                     { color = i == _selectedIndex ? Color.OrangeRed : new Color(180, 80, 60); }
 #endif
                 else
                 { color = i == _selectedIndex ? Color.Yellow : Color.White; }
