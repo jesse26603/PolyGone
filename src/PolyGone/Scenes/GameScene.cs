@@ -422,7 +422,7 @@ public class GameScene : IScene
         player.position = playerPos;
         player.Health = 100;
         player.Bullets.Clear();
-        
+
         // Reset turret enemies
         orphanedTurretBullets.Clear();
         turretEnemies.Clear();
@@ -607,7 +607,7 @@ public class GameScene : IScene
             {
                 berserk.position.X = worldMaxX - berserk.size[0];
             }
-        }  
+        }
 
         // Check factory enemies for falling out of bounds
         foreach (var factory in factoryEnemies)
@@ -744,7 +744,7 @@ public class GameScene : IScene
         }
 
         // Gather all entities for collision detection after all updates
-        List<Entity> allEntities = [player, .. enemies, .. turretEnemies, .. berserkEnemies, .. factoryEnemies, .. frogs, .. player.bullets, .. turretEnemies.SelectMany(t => t.Bullets), .. berserkEnemies.SelectMany(b => b.Bullets), .. orphanedTurretBullets];
+        List<Entity> allEntities = [player, .. enemies, .. turretEnemies, .. berserkEnemies, .. factoryEnemies, .. frogs, .. player.Bullets, .. turretEnemies.SelectMany(t => t.Bullets), .. berserkEnemies.SelectMany(b => b.Bullets), .. orphanedTurretBullets];
 
         // Handle entity-to-entity collisions
         player.EntityCollisionUpdate(allEntities);
@@ -768,7 +768,7 @@ public class GameScene : IScene
         {
             frog.EntityCollisionUpdate(allEntities);
         }
-        
+
 
         // Check for goal trigger
         if (goalTrigger != null && !levelComplete)

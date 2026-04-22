@@ -70,7 +70,7 @@ class BerserkEnemy : Enemy
             ySpeed: direction.Y * BULLET_SPEED,
             owner: Owner.Enemy,
             srcRect: srcRect,
-            collisionMap: collisionMap
+            collisionMap: CollisionMap
         ));
 
         audioManager.PlayAudio("shootSfx", true, "null", false); //Play shoot sound effect
@@ -91,12 +91,12 @@ class BerserkEnemy : Enemy
 
     protected override float GetPatrolSpeedMultiplier()
     {
-        return health <= BERSERK_HEALTH_THRESHOLD ? BERSERK_PATROL_MULTIPLIER : 1f;
+        return Health <= BERSERK_HEALTH_THRESHOLD ? BERSERK_PATROL_MULTIPLIER : 1f;
     }
 
     public override void Update(GameTime gameTime)
     {
-        bool isBerserk = health <= BERSERK_HEALTH_THRESHOLD;
+        bool isBerserk = Health <= BERSERK_HEALTH_THRESHOLD;
         bool playerInViewRange = IsPlayerInViewRange();
 
         // Chase player when in view range (instead of patrolling)
@@ -107,7 +107,7 @@ class BerserkEnemy : Enemy
             float deltaX = playerCenterX - myCenterX;
             float chaseSpeed = PatrolSpeed * GetPatrolSpeedMultiplier();
 
-            changeX = Math.Abs(deltaX) > 2f ? Math.Sign(deltaX) * chaseSpeed : 0f;
+            ChangeX = Math.Abs(deltaX) > 2f ? Math.Sign(deltaX) * chaseSpeed : 0f;
         }
 
         // Count down and fire while berserk
@@ -125,7 +125,7 @@ class BerserkEnemy : Enemy
         for (int i = Bullets.Count - 1; i >= 0; i--)
         {
             Bullets[i].Update(gameTime);
-            if (Bullets[i].lifetime <= 0)
+            if (Bullets[i].Lifetime <= 0)
             {
                 Bullets.RemoveAt(i);
             }

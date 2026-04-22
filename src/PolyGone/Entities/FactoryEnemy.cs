@@ -69,7 +69,7 @@ class FactoryEnemy : Enemy
             health: 25,
             color: Color.White,
             srcRect: srcRect,
-            collisionMap: collisionMap,
+            collisionMap: CollisionMap,
             patrolSpeed: 2f,
             visualSize: new int[] { 32, 32 },
             player: player
@@ -77,7 +77,7 @@ class FactoryEnemy : Enemy
 
         SpawnedEnemies.Add(spawnedEnemy);
         activeSpawnedEnemies.Add(spawnedEnemy);
- 
+
     }
 
     private void CleanupActiveSpawnedEnemies()
