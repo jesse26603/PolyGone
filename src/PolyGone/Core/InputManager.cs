@@ -28,7 +28,6 @@ public enum InputAction
     LoadoutSectionRight,
     LoadoutSectionDown,
     LoadoutSkip,
-    DevPaymentBypass,
 }
 
 public enum GamepadButtonBinding
@@ -158,7 +157,7 @@ public static class InputManager
                                Math.Abs(_rightThumbstick.Y) > 0.3f ||
                                Math.Abs(thumbstickX) > 0.1f ||
                                Math.Abs(thumbstickY) > 0.1f ||
-                               _currentGamepadState.IsConnected && _currentGamepadState.Buttons != default ||
+                               AnyGamepadButtonPressed(_currentGamepadState) ||
                                AnyMappedGamepadInputHeld();
         bool mouseInput = _currentMouseState.Position != _previousMouseState.Position ||
                           _currentMouseState.LeftButton == ButtonState.Pressed;
@@ -277,7 +276,7 @@ public static class InputManager
     public static bool MenuUp()
     {
         bool pressed = IsKeyboardTriggered(InputAction.MenuUp) ||
-                       thumbstickY > 0.3f && _previousGamepadState.ThumbSticks.Left.Y <= 0.3f ||
+                       (thumbstickY > 0.3f && _previousGamepadState.ThumbSticks.Left.Y <= 0.3f) ||
                        IsGamepadTriggered(InputAction.MenuUp);
         bool held = IsKeyboardHeld(InputAction.MenuUp) || thumbstickY > 0.3f || IsGamepadHeld(InputAction.MenuUp);
         return pressed || GetAutoRepeat(ref _menuUpAutoRepeatTimer, _menuUpHoldTimer, held);
@@ -286,7 +285,7 @@ public static class InputManager
     public static bool MenuDown()
     {
         bool pressed = IsKeyboardTriggered(InputAction.MenuDown) ||
-                       thumbstickY < -0.3f && _previousGamepadState.ThumbSticks.Left.Y >= -0.3f ||
+                       (thumbstickY < -0.3f && _previousGamepadState.ThumbSticks.Left.Y >= -0.3f) ||
                        IsGamepadTriggered(InputAction.MenuDown);
         bool held = IsKeyboardHeld(InputAction.MenuDown) || thumbstickY < -0.3f || IsGamepadHeld(InputAction.MenuDown);
         return pressed || GetAutoRepeat(ref _menuDownAutoRepeatTimer, _menuDownHoldTimer, held);
@@ -295,7 +294,7 @@ public static class InputManager
     public static bool MenuLeft()
     {
         bool pressed = IsKeyboardTriggered(InputAction.MenuLeft) ||
-                       thumbstickX < -0.3f && _previousGamepadState.ThumbSticks.Left.X >= -0.3f ||
+                       (thumbstickX < -0.3f && _previousGamepadState.ThumbSticks.Left.X >= -0.3f) ||
                        IsGamepadTriggered(InputAction.MenuLeft);
         bool held = IsKeyboardHeld(InputAction.MenuLeft) || thumbstickX < -0.3f || IsGamepadHeld(InputAction.MenuLeft);
         return pressed || GetAutoRepeat(ref _menuLeftAutoRepeatTimer, _menuLeftHoldTimer, held);
@@ -304,7 +303,7 @@ public static class InputManager
     public static bool MenuRight()
     {
         bool pressed = IsKeyboardTriggered(InputAction.MenuRight) ||
-                       thumbstickX > 0.3f && _previousGamepadState.ThumbSticks.Left.X <= 0.3f ||
+                       (thumbstickX > 0.3f && _previousGamepadState.ThumbSticks.Left.X <= 0.3f) ||
                        IsGamepadTriggered(InputAction.MenuRight);
         bool held = IsKeyboardHeld(InputAction.MenuRight) || thumbstickX > 0.3f || IsGamepadHeld(InputAction.MenuRight);
         return pressed || GetAutoRepeat(ref _menuRightAutoRepeatTimer, _menuRightHoldTimer, held);
@@ -370,17 +369,17 @@ public static class InputManager
 
     public static bool DevPaymentBypass()
     {
-        bool keyboardBypass = _currentKeyboardState.IsKeyDown(Keys.LeftControl)
-                              && _currentKeyboardState.IsKeyDown(Keys.LeftShift)
-                              && _currentKeyboardState.IsKeyDown(Keys.D)
-                              && !_previousKeyboardState.IsKeyDown(Keys.LeftControl)
-                              && !_previousKeyboardState.IsKeyDown(Keys.LeftShift)
-                              && !_previousKeyboardState.IsKeyDown(Keys.D);
+        bool keysHeld = _currentKeyboardState.IsKeyDown(Keys.LeftControl)
+                        && _currentKeyboardState.IsKeyDown(Keys.LeftShift)
+                        && _currentKeyboardState.IsKeyDown(Keys.D);
+        bool anyNewPress = (_currentKeyboardState.IsKeyDown(Keys.LeftControl) && _previousKeyboardState.IsKeyUp(Keys.LeftControl))
+                           || (_currentKeyboardState.IsKeyDown(Keys.LeftShift) && _previousKeyboardState.IsKeyUp(Keys.LeftShift))
+                           || (_currentKeyboardState.IsKeyDown(Keys.D) && _previousKeyboardState.IsKeyUp(Keys.D));
         bool gamepadBypass = _currentGamepadState.Buttons.Start == ButtonState.Pressed
                              && _previousGamepadState.Buttons.Start == ButtonState.Released
                              && _currentGamepadState.Buttons.A == ButtonState.Pressed
                              && _previousGamepadState.Buttons.A == ButtonState.Released;
-        return keyboardBypass || gamepadBypass;
+        return (keysHeld && anyNewPress) || gamepadBypass;
     }
 
     public static void ResetClickCooldown()
@@ -414,7 +413,6 @@ public static class InputManager
             InputAction.LoadoutSectionRight => "Loadout Right",
             InputAction.LoadoutSectionDown => "Loadout Down",
             InputAction.LoadoutSkip => "Loadout Skip",
-            InputAction.DevPaymentBypass => "Dev Bypass",
             _ => action.ToString(),
         };
     }
@@ -439,8 +437,8 @@ public static class InputManager
         return null;
     }
 
-    public static bool IsKeyboardRebindable(InputAction action) => action != InputAction.DevPaymentBypass;
-    public static bool IsGamepadRebindable(InputAction action) => action != InputAction.DevPaymentBypass;
+    public static bool IsKeyboardRebindable(InputAction action) => true;
+    public static bool IsGamepadRebindable(InputAction action) => true;
 
     public static void SetKeyboardBinding(InputAction action, Keys? key)
     {
@@ -486,7 +484,6 @@ public static class InputManager
         _keyboardBindings[InputAction.LoadoutSectionRight] = Keys.Right;
         _keyboardBindings[InputAction.LoadoutSectionDown] = Keys.Down;
         _keyboardBindings[InputAction.LoadoutSkip] = Keys.LeftControl;
-        _keyboardBindings[InputAction.DevPaymentBypass] = null;
 
         _gamepadBindings[InputAction.GameShoot] = GamepadButtonBinding.RightTrigger;
         _gamepadBindings[InputAction.GameJump] = GamepadButtonBinding.A;
@@ -505,14 +502,17 @@ public static class InputManager
         _gamepadBindings[InputAction.LoadoutSectionRight] = GamepadButtonBinding.DPadRight;
         _gamepadBindings[InputAction.LoadoutSectionDown] = GamepadButtonBinding.DPadDown;
         _gamepadBindings[InputAction.LoadoutSkip] = GamepadButtonBinding.Back;
-        _gamepadBindings[InputAction.DevPaymentBypass] = null;
     }
 
     public static void SaveBindings()
     {
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(SavePath)!);
+            var saveDir = Path.GetDirectoryName(SavePath);
+            if (!string.IsNullOrWhiteSpace(saveDir))
+            {
+                Directory.CreateDirectory(saveDir);
+            }
             var data = new BindingSaveData
             {
                 Keyboard = _keyboardBindings.ToDictionary(kvp => kvp.Key.ToString(), kvp => kvp.Value?.ToString()),
@@ -664,10 +664,29 @@ public static class InputManager
         {
             if (IsGamepadHeld(action))
             {
-                return true;
+               return true;
             }
         }
         return false;
+    }
+
+    private static bool AnyGamepadButtonPressed(GamePadState state)
+    {
+        return state.IsConnected &&
+               (state.Buttons.A == ButtonState.Pressed ||
+                state.Buttons.B == ButtonState.Pressed ||
+                state.Buttons.X == ButtonState.Pressed ||
+                state.Buttons.Y == ButtonState.Pressed ||
+                state.Buttons.Start == ButtonState.Pressed ||
+                state.Buttons.Back == ButtonState.Pressed ||
+                state.Buttons.LeftShoulder == ButtonState.Pressed ||
+                state.Buttons.RightShoulder == ButtonState.Pressed ||
+                state.DPad.Up == ButtonState.Pressed ||
+                state.DPad.Down == ButtonState.Pressed ||
+                state.DPad.Left == ButtonState.Pressed ||
+                state.DPad.Right == ButtonState.Pressed ||
+                state.Triggers.Left > TriggerThreshold ||
+                state.Triggers.Right > TriggerThreshold);
     }
 
     private static void UpdateMenuHoldTimers(float dt)

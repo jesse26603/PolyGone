@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.IO;
+using System.Linq;
 
 namespace PolyGone;
 
@@ -116,17 +117,14 @@ internal class ControlsScene : IScene
         var action = InputManager.RemappableActions[_selectedIndex];
         if (_selectedColumn == 1 && InputManager.IsKeyboardRebindable(action))
         {
-            var pressed = InputManager.GetJustPressedKeys();
-            foreach (var key in pressed)
+            var key = InputManager.GetJustPressedKeys()
+                .Where(k => k != Keys.Escape)
+                .OrderBy(k => k)
+                .FirstOrDefault();
+            if (key != Keys.None)
             {
-                if (key == Keys.Escape)
-                {
-                    continue;
-                }
-
                 InputManager.SetKeyboardBinding(action, key);
                 _listeningForInput = false;
-                return;
             }
         }
         else if (_selectedColumn == 2 && InputManager.IsGamepadRebindable(action))
