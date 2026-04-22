@@ -55,6 +55,8 @@ class Frog : Enemy
 
         ChangeY = -17f; // Jump strength
         ChangeX = direction.X * 20f; // Horizontal leap velocity
+        ChangeY = -17f; // Jump strength
+        ChangeX = direction.X * 20f; // Horizontal leap velocity
 
     }
 
@@ -78,15 +80,18 @@ class Frog : Enemy
         // Use regular chase movement while grounded.
         // In air, keep leap momentum instead of snapping to patrol speed.
         if (IsOnGround)
-        {
-            ChangeX = Math.Abs(deltaX) > 2f ? Math.Sign(deltaX) * chaseSpeed : 0f;
-        }
+            if (IsOnGround)
+            {
+                ChangeX = Math.Abs(deltaX) > 2f ? Math.Sign(deltaX) * chaseSpeed : 0f;
+                ChangeX = Math.Abs(deltaX) > 2f ? Math.Sign(deltaX) * chaseSpeed : 0f;
+            }
 
         if (IsOnGround && jumpCooldown <= 0f)
-        {
-            Jump();
-            jumpCooldown = JUMP_COOLDOWN_FRAMES;
-        }
+            if (IsOnGround && jumpCooldown <= 0f)
+            {
+                Jump();
+                jumpCooldown = JUMP_COOLDOWN_FRAMES;
+            }
     }
 
     public override void Draw(SpriteBatch spriteBatch, Vector2 offset)
