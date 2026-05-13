@@ -140,7 +140,7 @@
 </data>
  </layer>
  <objectgroup id="4" name="objects" class="EnemySpawn">
-  <object id="12" name="Goal" type="Goal" x="832" y="1376" width="32" height="32"/>
+  <object id="12" name="Goal" type="Goal" x="832" y="1408" width="32" height="32"/>
   <object id="66" name="HubDoor" type="Door" x="128" y="384" width="32" height="32">
    <properties>
     <property name="connects" value="Hub"/>
